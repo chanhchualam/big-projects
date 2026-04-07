@@ -1,0 +1,46 @@
+﻿@model DoAnCoSo.Models.Teacher
+
+@{
+    ViewData["Title"] = "Add Teacher";
+}
+
+<h2>Add Teacher</h2>
+
+<form asp-action="Add" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Gender" class="form-label"></label>
+        <select asp-for="Gender" class="form-select">
+            <option value="">-- Select Gender --</option>
+            <option value="0">Nam</option>
+            <option value="1">Nữ</option>
+        </select>
+        <span asp-validation-for="Gender" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CenterId" class="form-label">Center</label>
+        <select asp-for="CenterId" asp-items="ViewBag.Centers" class="form-select"></select>
+        <span asp-validation-for="CenterId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label for="ImageUrl" class="form-label">Avatar Image</label>
+        <input type="file" name="ImageUrl" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Add Teacher</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+

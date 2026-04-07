@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Tra cứu phạt nguội (SP){% endblock %}
+{% block page_title %}Tra cứu phạt nguội — dbo.usp_TraCuuPhatNguoi{% endblock %}
+{% block content %}
+
+<p style="color:var(--muted);font-size:0.9rem;margin:-0.5rem 0 1rem;">
+  Câu 3: ưu tiên <strong>Miền Trung</strong>, không có thì <strong>LINK_BAC</strong> + <strong>LINK_NAM</strong>.
+  <strong>Bắt buộc:</strong> trên SSMS, database <code>CSGT_MIENTRUNG</code>, chạy <code>sql/14_quick_deploy_csgt_mientrung.sql</code>
+  (tạo <code>dbo.usp_TraCuuPhatNguoi</code>). Cần <code>LINK_BAC</code>, <code>LINK_NAM</code> trước (<code>sql/13_setup_linked_servers.sql</code>).
+</p>
+
+<form method="post" class="filter-form" style="margin-bottom:1rem;">
+  <div class="filter-grid">
+    <div class="field">
+      <label for="bien_so">Biển số xe</label>
+      <input type="text" id="bien_so" name="bien_so" value="{{ bien_so or '' }}" placeholder="VD: 29A-123.45" required />
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Tra cứu (EXEC procedure)</button>
+</form>
+
+{% if error %}
+<div class="err-box" style="white-space:pre-wrap;">{{ error }}</div>
+{% endif %}
+
+{% if columns and rows %}
+<div class="card table-wrap">
+  <table class="data">
+    <thead>
+      <tr>{% for c in columns %}<th>{{ c }}</th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>{% for c in columns %}<td>{{ row.get(c) if row.get(c) is not none else '—' }}</td>{% endfor %}</tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% elif bien_so and not error %}
+<p style="color:var(--muted);">Không có dòng chưa xử lý cho biển số này.</p>
+{% endif %}
+{% endblock %}

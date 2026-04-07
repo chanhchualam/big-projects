@@ -1,0 +1,41 @@
+Thứ tự chạy script trên SQL Server Management Studio (SSMS):
+
+1) 00_create_databases.sql
+2) 01_schema_regional_template.sql
+3) 02_coordinator_catalog.sql
+4) 03_views_union_all.sql
+5) 05_seed_sample_bac.sql (tùy chọn — dữ liệu mẫu)
+
+Kết nối ứng dụng: sửa Server/User/Password trong config\connections.json
+hoặc sao chép từ config\connections.example.json.
+
+Python kiểm tra kết nối: pip install -r requirements.txt
+rồi chạy scripts\test_sql_connection.py
+
+Lưu ý: Cài Microsoft ODBC Driver 18 for SQL Server. Nếu chỉ có Driver 17,
+đổi chữ "18" thành "17" trong chuỗi kết nối (config\connections.json).
+
+--- Web kết nối CSGT (LINK_NAM, LINK_BAC) ---
+1) Sửa WebApp.ConnectionString trong config\connections.json (Server, Driver 17/18).
+2) Cài thêm: python -m pip install -r requirements.txt
+3) Chạy từ thư mục dự án: python -m flask --app web.app run
+   (web tự chọn ODBC Driver 17/18/... đã cài — không cần sửa tay nếu lỗi IM002)
+4) Mở trình duyệt: http://127.0.0.1:5000 — đăng nhập: WebApp.Auth.Users (Regions:
+   null = toàn quốc; ["Miền Nam"] = chỉ shard đó). Hoặc biến môi trường
+   CSGT_WEB_USER / CSGT_WEB_PASS (full miền). Dashboard, lọc/tìm/CSV, giới thiệu.
+   API: http://127.0.0.1:5000/api/don-vi-csgt (cần đăng nhập session)
+
+Tài khoản Windows chạy Flask cần quyền tương tự SSMS (Trusted_Connection).
+Có thể gán biến môi trường CSGT_CONNECTION_STRING để ghi đè chuỗi kết nối.
+
+--- Bài tập procedure/view/trigger (câu 3–7) ---
+- sql/13_setup_linked_servers.sql — tạo LINK_BAC, LINK_NAM trên instance Miền Trung (chỉnh tên máy).
+- sql/14_quick_deploy_csgt_mientrung.sql — CHẠY FILE NÀY TRƯỚC KHI DÙNG WEB (tạo usp_* trên CSGT_MIENTRUNG). Nếu lỗi 2812 là chưa chạy.
+- sql/12_bai_tap_cau_3_den_7_phan_tan.sql — bản đầy đủ cả 3 miền + trigger (tùy chọn).
+
+--- Demo bảng thật (BangLai_HanhChinh, BangLai_Diem, LoiViPham, BienBan) ---
+- Chạy sql/08_sp_CSGT_TruDiem.sql trên CSGT_MIENTRUNG, chỉnh tên cột INSERT cho
+  khớp bảng BienBan, LichSuTruDiem trong SSMS.
+- Web: /thong-ke-toan-quoc, /tra-cuu-bang-lai, /xu-ly-vi-pham, /danh-muc-loi,
+  /giai-lap-su-co
+- Ghi đè SQL trong WebApp.Demo (connections.json) nếu tên cột khác.

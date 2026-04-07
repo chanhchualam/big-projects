@@ -1,0 +1,285 @@
+@model DoAnCoSo.Models.Major
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Name" style="height: 400px; object-fit: cover;">
+                }
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h1 class="card-title">@Model.Name</h1>
+                            @if (!string.IsNullOrEmpty(Model.Code))
+                            {
+                                <p class="text-muted">Mã ngành: @Model.Code</p>
+                            }
+                        </div>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <div>
+                                @if (ViewBag.IsFavorite == true)
+                                {
+                                    <form asp-action="RemoveFavorite" method="post" class="d-inline">
+                                        <input type="hidden" name="majorId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            <i class="bi bi-heart-fill"></i> Đã lưu
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="AddFavorite" method="post" class="d-inline">
+                                        <input type="hidden" name="majorId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="bi bi-heart"></i> Lưu ngành này
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div class="row mb-3">
+                        @if (Model.Duration > 0)
+                        {
+                            <div class="col-md-3 mb-2">
+                                <div class="border rounded p-2 text-center">
+                                    <i class="bi bi-clock text-primary"></i>
+                                    <div class="fw-bold">Thời gian</div>
+                                    <div>@Model.Duration năm</div>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.TuitionFee.HasValue)
+                        {
+                            <div class="col-md-3 mb-2">
+                                <div class="border rounded p-2 text-center">
+                                    <i class="bi bi-cash-coin text-success"></i>
+                                    <div class="fw-bold">Học phí</div>
+                                    <div>@(Model.TuitionFee.Value.ToString("N0")) VNĐ/năm</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <h4 class="mt-4">Mô tả ngành học</h4>
+                    <p class="text-justify">@Html.Raw(Model.Description?.Replace("\n", "<br/>"))</p>
+
+                    @if (!string.IsNullOrEmpty(Model.MainSubjects))
+                    {
+                        <h4 class="mt-4">Các môn học chính</h4>
+                        <p>@Model.MainSubjects</p>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.CareerOpportunities))
+                    {
+                        <h4 class="mt-4">Cơ hội việc làm</h4>
+                        <p>@Html.Raw(Model.CareerOpportunities?.Replace("\n", "<br/>"))</p>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.AverageSalary))
+                    {
+                        <h4 class="mt-4">
+                            <i class="bi bi-cash-coin text-success"></i> Mức lương trung bình
+                        </h4>
+                        <div class="alert alert-success">
+                            <p class="mb-0 fw-bold fs-5">@Model.AverageSalary</p>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.CareerOpportunities))
+                    {
+                        <h4 class="mt-4">
+                            <i class="bi bi-briefcase text-primary"></i> Thị trường lao động
+                        </h4>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <p class="mb-2"><strong>Cơ hội việc làm:</strong></p>
+                                <p>@Html.Raw(Model.CareerOpportunities?.Replace("\n", "<br/>"))</p>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.RequiredQualities))
+                    {
+                        <h4 class="mt-4">
+                            <i class="bi bi-star text-warning"></i> Tố chất cần có
+                        </h4>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var quality in Model.RequiredQualities.Split(new[] { ',', ';', '.' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <span class="badge bg-warning text-dark">@quality.Trim()</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Admission Scores -->
+            @if (Model.AdmissionScores != null && Model.AdmissionScores.Any())
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Điểm chuẩn</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Trường</th>
+                                        <th>Khối</th>
+                                        <th>Điểm</th>
+                                        <th>Năm</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var score in Model.AdmissionScores.OrderByDescending(s => s.Year).ThenByDescending(s => s.Score))
+                                    {
+                                        <tr>
+                                            <td><small>@score.University?.Name</small></td>
+                                            <td><span class="badge bg-info">@score.ExamBlock?.Code</span></td>
+                                            <td><strong>@score.Score</strong></td>
+                                            <td>@score.Year</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">Thao tác nhanh</h6>
+                </div>
+                <div class="card-body">
+                    <a href="@Url.Action("Index", "Chat")" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-chat-dots"></i> Hỏi AI về ngành này
+                    </a>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="@Url.Action("AdmissionProbability", new { id = Model.Id })" class="btn btn-outline-warning w-100 mb-2">
+                            <i class="bi bi-graph-up"></i> Dự đoán tỷ lệ đậu
+                        </a>
+                        <a href="@Url.Action("Index", "StudentProfile")" class="btn btn-outline-success w-100">
+                            <i class="bi bi-person-circle"></i> Xem hồ sơ của tôi
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Score Trend Chart -->
+            @if (Model.AdmissionScores != null && Model.AdmissionScores.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="bi bi-graph-up"></i> Biến động điểm chuẩn</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="scoreTrendChart" height="100"></canvas>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        @if (Model.AdmissionScores != null && Model.AdmissionScores.Any())
+        {
+            var chartData = Model.AdmissionScores
+                .GroupBy(s => s.Year)
+                .Select(g => new { Year = g.Key, AvgScore = g.Average(s => s.Score), MinScore = g.Min(s => s.Score), MaxScore = g.Max(s => s.Score) })
+                .OrderBy(x => x.Year)
+                .ToList();
+            
+            <text>
+            const ctx = document.getElementById('scoreTrendChart');
+            if (ctx) {
+                const chartData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(chartData.Select(c => new { c.Year, AvgScore = Math.Round((decimal)c.AvgScore, 2), c.MinScore, c.MaxScore }))));
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.map(d => d.Year),
+                        datasets: [
+                            {
+                                label: 'Điểm trung bình',
+                                data: chartData.map(d => d.AvgScore),
+                                borderColor: 'rgb(75, 192, 192)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.1,
+                                fill: true
+                            },
+                            {
+                                label: 'Điểm cao nhất',
+                                data: chartData.map(d => d.MaxScore),
+                                borderColor: 'rgb(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                tension: 0.1,
+                                borderDash: [5, 5]
+                            },
+                            {
+                                label: 'Điểm thấp nhất',
+                                data: chartData.map(d => d.MinScore),
+                                borderColor: 'rgb(54, 162, 235)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                tension: 0.1,
+                                borderDash: [5, 5]
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Xu hướng điểm chuẩn qua các năm'
+                            },
+                            legend: {
+                                display: true,
+                                position: 'bottom'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: function(context) {
+                                    const values = context.chart.data.datasets.flatMap(d => d.data);
+                                    return Math.max(0, Math.min(...values) - 2);
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Điểm chuẩn'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Năm'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            </text>
+        }
+    </script>
+}
+

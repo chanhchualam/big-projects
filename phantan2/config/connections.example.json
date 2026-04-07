@@ -1,0 +1,55 @@
+{
+  "SqlServer": {
+    "Server": "localhost",
+    "UseIntegratedSecurity": true,
+    "UserId": "",
+    "Password": "",
+    "Databases": {
+      "Bac": "TrafficViolation_Bac",
+      "Trung": "TrafficViolation_Trung",
+      "Nam": "TrafficViolation_Nam",
+      "Coordinator": "TrafficViolation_Coordinator"
+    }
+  },
+  "ConnectionStrings": {
+    "Bac": "Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=TrafficViolation_Bac;Trusted_Connection=yes;TrustServerCertificate=yes;",
+    "Trung": "Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=TrafficViolation_Trung;Trusted_Connection=yes;TrustServerCertificate=yes;",
+    "Nam": "Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=TrafficViolation_Nam;Trusted_Connection=yes;TrustServerCertificate=yes;",
+    "Coordinator": "Driver={ODBC Driver 18 for SQL Server};Server=localhost;Database=TrafficViolation_Coordinator;Trusted_Connection=yes;TrustServerCertificate=yes;"
+  },
+  "WebApp": {
+    "ConnectionString": "Driver={ODBC Driver 18 for SQL Server};Server=LAPTOP-96O50AKP;Database=CSGT_MIENTRUNG;Trusted_Connection=yes;TrustServerCertificate=yes;",
+    "SecretKey": "doi-chuoi-bi-mat-session",
+    "Auth": {
+      "Users": [
+        {
+          "Username": "admin",
+          "Password": "admin123",
+          "Regions": null
+        },
+        {
+          "Username": "csgt_nam",
+          "Password": "nam123",
+          "Regions": ["Miền Nam"]
+        }
+      ]
+    },
+    "Demo": {
+      "TraCuuBangLai": "",
+      "ListLoiViPham": "",
+      "InsertLoiViPham": "",
+      "ProcTruDiem": "dbo.sp_CSGT_TruDiem",
+      "CountLoiBac": "",
+      "CountBienBanTrung": "",
+      "CountBienBanNam": "",
+      "CountBienBanBac": "",
+      "ListPhuongTien": "",
+      "ListBienBan": "",
+      "QueryPhatTren10TrieuTrung": "",
+      "QueryThuNganSachToanQuoc": "",
+      "ProcTraCuuPhatNguoi": "",
+      "ProcTruDiemBangLai": "",
+      "ProcDemTaiXeVuPhamTren3Lan": ""
+    }
+  }
+}

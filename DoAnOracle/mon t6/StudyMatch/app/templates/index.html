@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}StudyMatch - Trang Chủ{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <h1>Chào mừng đến StudyMatch</h1>
+    <p>Hệ thống gợi ý chọn ngành học đại học thông minh dành cho học sinh bậc THPT</p>
+    
+    {% if not session.user_id %}
+        <div class="hero-buttons">
+            <a href="{{ url_for('main.login') }}" class="btn btn-primary">Đăng Nhập</a>
+            <a href="{{ url_for('main.register') }}" class="btn btn-secondary">Đăng Ký</a>
+        </div>
+    {% else %}
+        <div class="hero-buttons">
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-primary">Nhập Điểm Số</a>
+            <a href="{{ url_for('recommendation.get_recommendation') }}" class="btn btn-secondary">Nhận Gợi Ý</a>
+        </div>
+    {% endif %}
+</div>
+
+<section class="features-section">
+    <h2>Tính Năng Chính</h2>
+    
+    <div class="features-grid">
+        <div class="feature-card">
+            <h3>📊 Nhập Điểm Số</h3>
+            <p>Nhập điểm thi THPT của bạn ở các khối A, B, C, D và theo dõi tiến trình.</p>
+        </div>
+        
+        <div class="feature-card">
+            <h3>🎯 Gợi Ý Thông Minh</h3>
+            <p>Nhận gợi ý ngành học phù hợp dựa trên điểm số và năng lực của bạn.</p>
+        </div>
+        
+        <div class="feature-card">
+            <h3>🏫 Thông Tin Đại Học</h3>
+            <p>Tìm hiểu chi tiết về các ngành học tại các trường đại học.</p>
+        </div>
+        
+        <div class="feature-card">
+            <h3>⭐ Đánh Giá & Review</h3>
+            <p>Xem đánh giá từ các học sinh khác về các ngành học.</p>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2>Cách Sử Dụng</h2>
+    
+    <div class="steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Đăng Ký / Đăng Nhập</h3>
+            <p>Tạo tài khoản hoặc đăng nhập vào hệ thống</p>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Nhập Điểm Thi</h3>
+            <p>Nhập điểm thi THPT của bạn</p>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Nhận Gợi Ý</h3>
+            <p>Hệ thống sẽ gợi ý các ngành học phù hợp</p>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">4</div>
+            <h3>Tìm Hiểu Chi Tiết</h3>
+            <p>Tìm hiểu thêm về các ngành được gợi ý</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

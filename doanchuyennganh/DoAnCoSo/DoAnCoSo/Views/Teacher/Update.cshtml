@@ -1,0 +1,52 @@
+﻿@model DoAnCoSo.Models.Teacher
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Cập nhật giáo viên";
+}
+
+<h2>Cập nhật giáo viên</h2>
+
+<form asp-action="Update" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="Name">Họ tên</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Gender">Giới tính</label>
+        <select asp-for="Gender" class="form-control">
+            <option value="">-- Chọn giới tính --</option>
+            <option value="0" selected="@Model.Gender == " 0"">Nam</option>
+            <option value="1" selected="@Model.Gender == " 1"">Nữ</option>
+            <option value="2" selected="@Model.Gender == " 2"">Khác</option>
+        </select>
+        <span asp-validation-for="Gender" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CenterId">Nơi công tác</label>
+        <select asp-for="CenterId" asp-items="@ViewBag.Centers" class="form-control"></select>
+        <span asp-validation-for="CenterId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ImageUrl">Ảnh đại diện</label>
+        <input type="file" asp-for="ImageUrl" class="form-control" />
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="Avatar" style="max-width: 200px; margin-top: 10px;" />
+        }
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description">Mô tả</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+</form>

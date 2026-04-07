@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Kết Quả Gợi Ý Đã Lưu - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="saved-results-container">
+    <h1>Kết Quả Gợi Ý Đã Lưu</h1>
+    
+    {% if results %}
+        <div class="results-table-wrapper">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Ngành Học</th>
+                        <th>Trường Đại Học</th>
+                        <th>Điểm Trung Bình</th>
+                        <th>Mức Độ Phù Hợp</th>
+                        <th>Ngày Tính Toán</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            <td>
+                                <strong>{{ result.nganh.TenNganh }}</strong>
+                            </td>
+                            <td>
+                                {{ result.nganh.truong.TenTruong if result.nganh.truong else 'N/A' }}
+                            </td>
+                            <td>
+                                <span class="badge badge-info">{{ result.DiemTrungBinh|round(2) }}</span>
+                            </td>
+                            <td>
+                                <div class="match-indicator">
+                                    <div class="match-bar" style="width: {{ result.TiLePhuHop }}%"></div>
+                                </div>
+                                <span>{{ result.TiLePhuHop|round(1) }}%</span>
+                            </td>
+                            <td>
+                                {{ result.NgayTinhToan.strftime('%d/%m/%Y') }}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('major.major_detail', nganh_id=result.NganhID) }}" class="btn btn-small">
+                                    Chi Tiết
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="actions">
+            <a href="{{ url_for('recommendation.get_recommendation') }}" class="btn btn-primary">
+                Tính Toán Lại
+            </a>
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-secondary">
+                Cập Nhật Điểm
+            </a>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Bạn chưa có kết quả gợi ý nào.</p>
+            <a href="{{ url_for('recommendation.get_recommendation') }}" class="btn btn-primary">
+                Nhận Gợi Ý Ngay
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.saved-results-container {
+    padding: 2rem 0;
+}
+
+.results-table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.results-table thead {
+    background-color: #f0f4f8;
+}
+
+.results-table th,
+.results-table td {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.results-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.badge-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.match-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.match-bar {
+    width: 100px;
+    height: 15px;
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.match-bar::after {
+    content: '';
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    width: 100%;
+}
+
+.btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.empty-state {
+    background: white;
+    padding: 3rem;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+    .results-table {
+        font-size: 0.9rem;
+    }
+    
+    .results-table th,
+    .results-table td {
+        padding: 0.75rem;
+    }
+    
+    .match-bar {
+        width: 60px;
+    }
+}
+</style>
+{% endblock %}

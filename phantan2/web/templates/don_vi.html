@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Đơn vị CSGT{% endblock %}
+{% block page_title %}Đơn vị CSGT{% endblock %}
+{% block content %}
+
+<p style="color:var(--muted);margin:-0.5rem 0 1rem;font-size:0.9rem;">
+  Dữ liệu hợp nhất từ <strong>CSGT_MIENTRUNG</strong>, <strong>LINK_NAM</strong>, <strong>LINK_BAC</strong>.
+</p>
+
+{% if error %}
+<div class="err-box"><strong>Không tải được dữ liệu.</strong><br/>{{ error }}</div>
+{% endif %}
+
+<p style="font-size:0.8rem;color:var(--muted);margin:0 0 0.75rem;">Lọc nhanh theo miền</p>
+<div class="filter-chips">
+  <a class="chip {% if not kv_selected and not request.args.get('khu_vuc') %}chip-on{% endif %}" href="{{ url_for('don_vi') }}">Tất cả</a>
+  {% for kv in khu_vucs %}
+  <a class="chip {% if kv in kv_selected or request.args.get('khu_vuc') == kv %}chip-on{% endif %}" href="{{ url_for('don_vi', khu_vuc=kv) }}">{{ kv }}</a>
+  {% endfor %}
+</div>
+
+<form class="filter-form" method="get" action="{{ url_for('don_vi') }}">
+  <div class="filter-grid">
+    <div class="field span-2">
+      <label for="q">Từ khóa</label>
+      <input type="text" id="q" name="q" value="{{ q or '' }}" placeholder="Mã đơn vị, tên đơn vị..." />
+    </div>
+    <div class="field">
+      <label for="tim_trong">Tìm trong</label>
+      <select id="tim_trong" name="tim_trong">
+        <option value="tat_ca" {% if tim_trong == 'tat_ca' %}selected{% endif %}>Mã và tên</option>
+        <option value="ma" {% if tim_trong == 'ma' %}selected{% endif %}>Chỉ mã đơn vị</option>
+        <option value="ten" {% if tim_trong == 'ten' %}selected{% endif %}>Chỉ tên đơn vị</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="khop">Kiểu khớp</label>
+      <select id="khop" name="khop">
+        <option value="chua" {% if khop == 'chua' %}selected{% endif %}>Chứa chuỗi</option>
+        <option value="bat_dau" {% if khop == 'bat_dau' %}selected{% endif %}>Bắt đầu bằng</option>
+        <option value="chinh_xac_ma" {% if khop == 'chinh_xac_ma' %}selected{% endif %}>Khớp chính xác mã</option>
+      </select>
+    </div>
+
+    <div class="field span-2 kv-checks">
+      <span class="kv-label">Khu vực (chọn một hoặc nhiều)</span>
+      <div class="kv-box">
+        {% for kv in khu_vucs %}
+        <label class="check-item">
+          <input type="checkbox" name="kv" value="{{ kv }}" {% if kv in kv_selected %}checked{% endif %} />
+          <span>{{ kv }}</span>
+        </label>
+        {% endfor %}
+        {% if not khu_vucs %}
+        <span style="color:var(--muted);font-size:0.85rem;">Không có danh sách khu vực (lỗi tải dữ liệu).</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="sap_xep">Sắp xếp</label>
+      <select id="sap_xep" name="sap_xep">
+        <option value="mac_dinh" {% if sap_xep == 'mac_dinh' %}selected{% endif %}>Theo dữ liệu gốc (SQL)</option>
+        <option value="ma_asc" {% if sap_xep == 'ma_asc' %}selected{% endif %}>Mã A → Z</option>
+        <option value="ma_desc" {% if sap_xep == 'ma_desc' %}selected{% endif %}>Mã Z → A</option>
+        <option value="ten_asc" {% if sap_xep == 'ten_asc' %}selected{% endif %}>Tên A → Z</option>
+        <option value="ten_desc" {% if sap_xep == 'ten_desc' %}selected{% endif %}>Tên Z → A</option>
+        <option value="khu_asc" {% if sap_xep == 'khu_asc' %}selected{% endif %}>Khu vực A → Z</option>
+        <option value="khu_desc" {% if sap_xep == 'khu_desc' %}selected{% endif %}>Khu vực Z → A</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="per_page">Số dòng / trang</label>
+      <select id="per_page" name="per_page" onchange="this.form.submit()">
+        {% for n in [10, 25, 50, 100] %}
+        <option value="{{ n }}" {% if per_page == n %}selected{% endif %}>{{ n }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-actions">
+    <button type="submit" class="btn btn-primary">Áp dụng bộ lọc</button>
+    <a class="btn btn-ghost" href="{{ url_for('don_vi') }}">Xóa bộ lọc</a>
+    <a class="btn btn-ghost" href="{{ url_csv }}">Xuất CSV (theo bộ lọc)</a>
+  </div>
+</form>
+
+<p style="font-size:0.85rem;color:var(--muted);margin:1rem 0;">
+  Hiển thị {{ page_info.start }}–{{ page_info.end }} / {{ page_info.total }} dòng
+  {% if page_info.total_pages > 1 %}· Trang {{ page }} / {{ page_info.total_pages }}{% endif %}
+</p>
+
+<div class="card table-wrap">
+  <table class="data">
+    <thead>
+      <tr>
+        <th>STT</th>
+        <th>Mã đơn vị</th>
+        <th>Tên đơn vị</th>
+        <th>Khu vực</th>
+        {% if show_nguon %}<th>Nguồn dữ liệu</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td style="color:var(--muted);font-size:0.85rem;">{{ page_info.start + loop.index0 }}</td>
+        <td><strong>{{ r.MaDonVi }}</strong></td>
+        <td>{{ r.TenDonVi }}</td>
+        <td>
+          {% set k = (r.KhuVuc or '')|lower %}
+          {% if 'bắc' in k or 'bac' in k %}
+          <span class="badge badge-bac">{{ r.KhuVuc }}</span>
+          {% elif 'trung' in k %}
+          <span class="badge badge-trung">{{ r.KhuVuc }}</span>
+          {% elif 'nam' in k %}
+          <span class="badge badge-nam">{{ r.KhuVuc }}</span>
+          {% else %}
+          <span class="badge badge-default">{{ r.KhuVuc }}</span>
+          {% endif %}
+        </td>
+        {% if show_nguon %}
+        <td style="font-size:0.8rem;color:var(--muted);max-width:220px;">{{ r.NguonDuLieu or '—' }}</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+      {% if not error and not rows %}
+      <tr><td colspan="{% if show_nguon %}5{% else %}4{% endif %}" style="color:var(--muted);">Không có dòng phù hợp bộ lọc.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+{% if page_info.total_pages > 1 %}
+<div style="display:flex;gap:0.5rem;align-items:center;margin-top:1rem;flex-wrap:wrap;">
+  {% if url_prev %}
+  <a class="btn btn-ghost" href="{{ url_prev }}">« Trước</a>
+  {% endif %}
+  {% if url_next %}
+  <a class="btn btn-ghost" href="{{ url_next }}">Sau »</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

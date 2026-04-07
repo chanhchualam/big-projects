@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Xem Điểm - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="view-scores-container">
+    <h1>Điểm Thi THPT Của Bạn</h1>
+    
+    {% if diem %}
+        <div class="scores-summary">
+            <div class="summary-card">
+                <h3>Tổng Số Môn</h3>
+                <p class="summary-value">{{ diem|length }}</p>
+            </div>
+            
+            <div class="summary-card">
+                <h3>Điểm Trung Bình</h3>
+                <p class="summary-value">{{ (diem|map(attribute='DiemThi')|sum / diem|length)|round(2) }}</p>
+            </div>
+            
+            <div class="summary-card">
+                <h3>Điểm Cao Nhất</h3>
+                <p class="summary-value">{{ diem|map(attribute='DiemThi')|max|round(2) }}</p>
+            </div>
+            
+            <div class="summary-card">
+                <h3>Điểm Thấp Nhất</h3>
+                <p class="summary-value">{{ diem|map(attribute='DiemThi')|min|round(2) }}</p>
+            </div>
+        </div>
+        
+        <table class="scores-table">
+            <thead>
+                <tr>
+                    <th>Môn Học</th>
+                    <th>Điểm Thi</th>
+                    <th>Điểm Thưởng</th>
+                    <th>Hệ Số</th>
+                    <th>Ngày Nhập</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in diem %}
+                    <tr>
+                        <td>{{ d.mon.TenMon if d.mon else 'N/A' }}</td>
+                        <td>{{ d.DiemThi }}</td>
+                        <td>{{ d.DiemThuong }}</td>
+                        <td>{{ d.HeSo }}</td>
+                        <td>{{ d.NgayNhap.strftime('%d/%m/%Y') if d.NgayNhap else 'N/A' }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="actions">
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-primary">Cập Nhật Điểm</a>
+            <a href="{{ url_for('recommendation.get_recommendation') }}" class="btn btn-secondary">Nhận Gợi Ý</a>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Bạn chưa nhập điểm số nào.</p>
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-primary">Nhập Điểm Ngay</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

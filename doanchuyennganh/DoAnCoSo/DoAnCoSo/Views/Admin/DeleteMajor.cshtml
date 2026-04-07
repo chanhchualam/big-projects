@@ -1,0 +1,48 @@
+@model DoAnCoSo.Models.Major
+@{
+    ViewData["Title"] = "Xóa Ngành Học";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Xác Nhận Xóa</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <strong>Bạn có chắc muốn xóa ngành học này?</strong><br>
+                        Hành động này không thể hoàn tác!
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Tên ngành:</strong> @Model.Name
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Code))
+                    {
+                        <div class="mb-3">
+                            <strong>Mã ngành:</strong> @Model.Code
+                        </div>
+                    }
+                    <div class="mb-3">
+                        <strong>Mô tả:</strong> @(Model.Description?.Length > 200 ? Model.Description.Substring(0, 200) + "..." : Model.Description)
+                    </div>
+
+                    <form asp-action="DeleteMajorConfirmed" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Majors")" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+}
+

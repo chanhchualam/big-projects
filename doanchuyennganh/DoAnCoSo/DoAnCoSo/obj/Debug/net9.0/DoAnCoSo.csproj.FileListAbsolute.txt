@@ -1,0 +1,870 @@
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\appsettings.Development.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\appsettings.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.staticwebassets.runtime.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.staticwebassets.endpoints.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.exe
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.deps.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.runtimeconfig.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.pdb
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Azure.Core.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Azure.Identity.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Humanizer.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Build.Locator.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.CSharp.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Workspaces.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Data.SqlClient.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Design.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Relational.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Caching.Abstractions.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Caching.Memory.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Abstractions.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.DependencyInjection.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.DependencyModel.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Logging.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Logging.Abstractions.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Options.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Primitives.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Identity.Client.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Identity.Client.Extensions.Msal.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.SqlServer.Server.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Mono.TextTemplating.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.ClientModel.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.CodeDom.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.AttributedModel.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.Convention.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.Hosting.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.Runtime.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.TypedParts.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Configuration.ConfigurationManager.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Formats.Asn1.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Memory.Data.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Runtime.Caching.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Security.Cryptography.ProtectedData.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Text.Json.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.csproj.AssemblyReference.cache
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.GeneratedMSBuildEditorConfig.editorconfig
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.AssemblyInfoInputs.cache
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.AssemblyInfo.cs
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.csproj.CoreCompileInputs.cache
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.MvcApplicationPartsAssemblyInfo.cache
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.RazorAssemblyInfo.cache
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.RazorAssemblyInfo.cs
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\scopedcss\bundle\DoAnCoSo.styles.css
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\scopedcss\projectbundle\DoAnCoSo.bundle.scp.css
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\dxzp0e4k0t-61n19gt1b8.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\5a44dk3x58-xtxxf3hu2r.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\z8xf246x9l-bqjiyaj88i.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tzvrffsm9c-c2jlpeoesf.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\x44zc065al-erw9l3u2r3.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\za3todb6a7-aexeepp0ev.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\la07jwrveo-d7shbmvgxk.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\2309cp4k0o-ausgxo2sd3.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\zp2sg3lgzl-k8d9w2qqmf.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qt2a2ww7gk-cosvhxvwiu.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ka5iviuvmd-ub07r2b239.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\p4yash388h-fvhpjtyr6v.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\dxt4urxr9r-b7pk76d08c.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\cyvtbadyj3-fsbi9cje9m.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\8m906an6pu-rzd6atqjts.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\2insrz1c8i-ee0r1s7dh0.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\oyiwf377x5-dxx9fxp4il.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\6n5lhgx8e2-jd9uben2k1.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\4me8luaca6-khv3u5hwcm.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\xlhco32f10-r4e9w2rdcm.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\w62ol1avbq-lcd1t2u6c8.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\3hrgeid87t-c2oey78nd0.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qacq7v1m3h-tdbxkamptv.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qwdjj6t2lk-j5mq2jizvt.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\3tn6fiy1zq-06098lyss8.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ae6g7qdmgr-nvvlpmu67g.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\oddb79wpez-s35ty4nyc5.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\icwi7kqo7t-pj5nd1wqec.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\8tbtw77ll1-46ein0sx1k.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\poc5gfrrck-v0zj4ognzu.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\j2o8xsalm1-37tfw0ft22.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\h9il6tewww-hrwsygsryq.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\x2392kxdet-pk9g2wxc8p.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\vwfrdu6yju-ft3s53vfgj.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\3bxls9wpzb-6cfz1n2cew.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\gfhpcv204z-6pdc2jztkx.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\9u93u1pfsf-493y06b0oq.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\6yzv491yel-iovd86k7lj.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7nyntfwhl3-vr1egmr9el.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bmj6kcirr4-kbrnm935zg.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qj44wte85r-jj8uyg4cgr.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\68tfouu91c-y7v9cxd14o.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\nqizj2gynq-notf2xhcfb.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\27fm85um1z-h1s4sie4z3.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\r4dcbofrxj-63fj8s7r0e.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tb4xrsn4jy-0j3bgjxly4.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\r0l3yadsmr-47otxtyo56.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\zc66775tyd-4v8eqarkd7.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\h3envk9vrg-356vix0kms.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\925exkzlq1-83jwlth58m.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\irf8at1ss7-mrlpezrjn3.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7hotrc9gi7-lzl9nlhx6b.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ed4hfecap9-ag7o75518u.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\2496kcml6l-x0q3zqp4vz.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\s006m8j0z4-0i3buxo5is.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7ssl40ymvj-o1o13a6vjx.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tc7g5cggdv-ttgo8qnofa.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bjzq099ce2-2z0ns9nrw6.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\6ecmy5rjyy-muycvpuwrr.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bgp5liwtjj-87fc7y1x7t.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\dxwcrc45ge-mlv21k5csn.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\jhxsjuu35d-7y8whsl4fb.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7ss62qrtvc-7y8whsl4fb.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets.build.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets.development.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets\msbuild.DoAnCoSo.Microsoft.AspNetCore.StaticWebAssets.props
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets\msbuild.DoAnCoSo.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets\msbuild.build.DoAnCoSo.props
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets\msbuild.buildMultiTargeting.DoAnCoSo.props
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets\msbuild.buildTransitive.DoAnCoSo.props
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets.pack.json
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.csproj.Up2Date
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\refint\DoAnCoSo.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.pdb
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.genruntimeconfig.cache
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\ref\DoAnCoSo.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Cryptography.Internal.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Identity.UI.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Razor.Language.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Build.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Build.Framework.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.AnalyzerUtilities.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.CSharp.Features.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Elfie.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Features.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Razor.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Scripting.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.DiaSymReader.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.DotNet.Scaffolding.Shared.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.FileProviders.Abstractions.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.FileProviders.Embedded.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Identity.Core.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Identity.Stores.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.NET.StringTools.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.Core.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\dotnet-aspnet-codegenerator-design.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.Templating.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.Utils.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Newtonsoft.Json.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Common.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Configuration.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.DependencyResolver.Core.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Frameworks.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.LibraryModel.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Packaging.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.ProjectModel.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Protocol.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Versioning.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Reflection.MetadataLoadContext.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\af\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ar\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\az\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\bg\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\bn-BD\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\da\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\el\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fa\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fi-FI\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr-BE\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\he\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\hr\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\hu\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\hy\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\id\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\is\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko-KR\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ku\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\lv\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ms-MY\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\mt\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\nb\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\nb-NO\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\nl\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ro\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sk\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sl\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sr\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sr-Latn\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sv\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\th-TH\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\uk\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\uz-Cyrl-UZ\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\uz-Latn-UZ\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\vi\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-CN\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Humanizer.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Features.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Scripting.resources.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.MvcApplicationPartsAssemblyInfo.cs
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ofa40bqe71-b9sayid5wm.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\j9swiz3yzq-90yqlj465b.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\vltxs1u3vm-xtxxf3hu2r.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\14ipv7q33s-bqjiyaj88i.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\rh65p086id-c2jlpeoesf.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\eb27mqwgz2-erw9l3u2r3.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\9glsckmvxo-aexeepp0ev.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\hh8ihyobdx-d7shbmvgxk.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bww8ud00yd-ausgxo2sd3.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\edcrak57d7-k8d9w2qqmf.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\sf8kf2lula-cosvhxvwiu.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\3tzsqhslk9-ub07r2b239.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\oxk5o6czdw-fvhpjtyr6v.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\k8b25g0zwc-b7pk76d08c.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\8axix7wldr-fsbi9cje9m.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\d5z9sfpxbi-rzd6atqjts.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\u8428c4e9i-ee0r1s7dh0.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tg53r17ghy-dxx9fxp4il.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\nlrl0f3xs3-jd9uben2k1.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\1fc4q00scq-khv3u5hwcm.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\8xykfy6qmd-r4e9w2rdcm.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\vsrbd71spn-lcd1t2u6c8.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\cynp17w084-c2oey78nd0.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7o8oyvng68-tdbxkamptv.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\h9vwtoirpy-j5mq2jizvt.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\o5k23vqhrk-06098lyss8.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\iznc766avz-nvvlpmu67g.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ns4583i71s-s35ty4nyc5.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\47012z8l2l-pj5nd1wqec.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\4vzefxwp2m-46ein0sx1k.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bh4v3mdph9-v0zj4ognzu.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\l186vlgaag-37tfw0ft22.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\rsc7qacj1u-hrwsygsryq.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\z408qb6q7a-pk9g2wxc8p.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qfr28sqcy1-ft3s53vfgj.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\0k1i85ntyh-6cfz1n2cew.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\xa379ftczi-6pdc2jztkx.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\lr5hmrr0j7-493y06b0oq.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ivy2s9gwh5-iovd86k7lj.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\higufxz8op-vr1egmr9el.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\s3tglgz8hr-kbrnm935zg.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\vw9sls9bhj-jj8uyg4cgr.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ym8tkpcl2i-y7v9cxd14o.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\zzna4nrm5w-notf2xhcfb.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\igscs4x0yk-h1s4sie4z3.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\zap00c0tb5-63fj8s7r0e.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\pogzkicjpz-0j3bgjxly4.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\j3hwsq15kh-47otxtyo56.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\q3naettu8c-4v8eqarkd7.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ldxy2n3w6q-356vix0kms.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ypthv7q62w-83jwlth58m.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\t6e3b82hrf-mrlpezrjn3.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\uocis9wxbx-lzl9nlhx6b.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\2tikzqlmtu-ag7o75518u.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\9muusbdg0a-x0q3zqp4vz.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tpsq5dibur-0i3buxo5is.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\t0qo7o574p-o1o13a6vjx.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\b9lhb08218-ttgo8qnofa.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\a3ygkwa5zy-2z0ns9nrw6.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\nezrqnk58p-muycvpuwrr.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\v0zgfp0y55-87fc7y1x7t.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\yfc7ypekbg-mlv21k5csn.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\9klqxh83hg-pk47gz8td0.gz
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Data.Sqlite.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Sqlite.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\SQLitePCLRaw.batteries_v2.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\SQLitePCLRaw.core.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\SQLitePCLRaw.provider.e_sqlite3.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\browser-wasm\nativeassets\net9.0\e_sqlite3.a
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-arm\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-arm64\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-armel\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-mips64\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-musl-arm\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-musl-arm64\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-musl-s390x\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-musl-x64\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-ppc64le\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-s390x\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-x64\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-x86\native\libe_sqlite3.so
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\maccatalyst-arm64\native\libe_sqlite3.dylib
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\maccatalyst-x64\native\libe_sqlite3.dylib
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\osx-arm64\native\libe_sqlite3.dylib
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\osx-x64\native\libe_sqlite3.dylib
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-arm\native\e_sqlite3.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-arm64\native\e_sqlite3.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-x64\native\e_sqlite3.dll
+F:\LT Web\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-x86\native\e_sqlite3.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\appsettings.Development.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\appsettings.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.staticwebassets.runtime.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.staticwebassets.endpoints.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.exe
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.deps.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.runtimeconfig.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\DoAnCoSo.pdb
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Azure.Core.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Azure.Identity.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Humanizer.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Cryptography.Internal.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Identity.UI.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.AspNetCore.Razor.Language.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Build.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Build.Framework.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Build.Locator.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.AnalyzerUtilities.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.CSharp.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.CSharp.Features.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Elfie.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Features.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Razor.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Scripting.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Workspaces.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Data.SqlClient.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Data.Sqlite.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.DiaSymReader.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.DotNet.Scaffolding.Shared.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Design.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Relational.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Sqlite.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Caching.Abstractions.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Caching.Memory.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Abstractions.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.DependencyInjection.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.DependencyModel.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.FileProviders.Abstractions.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.FileProviders.Embedded.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Identity.Core.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Identity.Stores.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Logging.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Logging.Abstractions.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Options.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Extensions.Primitives.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Identity.Client.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.Identity.Client.Extensions.Msal.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.NET.StringTools.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.SqlServer.Server.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.Core.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\dotnet-aspnet-codegenerator-design.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.Templating.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGeneration.Utils.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Microsoft.VisualStudio.Web.CodeGenerators.Mvc.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Mono.TextTemplating.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\Newtonsoft.Json.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Common.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Configuration.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.DependencyResolver.Core.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Frameworks.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.LibraryModel.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Packaging.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.ProjectModel.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Protocol.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\NuGet.Versioning.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\SQLitePCLRaw.batteries_v2.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\SQLitePCLRaw.core.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\SQLitePCLRaw.provider.e_sqlite3.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.ClientModel.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.CodeDom.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.AttributedModel.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.Convention.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.Hosting.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.Runtime.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Composition.TypedParts.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Configuration.ConfigurationManager.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Memory.Data.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Reflection.MetadataLoadContext.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Runtime.Caching.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\System.Security.Cryptography.ProtectedData.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\af\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ar\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\az\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\bg\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\bn-BD\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\da\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\el\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fa\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fi-FI\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr-BE\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\he\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\hr\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\hu\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\hy\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\id\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\is\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko-KR\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ku\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\lv\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ms-MY\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\mt\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\nb\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\nb-NO\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\nl\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ro\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sk\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sl\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sr\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sr-Latn\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\sv\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\th-TH\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\uk\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\uz-Cyrl-UZ\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\uz-Latn-UZ\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\vi\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-CN\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Humanizer.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Features.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Scripting.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\browser-wasm\nativeassets\net9.0\e_sqlite3.a
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-arm\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-arm64\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-armel\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-mips64\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-musl-arm\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-musl-arm64\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-musl-s390x\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-musl-x64\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-ppc64le\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-s390x\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-x64\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\linux-x86\native\libe_sqlite3.so
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\maccatalyst-arm64\native\libe_sqlite3.dylib
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\maccatalyst-x64\native\libe_sqlite3.dylib
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\osx-arm64\native\libe_sqlite3.dylib
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\osx-x64\native\libe_sqlite3.dylib
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-arm\native\e_sqlite3.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-arm64\native\e_sqlite3.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-x64\native\e_sqlite3.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win-x86\native\e_sqlite3.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.csproj.AssemblyReference.cache
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\rpswa.dswa.cache.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.AssemblyInfoInputs.cache
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.AssemblyInfo.cs
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.csproj.CoreCompileInputs.cache
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.MvcApplicationPartsAssemblyInfo.cs
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.MvcApplicationPartsAssemblyInfo.cache
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.RazorAssemblyInfo.cache
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.RazorAssemblyInfo.cs
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\rjimswa.dswa.cache.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\scopedcss\bundle\DoAnCoSo.styles.css
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\scopedcss\projectbundle\DoAnCoSo.bundle.scp.css
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ofa40bqe71-b9sayid5wm.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\j9swiz3yzq-90yqlj465b.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\vltxs1u3vm-xtxxf3hu2r.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\14ipv7q33s-bqjiyaj88i.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\rh65p086id-c2jlpeoesf.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\eb27mqwgz2-erw9l3u2r3.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\9glsckmvxo-aexeepp0ev.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\hh8ihyobdx-d7shbmvgxk.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bww8ud00yd-ausgxo2sd3.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\edcrak57d7-k8d9w2qqmf.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\sf8kf2lula-cosvhxvwiu.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\3tzsqhslk9-ub07r2b239.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\oxk5o6czdw-fvhpjtyr6v.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\k8b25g0zwc-b7pk76d08c.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\8axix7wldr-fsbi9cje9m.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\d5z9sfpxbi-rzd6atqjts.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\u8428c4e9i-ee0r1s7dh0.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tg53r17ghy-dxx9fxp4il.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\nlrl0f3xs3-jd9uben2k1.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\1fc4q00scq-khv3u5hwcm.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\8xykfy6qmd-r4e9w2rdcm.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\vsrbd71spn-lcd1t2u6c8.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\cynp17w084-c2oey78nd0.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7o8oyvng68-tdbxkamptv.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\h9vwtoirpy-j5mq2jizvt.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\o5k23vqhrk-06098lyss8.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\iznc766avz-nvvlpmu67g.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ns4583i71s-s35ty4nyc5.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\47012z8l2l-pj5nd1wqec.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\4vzefxwp2m-46ein0sx1k.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bh4v3mdph9-v0zj4ognzu.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\l186vlgaag-37tfw0ft22.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\rsc7qacj1u-hrwsygsryq.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\z408qb6q7a-pk9g2wxc8p.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qfr28sqcy1-ft3s53vfgj.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\0k1i85ntyh-6cfz1n2cew.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\xa379ftczi-6pdc2jztkx.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\lr5hmrr0j7-493y06b0oq.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ivy2s9gwh5-iovd86k7lj.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\higufxz8op-vr1egmr9el.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\s3tglgz8hr-kbrnm935zg.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\vw9sls9bhj-jj8uyg4cgr.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ym8tkpcl2i-y7v9cxd14o.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\zzna4nrm5w-notf2xhcfb.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\igscs4x0yk-h1s4sie4z3.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\zap00c0tb5-63fj8s7r0e.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\pogzkicjpz-0j3bgjxly4.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\j3hwsq15kh-47otxtyo56.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\q3naettu8c-4v8eqarkd7.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ldxy2n3w6q-356vix0kms.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ypthv7q62w-83jwlth58m.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\t6e3b82hrf-mrlpezrjn3.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\uocis9wxbx-lzl9nlhx6b.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\2tikzqlmtu-ag7o75518u.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\9muusbdg0a-x0q3zqp4vz.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tpsq5dibur-0i3buxo5is.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\t0qo7o574p-o1o13a6vjx.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\b9lhb08218-ttgo8qnofa.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\a3ygkwa5zy-2z0ns9nrw6.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\nezrqnk58p-muycvpuwrr.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\v0zgfp0y55-87fc7y1x7t.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\yfc7ypekbg-mlv21k5csn.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\9klqxh83hg-pk47gz8td0.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\dxzp0e4k0t-61n19gt1b8.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\5a44dk3x58-xtxxf3hu2r.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\z8xf246x9l-bqjiyaj88i.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tzvrffsm9c-c2jlpeoesf.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\x44zc065al-erw9l3u2r3.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\za3todb6a7-aexeepp0ev.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\la07jwrveo-d7shbmvgxk.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\2309cp4k0o-ausgxo2sd3.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\zp2sg3lgzl-k8d9w2qqmf.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qt2a2ww7gk-cosvhxvwiu.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ka5iviuvmd-ub07r2b239.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\p4yash388h-fvhpjtyr6v.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\dxt4urxr9r-b7pk76d08c.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\cyvtbadyj3-fsbi9cje9m.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\8m906an6pu-rzd6atqjts.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\2insrz1c8i-ee0r1s7dh0.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\oyiwf377x5-dxx9fxp4il.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\6n5lhgx8e2-jd9uben2k1.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\4me8luaca6-khv3u5hwcm.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\xlhco32f10-r4e9w2rdcm.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\w62ol1avbq-lcd1t2u6c8.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\3hrgeid87t-c2oey78nd0.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qacq7v1m3h-tdbxkamptv.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qwdjj6t2lk-j5mq2jizvt.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\3tn6fiy1zq-06098lyss8.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ae6g7qdmgr-nvvlpmu67g.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\oddb79wpez-s35ty4nyc5.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\icwi7kqo7t-pj5nd1wqec.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\8tbtw77ll1-46ein0sx1k.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\poc5gfrrck-v0zj4ognzu.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\j2o8xsalm1-37tfw0ft22.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\h9il6tewww-hrwsygsryq.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\x2392kxdet-pk9g2wxc8p.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\vwfrdu6yju-ft3s53vfgj.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\3bxls9wpzb-6cfz1n2cew.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\gfhpcv204z-6pdc2jztkx.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\9u93u1pfsf-493y06b0oq.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\6yzv491yel-iovd86k7lj.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7nyntfwhl3-vr1egmr9el.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bmj6kcirr4-kbrnm935zg.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\qj44wte85r-jj8uyg4cgr.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\68tfouu91c-y7v9cxd14o.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\nqizj2gynq-notf2xhcfb.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\27fm85um1z-h1s4sie4z3.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\r4dcbofrxj-63fj8s7r0e.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tb4xrsn4jy-0j3bgjxly4.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\r0l3yadsmr-47otxtyo56.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\zc66775tyd-4v8eqarkd7.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\h3envk9vrg-356vix0kms.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\925exkzlq1-83jwlth58m.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\irf8at1ss7-mrlpezrjn3.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7hotrc9gi7-lzl9nlhx6b.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\ed4hfecap9-ag7o75518u.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\2496kcml6l-x0q3zqp4vz.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\s006m8j0z4-0i3buxo5is.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7ssl40ymvj-o1o13a6vjx.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\tc7g5cggdv-ttgo8qnofa.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bjzq099ce2-2z0ns9nrw6.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\6ecmy5rjyy-muycvpuwrr.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\bgp5liwtjj-87fc7y1x7t.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\dxwcrc45ge-mlv21k5csn.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\jhxsjuu35d-7y8whsl4fb.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\compressed\7ss62qrtvc-7y8whsl4fb.gz
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets.build.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets.build.json.cache
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets.development.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.csproj.Up2Date
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\refint\DoAnCoSo.dll
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.pdb
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\DoAnCoSo.genruntimeconfig.cache
+c:\Users\ADMIN\Downloads\doanchuyennganh\DoAnCoSo\DoAnCoSo\obj\Debug\net9.0\ref\DoAnCoSo.dll

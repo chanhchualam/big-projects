@@ -1,0 +1,77 @@
+@model IEnumerable<DoAnCoSo.Models.Major>
+@{
+    ViewData["Title"] = "Ngành Đã Lưu";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="bi bi-heart-fill"></i> Ngành Học Đã Lưu
+    </h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Bạn chưa lưu ngành học nào. 
+            <a href="@Url.Action("Index", "Major")" class="alert-link">Tìm ngành học</a> và lưu lại những ngành bạn quan tâm.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var major in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        @if (!string.IsNullOrEmpty(major.ImageUrl))
+                        {
+                            <img src="@major.ImageUrl" class="card-img-top" alt="@major.Name" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-book text-white" style="font-size: 4rem;"></i>
+                            </div>
+                        }
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@major.Name</h5>
+                            @if (!string.IsNullOrEmpty(major.Code))
+                            {
+                                <p class="text-muted small mb-2">Mã ngành: @major.Code</p>
+                            }
+                            <p class="card-text flex-grow-1">
+                                @(major.Description?.Length > 100 ? major.Description.Substring(0, 100) + "..." : major.Description)
+                            </p>
+                            <div class="mb-2">
+                                @if (major.Duration > 0)
+                                {
+                                    <span class="badge bg-info me-1">
+                                        <i class="bi bi-clock"></i> @major.Duration năm
+                                    </span>
+                                }
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="@Url.Action("Details", "Major", new { id = major.Id })" class="btn btn-primary flex-grow-1">
+                                    <i class="bi bi-eye"></i> Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="mt-4">
+        <a href="@Url.Action("Index", "Major")" class="btn btn-outline-primary">
+            <i class="bi bi-search"></i> Tìm thêm ngành học
+        </a>
+        <a href="@Url.Action("Index")" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Về hồ sơ
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+}
+

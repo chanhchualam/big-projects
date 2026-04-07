@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Gợi Ý Ngành Học - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="recommendation-container">
+    <h1>Kết Quả Gợi Ý Ngành Học</h1>
+    
+    {% if recommendations %}
+        <div class="summary-box">
+            <h2>Phân Tích Điểm Số</h2>
+            <p>
+                Tổng điểm của bạn{% if khoi_name %} (khối {{ khoi_name }}){% endif %}:
+                <strong>{{ diem_tong|round(2) }}</strong>
+            </p>
+            <p>Điểm trung bình theo môn (tham khảo): <strong>{{ diem_trung_binh|round(2) }}</strong></p>
+            <p>Chúng tôi đã tìm thấy <strong>{{ recommendations|length }}</strong> ngành học phù hợp với bạn</p>
+        </div>
+        
+        <div class="recommendations-list">
+            {% for rec in recommendations %}
+                <div class="recommendation-item">
+                    <div class="rank-badge">{{ loop.index }}</div>
+                    <div class="rec-content">
+                        <h3>{{ rec.nganh.TenNganh }}</h3>
+                        <p class="school">{{ rec.nganh.truong.TenTruong if rec.nganh.truong else 'N/A' }}</p>
+                        
+                        <div class="match-bar">
+                            <div class="match-fill" style="width: {{ rec.ti_le }}%"></div>
+                        </div>
+                        <p class="match-text">Mức độ phù hợp: <strong>{{ rec.ti_le|round(1) }}%</strong></p>
+                        
+                        <div class="rec-info">
+                            <span>Điểm Chuan: {{ rec.nganh.DiemChuan or 'N/A' }}</span>
+                            <span>Khối: {{ rec.nganh.KhoiThi_YeuCau or 'N/A' }}</span>
+                            <span>Chỉ Tiêu: {{ rec.nganh.ChiTieuTuyen or 'N/A' }}</span>
+                        </div>
+                        
+                        <a href="{{ url_for('major.major_detail', nganh_id=rec.nganh.NganhID) }}" class="btn btn-secondary">
+                            Xem Chi Tiết
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="actions">
+            <button onclick="window.print()" class="btn btn-secondary">In Kết Quả</button>
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-secondary">Cập Nhật Điểm</a>
+            <a href="{{ url_for('recommendation.view_results') }}" class="btn btn-secondary">Lịch Sử Gợi Ý</a>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Chưa tìm thấy ngành học phù hợp.</p>
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-primary">Nhập Điểm Thi</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

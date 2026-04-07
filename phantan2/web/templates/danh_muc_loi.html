@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Danh mục lỗi{% endblock %}
+{% block page_title %}Danh mục lỗi vi phạm{% endblock %}
+{% block content %}
+
+<p style="color:var(--muted);margin:-0.5rem 0 1rem;font-size:0.9rem;">
+  Gộp <code>LoiViPham</code> từ <strong>ba miền</strong> (Trung cục bộ, Nam qua <code>LINK_NAM</code>, Bắc qua <code>LINK_BAC</code>). Cột <strong>Nguồn miền</strong> tương ứng shard. Đếm nhanh:
+  Trung <strong>{{ dem_loi.trung if dem_loi and dem_loi.trung is not none else '—' }}</strong>
+  · Nam <strong>{{ dem_loi.nam if dem_loi and dem_loi.nam is not none else '—' }}</strong>
+  · Bắc <strong>{{ dem_loi.bac if dem_loi and dem_loi.bac is not none else '—' }}</strong>
+</p>
+
+{% if error %}
+<div class="err-box">{{ error }}</div>
+{% endif %}
+
+<div class="card table-wrap" style="margin-bottom:1.5rem;">
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Nguồn miền</th>
+        <th>Mã lỗi</th>
+        <th>Tên lỗi</th>
+        <th>Mức phạt (VNĐ)</th>
+        <th>Điểm trừ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td style="font-size:0.85rem;color:var(--muted);">{{ r.get('NguonMien', '—') }}</td>
+        <td><strong>{{ r.MaLoi }}</strong></td>
+        <td>{{ r.TenLoi }}</td>
+        <td>{% if r.MucPhatTien is not none %}{{ "{:,.0f}".format(r.MucPhatTien|float) }}{% else %}—{% endif %}</td>
+        <td>{{ r.DiemTru }}</td>
+      </tr>
+      {% endfor %}
+      {% if not rows and not error %}
+      <tr><td colspan="5" style="color:var(--muted);">Chưa có dữ liệu (hoặc không có quyền miền).</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<h3 style="font-size:1rem;margin-bottom:0.75rem;">Thêm lỗi mới</h3>
+<p style="font-size:0.8rem;color:var(--muted);margin:-0.25rem 0 0.75rem;">Ghi trực tiếp vào CSDL của miền chọn (kết nối <code>ConnectionStrings</code> tương ứng).</p>
+<form method="post" class="filter-form">
+  <div class="filter-grid">
+    {% if insert_shard_choices|length > 1 %}
+    <div class="field">
+      <label for="mien_ghi">Ghi tại miền</label>
+      <select id="mien_ghi" name="mien_ghi" style="width:100%;">
+        {% for sid, label in insert_shard_choices %}
+        <option value="{{ sid }}" {% if sid == insert_default_shard %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% else %}
+    <input type="hidden" name="mien_ghi" value="{{ insert_default_shard }}" />
+    {% endif %}
+    <div class="field">
+      <label for="ma_loi">Mã lỗi (số nguyên)</label>
+      <input type="number" id="ma_loi" name="ma_loi" required min="1" step="1" />
+    </div>
+    <div class="field span-2">
+      <label for="ten_loi">Tên lỗi</label>
+      <input type="text" id="ten_loi" name="ten_loi" required style="width:100%;min-width:0;" />
+    </div>
+    <div class="field">
+      <label for="muc_phat">Mức phạt (VNĐ)</label>
+      <input type="number" step="0.01" id="muc_phat" name="muc_phat" value="0" />
+    </div>
+    <div class="field">
+      <label for="diem_tru">Điểm trừ</label>
+      <input type="number" id="diem_tru" name="diem_tru" value="1" />
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Thêm</button>
+</form>
+{% endblock %}

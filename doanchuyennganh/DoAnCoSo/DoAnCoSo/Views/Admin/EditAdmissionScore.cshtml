@@ -1,0 +1,12 @@
+@model DoAnCoSo.Models.AdmissionScore
+@{
+    ViewData["Title"] = "Chỉnh Sửa Điểm Chuẩn";
+    ViewData["AdmissionScoreHeading"] = "Chỉnh Sửa Điểm Chuẩn";
+    ViewData["AdmissionScoreFormAction"] = "EditAdmissionScore";
+    ViewData["AdmissionScoreSubmitText"] = "Cập nhật";
+}
+<partial name="_AdmissionScoreForm" model="Model" />
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

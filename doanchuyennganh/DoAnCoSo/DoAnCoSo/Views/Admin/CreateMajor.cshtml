@@ -1,0 +1,85 @@
+@model DoAnCoSo.Models.Major
+@{
+    ViewData["Title"] = "Thêm Ngành Học Mới";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Thêm Ngành Học Mới</h2>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="CreateMajor" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label">Tên ngành học *</label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Code" class="form-label">Mã ngành</label>
+                                <input asp-for="Code" class="form-control" />
+                                <span asp-validation-for="Code" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Mô tả *</label>
+                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Duration" class="form-label">Thời gian đào tạo (năm)</label>
+                                <input asp-for="Duration" class="form-control" type="number" min="1" max="10" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="TuitionFee" class="form-label">Học phí (VNĐ/năm)</label>
+                                <input asp-for="TuitionFee" class="form-control" type="number" min="0" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MainSubjects" class="form-label">Các môn học chính</label>
+                            <input asp-for="MainSubjects" class="form-control" placeholder="Ví dụ: Toán, Lý, Hóa" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CareerOpportunities" class="form-label">Cơ hội việc làm</label>
+                            <textarea asp-for="CareerOpportunities" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AverageSalary" class="form-label">Mức lương trung bình</label>
+                            <input asp-for="AverageSalary" class="form-control" placeholder="Ví dụ: 8-20 triệu/tháng" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RequiredQualities" class="form-label">Tố chất cần có</label>
+                            <input asp-for="RequiredQualities" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Hình ảnh</label>
+                            <input type="file" name="imageFile" class="form-control" accept="image/*" />
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Majors")" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary">Lưu</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

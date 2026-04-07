@@ -1,0 +1,90 @@
+@model DoAnCoSo.Models.University
+@{
+    ViewData["Title"] = "Thêm Trường Đại Học Mới";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Thêm Trường Đại Học Mới</h2>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="CreateUniversity" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Name" class="form-label">Tên trường *</label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Code" class="form-label">Mã trường</label>
+                                <input asp-for="Code" class="form-control" />
+                                <span asp-validation-for="Code" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="City" class="form-label">Thành phố/Tỉnh</label>
+                                <input asp-for="City" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Type" class="form-label">Loại trường</label>
+                                <select asp-for="Type" class="form-select">
+                                    <option value="">-- Chọn loại --</option>
+                                    <option value="Công lập">Công lập</option>
+                                    <option value="Tư thục">Tư thục</option>
+                                    <option value="Quốc tế">Quốc tế</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label">Địa chỉ</label>
+                            <input asp-for="Address" class="form-control" />
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                                <input asp-for="PhoneNumber" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Website" class="form-label">Website</label>
+                                <input asp-for="Website" class="form-control" type="url" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Ranking" class="form-label">Xếp hạng</label>
+                            <input asp-for="Ranking" class="form-control" type="number" min="1" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Mô tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Logo trường</label>
+                            <input type="file" name="logoFile" class="form-control" accept="image/*" />
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Universities")" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary">Lưu</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

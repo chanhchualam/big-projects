@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}{{ nganh.TenNganh }} - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="major-detail-container">
+    <div class="major-header">
+        <h1>{{ nganh.TenNganh }}</h1>
+        <p class="school-name">{{ truong.TenTruong if truong else 'N/A' }}</p>
+    </div>
+    
+    <div class="major-grid">
+        <div class="major-main">
+            <section class="info-section">
+                <h2>Thông Tin Chung</h2>
+                {% if nganh.MoTa %}
+                    <p>{{ nganh.MoTa }}</p>
+                {% endif %}
+                
+                <div class="info-box">
+                    <h3>Yêu Cầu Tuyển Sinh</h3>
+                    <ul>
+                        <li><strong>Khối Thi:</strong> {{ nganh.KhoiThi_YeuCau or 'N/A' }}</li>
+                        <li><strong>Điểm Chuan:</strong> {{ nganh.DiemChuan or 'N/A' }}</li>
+                        <li><strong>Chỉ Tiêu Tuyển:</strong> {{ nganh.ChiTieuTuyen or 'N/A' }}</li>
+                        <li><strong>Mã Ngành:</strong> {{ nganh.MaNganh or 'N/A' }}</li>
+                    </ul>
+                </div>
+            </section>
+            
+            {% if thong_tin %}
+                <section class="info-section">
+                    <h2>Thông Tin Tuyển Sinh Chi Tiết</h2>
+                    <table class="detail-table">
+                        <thead>
+                            <tr>
+                                <th>Năm</th>
+                                <th>Hình Thức</th>
+                                <th>Điểm Chuan</th>
+                                <th>Chỉ Tiêu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tt in thong_tin %}
+                                <tr>
+                                    <td>{{ tt.NamTuyen }}</td>
+                                    <td>{{ tt.TenHinhThuc }}</td>
+                                    <td>{{ tt.DiemChuan }}</td>
+                                    <td>{{ tt.DuToanChiTieu }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            {% endif %}
+            
+            <section class="info-section">
+                <h2>Thông Tin Trường Đại Học</h2>
+                {% if truong %}
+                    <div class="school-info">
+                        <p><strong>Tên Trường:</strong> {{ truong.TenTruong }}</p>
+                        <p><strong>Địa Chỉ:</strong> {{ truong.DiaChi }}</p>
+                        <p><strong>Điện Thoại:</strong> {{ truong.SoDienThoai }}</p>
+                        <p><strong>Email:</strong> {{ truong.Email }}</p>
+                        <p><strong>Website:</strong> <a href="{{ truong.Website }}" target="_blank">{{ truong.Website }}</a></p>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+        
+        <aside class="major-sidebar">
+            <div class="rating-box">
+                <h3>Đánh Giá</h3>
+                <div class="rating-score">
+                    <span class="score">{{ avg_rating|round(1) }}</span>
+                    <span class="stars">★★★★★</span>
+                    <span class="count">({{ danh_gia|length }} đánh giá)</span>
+                </div>
+            </div>
+            
+            <div class="action-box">
+                <h3>Hành Động</h3>
+                {% if session.user_id %}
+                    <button class="btn btn-primary btn-block" onclick="showRatingForm()">Đánh Giá Ngành</button>
+                    <a href="{{ url_for('recommendation.get_recommendation') }}" class="btn btn-secondary btn-block">Kiểm Tra Phù Hợp</a>
+                {% else %}
+                    <p style="color: #666;">Đăng nhập để đánh giá ngành</p>
+                    <a href="{{ url_for('main.login') }}" class="btn btn-primary btn-block">Đăng Nhập</a>
+                {% endif %}
+            </div>
+        </aside>
+    </div>
+    
+    {% if danh_gia %}
+        <section class="reviews-section">
+            <h2>Đánh Giá Từ Học Sinh ({{ danh_gia|length }})</h2>
+            <div class="reviews-list">
+                {% for review in danh_gia[:5] %}
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="reviewer-name">{{ review.user.HoTen }}</span>
+                            <span class="review-rating">★★★★★</span>
+                        </div>
+                        <p class="review-text">{{ review.NhanXet }}</p>
+                        <span class="review-date">{{ review.NgayDanhGia.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>
+
+<div id="rating-modal" style="display: none;" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeRatingForm()">&times;</span>
+        <h2>Đánh Giá Ngành Học</h2>
+        <form onsubmit="submitRating(event, {{ nganh.NganhID }})">
+            <div class="form-group">
+                <label for="rating-select">Điểm Đánh Giá (1-5):</label>
+                <select id="rating-select">
+                    <option value="5">5 - Rất Tốt</option>
+                    <option value="4">4 - Tốt</option>
+                    <option value="3">3 - Bình Thường</option>
+                    <option value="2">2 - Không Tốt</option>
+                    <option value="1">1 - Rất Không Tốt</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="review-text">Nhận Xét:</label>
+                <textarea id="review-text" placeholder="Viết nhận xét của bạn..." rows="4"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Gửi Đánh Giá</button>
+        </form>
+    </div>
+</div>
+<script>
+function showRatingForm() {
+    document.getElementById('rating-modal').style.display = 'flex';
+}
+
+function closeRatingForm() {
+    document.getElementById('rating-modal').style.display = 'none';
+}
+
+async function submitRating(e, nganhId) {
+    e.preventDefault();
+    
+    const rating = document.getElementById('rating-select').value;
+    const review = document.getElementById('review-text').value;
+    
+    try {
+        const response = await fetch(`/major/api/rating/${nganhId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                rating: parseInt(rating),
+                review: review
+            })
+        });
+        
+        if (response.ok) {
+            alert('Cảm ơn bạn đã đánh giá!');
+            closeRatingForm();
+            location.reload();
+        }
+    } catch (error) {
+        alert('Lỗi: ' + error.message);
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('rating-modal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Tra cứu bằng lái hành chính{% endblock %}
+{% block page_title %}Tra cứu bằng lái (hành chính){% endblock %}
+{% block content %}
+
+<div class="prose" style="margin-bottom:1.25rem;">
+  <p>Hành chính: lần lượt <strong><code>BangLai_HanhChinh</code></strong> trên Miền Trung, rồi <strong>LINK_NAM</strong> (Nam), rồi <strong>LINK_BAC</strong> (Bắc) — ví dụ <code>MT…</code> ở Trung, <code>MB…</code> ở Bắc. Điểm: thử <code>BangLai_Diem</code> / <code>BangLai</code> trên các miền tương ứng.</p>
+</div>
+
+<form method="get" action="{{ url_for('tra_cuu_bang_lai') }}" class="filter-form" style="max-width:420px;">
+  <div class="field">
+    <label for="so_bang">Số bằng lái (<code>SoBangLai</code>)</label>
+    <input type="text" id="so_bang" name="so_bang" value="{{ so_bang or '' }}" placeholder="VD: MT001, MB001, MN001…" required />
+  </div>
+  <button type="submit" class="btn btn-primary">Tra cứu</button>
+</form>
+
+{% if error %}
+<div class="err-box" style="margin-top:1rem;">{{ error }}</div>
+{% endif %}
+
+{% if ket_qua %}
+<div class="card card-pad" style="margin-top:1.25rem;">
+  <h3 style="margin:0 0 1rem;font-size:1rem;">Kết quả</h3>
+  {% if ket_qua.get('_NguonHanhChinh') %}
+  <p style="font-size:0.82rem;color:var(--muted);margin:0 0 0.35rem;">Nguồn hành chính: <strong>{{ ket_qua['_NguonHanhChinh'] }}</strong></p>
+  {% endif %}
+  {% if ket_qua.get('_NguonDiem') %}
+  <p style="font-size:0.82rem;color:var(--muted);margin:0 0 0.75rem;">Nguồn điểm: <strong>{{ ket_qua['_NguonDiem'] }}</strong></p>
+  {% endif %}
+  <table class="data">
+    <tbody>
+      <tr><th style="width:40%;">Số bằng</th><td>{{ ket_qua.get('SoBangLai') }}</td></tr>
+      <tr><th>Họ tên</th><td>{{ ket_qua.get('HoTen') }}</td></tr>
+      <tr><th>Ngày sinh</th><td>{{ ket_qua.get('NgaySinh') }}</td></tr>
+      <tr><th>Hạng bằng</th><td><strong>{{ ket_qua.get('HangBang') }}</strong></td></tr>
+      <tr><th>Điểm (còn lại / tổng)</th><td>{% if ket_qua.get('DiemConLai') is not none %}<strong>{{ ket_qua.DiemConLai }}</strong>{% else %}<span style="color:var(--muted);">—</span>{% endif %}</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.8rem;color:var(--muted);margin:1rem 0 0;">Nếu không có điểm: kiểm tra bảng điểm trên Miền Nam hoặc cột điểm trên <code>BangLai</code> trong SSMS.</p>
+</div>
+{% endif %}
+
+<div class="card card-pad" style="margin-top:1.25rem;">
+  <h3 style="margin:0 0 0.5rem;font-size:0.9rem;">Gợi ý khi lỗi</h3>
+  <ul style="margin:0;padding-left:1.2rem;font-size:0.85rem;color:var(--muted);line-height:1.6;">
+    <li><strong>Lỗi SQL:</strong> chạy <code>sql/10_kiem_tra_cot_bang_lai.sql</code>, chỉnh <code>WebApp.Demo.TraCuuBangLai</code> trong <code>config/connections.json</code> (một tham số <code>?</code>).</li>
+    <li><strong>Không có dòng:</strong> không có trên cả ba miền, hoặc linked server / tên DB khác <code>connections.json</code>.</li>
+  </ul>
+</div>
+{% endblock %}

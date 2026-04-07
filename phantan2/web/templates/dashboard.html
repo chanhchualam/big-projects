@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Bảng điều khiển · CSGT{% endblock %}
+{% block page_title %}Bảng điều khiển{% endblock %}
+{% block content %}
+
+{% if error %}
+<div class="err-box"><strong>Lỗi dữ liệu.</strong><br/>{{ error }}</div>
+{% endif %}
+
+{% if shard_errors %}
+<div class="card card-pad" style="margin-bottom:1rem;border-color:rgba(248,113,113,0.35);">
+  <h3 style="margin:0 0 0.5rem;font-size:0.85rem;color:var(--danger);">Cảnh báo shard</h3>
+  <ul style="margin:0;padding-left:1.1rem;font-size:0.82rem;color:var(--muted);">
+    {% for e in shard_errors %}
+    <li><strong>{{ e.title }}</strong>: {{ e.message }}</li>
+    {% endfor %}
+  </ul>
+  <p style="margin:0.75rem 0 0;font-size:0.8rem;color:var(--muted);">Xem chi tiết: <a href="{{ url_for('thong_ke_toan_quoc') }}">Thống kê toàn quốc</a> · <a href="{{ url_for('giai_lap_su_co') }}">Giả lập sự cố</a></p>
+</div>
+{% endif %}
+
+<div class="grid-stats">
+  <div class="stat-card">
+    <h3>Tổng đơn vị</h3>
+    <div class="num">{{ stats.tong }}</div>
+    <div class="hint">Từ các shard phản hồi OK</div>
+  </div>
+  {% for kv, sl in stats.theo_khu %}
+  <a href="{{ url_for('don_vi', khu_vuc=kv) }}" class="stat-card" style="text-decoration:none;color:inherit;display:block;cursor:pointer;" title="Lọc danh sách theo {{ kv }}">
+    <h3>{{ kv }}</h3>
+    <div class="num">{{ sl }}</div>
+    <div class="hint">đơn vị · nhấn để lọc</div>
+  </a>
+  {% endfor %}
+</div>
+
+{% if bb_stats and (bb_stats.trung is not none or bb_stats.nam is not none or bb_stats.bac is not none) %}
+<div class="grid-stats" style="margin-top:1rem;">
+  <div class="stat-card">
+    <h3>Biên bản · Trung</h3>
+    <div class="num">{{ bb_stats.trung if bb_stats.trung is not none else '—' }}</div>
+  </div>
+  <div class="stat-card">
+    <h3>Biên bản · Nam</h3>
+    <div class="num">{{ bb_stats.nam if bb_stats.nam is not none else '—' }}</div>
+  </div>
+  <div class="stat-card">
+    <h3>Biên bản · Bắc</h3>
+    <div class="num">{{ bb_stats.bac if bb_stats.bac is not none else '—' }}</div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card card-pad" style="margin-bottom:1.5rem;">
+  <h3 style="margin:0 0 0.75rem;font-size:0.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;">Phân bổ theo khu vực</h3>
+  {% set mx = stats.tong or 1 %}
+  {% for kv, sl in stats.theo_khu %}
+  <div class="bar-row">
+    <span>{{ kv }}</span>
+    <div class="bar-track">
+      <div class="bar-fill" style="width: {{ (sl * 100 / mx)|round(1) }}%;"></div>
+    </div>
+    <span style="color:var(--muted);font-size:0.8rem;min-width:2rem;">{{ sl }}</span>
+  </div>
+  {% endfor %}
+  {% if not stats.theo_khu %}
+  <p style="color:var(--muted);margin:0;">Chưa có dữ liệu hoặc lỗi kết nối.</p>
+  {% endif %}
+</div>
+
+<div class="card card-pad">
+  <h3 style="margin:0 0 0.5rem;font-size:1rem;">Chức năng minh họa phân tán</h3>
+  <p style="color:var(--muted);font-size:0.9rem;margin:0 0 1rem;">Phân mảnh ngang / dọc, procedure trừ điểm qua link, danh mục lỗi.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+    <a class="btn btn-primary" href="{{ url_for('thong_ke_toan_quoc') }}">Thống kê toàn quốc</a>
+    <a class="btn btn-primary" href="{{ url_for('don_vi') }}">Đơn vị CSGT</a>
+    <a class="btn btn-ghost" href="{{ url_for('tra_cuu_bang_lai') }}">Tra cứu BL hành chính</a>
+    <a class="btn btn-ghost" href="{{ url_for('xu_ly_vi_pham') }}">Xử lý vi phạm</a>
+    <a class="btn btn-ghost" href="{{ url_for('danh_muc_loi') }}">Danh mục lỗi</a>
+    <a class="btn btn-ghost" href="{{ url_for('phuong_tien') }}">Phương tiện</a>
+    <a class="btn btn-ghost" href="{{ url_for('bien_ban') }}">Tra cứu biên bản</a>
+    <a class="btn btn-ghost" href="{{ url_for('phat_tren_10_trieu_mien_trung') }}">Phạt &gt; 10tr (Trung)</a>
+    <a class="btn btn-ghost" href="{{ url_for('thu_ngan_sach_toan_quoc') }}">Thu ngân sách</a>
+    <a class="btn btn-ghost" href="{{ url_for('tra_cuu_phat_nguoi') }}">Phạt nguội (SP)</a>
+    <a class="btn btn-ghost" href="{{ url_for('tru_diem_bang_lai_bai_tap') }}">Trừ điểm (SP)</a>
+    <a class="btn btn-ghost" href="{{ url_for('dem_tai_xe_nhieu_vu') }}">Tài xế &gt;3 BB</a>
+    <a class="btn btn-ghost" href="{{ url_for('giai_lap_su_co') }}">Giả lập sự cố</a>
+    <a class="btn btn-ghost" href="{{ url_for('xuat_don_vi_csv') }}">Xuất CSV</a>
+  </div>
+</div>
+{% endblock %}

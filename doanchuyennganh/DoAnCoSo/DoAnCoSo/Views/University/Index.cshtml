@@ -1,0 +1,94 @@
+@model IEnumerable<DoAnCoSo.Models.University>
+@{
+    ViewData["Title"] = "Danh Sách Trường Đại Học";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="bi bi-building"></i> Danh Sách Trường Đại Học
+    </h2>
+
+    <!-- Search Form -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Tìm kiếm</label>
+                    <input type="text" name="keyword" class="form-control" 
+                           value="@ViewBag.Keyword" placeholder="Tên trường, mã trường...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Thành phố</label>
+                    <select name="city" class="form-select">
+                        <option value="">Tất cả</option>
+                        @foreach (var city in ViewBag.Cities as List<string>)
+                        {
+                            <option value="@city" selected="@(ViewBag.City == city)">@city</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Loại trường</label>
+                    <select name="type" class="form-select">
+                        <option value="">Tất cả</option>
+                        <option value="Công lập" selected="@(ViewBag.Type == "Công lập")">Công lập</option>
+                        <option value="Tư thục" selected="@(ViewBag.Type == "Tư thục")">Tư thục</option>
+                        <option value="Quốc tế" selected="@(ViewBag.Type == "Quốc tế")">Quốc tế</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Tìm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="row">
+        @foreach (var university in Model)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    @if (!string.IsNullOrEmpty(university.LogoUrl))
+                    {
+                        <img src="@university.LogoUrl" class="card-img-top" alt="@university.Name" style="height: 200px; object-fit: contain; padding: 10px;">
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-building text-white" style="font-size: 4rem;"></i>
+                        </div>
+                    }
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@university.Name</h5>
+                        @if (!string.IsNullOrEmpty(university.Code))
+                        {
+                            <p class="text-muted small mb-2">Mã trường: @university.Code</p>
+                        }
+                        <p class="card-text flex-grow-1">
+                            <i class="bi bi-geo-alt"></i> @university.City<br>
+                            <i class="bi bi-tag"></i> @university.Type
+                        </p>
+                        <a href="@Url.Action("Details", "University", new { id = university.Id })" class="btn btn-primary mt-auto">
+                            <i class="bi bi-eye"></i> Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i> Không tìm thấy trường đại học nào.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+}
+

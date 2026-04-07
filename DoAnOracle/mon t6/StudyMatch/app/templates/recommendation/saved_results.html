@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Kết Quả Gợi Ý Đã Lưu - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="saved-results-container">
+    <h1>Kết Quả Gợi Ý Đã Lưu</h1>
+    
+    {% if results %}
+        <div class="results-table-wrapper">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Ngành Học</th>
+                        <th>Trường Đại Học</th>
+                        <th>Tổng Điểm</th>
+                        <th>Mức Độ Phù Hợp</th>
+                        <th>Ngày Tính Toán</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            <td>
+                                <strong>{{ result.nganh.TenNganh }}</strong>
+                            </td>
+                            <td>
+                                {{ result.nganh.truong.TenTruong if result.nganh.truong else 'N/A' }}
+                            </td>
+                            <td>
+                                <span class="badge badge-info">{{ result.DiemTrungBinh|round(2) }}</span>
+                            </td>
+                            <td>
+                                <div class="match-indicator">
+                                    <div class="match-bar">
+                                        <div class="match-fill" style="width: {{ result.TiLePhuHop }}%"></div>
+                                    </div>
+                                </div>
+                                <span>{{ result.TiLePhuHop|round(1) }}%</span>
+                            </td>
+                            <td>
+                                {{ result.NgayTinhToan.strftime('%d/%m/%Y') }}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('major.major_detail', nganh_id=result.NganhID) }}" class="btn btn-small">
+                                    Chi Tiết
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="actions">
+            <a href="{{ url_for('recommendation.get_recommendation') }}" class="btn btn-primary">
+                Tính Toán Lại
+            </a>
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-secondary">
+                Cập Nhật Điểm
+            </a>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Bạn chưa có kết quả gợi ý nào.</p>
+            <a href="{{ url_for('recommendation.get_recommendation') }}" class="btn btn-primary">
+                Nhận Gợi Ý Ngay
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Gợi Ý Ngành - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="no-scores-container">
+    <div class="empty-state">
+        <h1>Chưa Có Điểm Số</h1>
+        <p>Để nhận gợi ý ngành học, bạn cần phải nhập điểm thi THPT của mình trước.</p>
+        
+        <div class="empty-actions">
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-primary btn-large">
+                Nhập Điểm Ngay
+            </a>
+            <a href="{{ url_for('major.list_majors') }}" class="btn btn-secondary btn-large">
+                Khám Phá Các Ngành Học
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
