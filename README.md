@@ -1,5 +1,5 @@
 ## 📌 Tổng quan (Overview)
-Dự án được xây dựng trên nền tảng **ASP.NET Core MVC**, giải quyết bài toán [A, B, C...].
+Dự án được xây dựng trên nền tảng **ASP.NET Core MVC** và **Flutter**.
 
 ## 📊 Kỹ năng Business Analyst (BA Skills)
 Trong dự án này, tôi đã thực hiện:
