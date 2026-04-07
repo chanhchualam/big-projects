@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Thu ngân sách toàn quốc{% endblock %}
+{% block page_title %}Thống kê thu ngân sách (GiaoDichNopPhat){% endblock %}
+{% block content %}
+
+<p style="color:var(--muted);font-size:0.9rem;margin:-0.5rem 0 1rem;">
+  Câu 5 đồ án: <code>SUM(SoTien)</code> trên <code>GiaoDichNopPhat</code> từng miền qua
+  <strong>LINK_BAC</strong>, bảng cục bộ Trung, <strong>LINK_NAM</strong> — không dùng bảng đồng bộ định kỳ.
+  Script đầy đủ: <code>sql/12_bai_tap_cau_3_den_7_phan_tan.sql</code> (view <code>vw_ThuNganSachTheoMien</code>).
+  Ghi đè câu SQL: <code>WebApp.Demo.QueryThuNganSachToanQuoc</code>.
+</p>
+
+{% if error %}
+<div class="err-box">{{ error }}</div>
+{% endif %}
+
+{% if columns and rows %}
+<div class="card table-wrap">
+  <table class="data">
+    <thead>
+      <tr>
+        {% for c in columns %}
+        <th>{{ c }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for c in columns %}
+        <td>{% set v = row.get(c) %}{% if v is not none %}{% if c == 'TongTienDaThu' %}{{ "{:,.0f}".format(v|float) }}{% else %}{{ v }}{% endif %}{% else %}—{% endif %}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% elif not error %}
+<p style="color:var(--muted);">Không có dòng hoặc lỗi link server.</p>
+{% endif %}
+{% endblock %}

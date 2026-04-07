@@ -1,0 +1,135 @@
+﻿@using System.Security.Claims
+@model DoAnCoSo.Models.Teacher
+@{
+    ViewData["Title"] = "Chi tiết giáo viên";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Thông tin giáo viên -->
+        <div class="col-md-8">
+            <h2>THÔNG TIN GIÁO VIÊN</h2>
+            <table class="table table-borderless">
+                <tr>
+                    <th>Tên:</th>
+                    <td>@Model.Name</td>
+                </tr>
+                <tr>
+                    <th>Bộ môn:</th>
+                    <td>@Model.Subject</td>
+                </tr>
+                <tr>
+                    <th>Nơi công tác:</th>
+                    <td>@Model.Center?.Name</td>
+                </tr>
+            </table>
+
+            <div class="mt-4">
+                <h4>ĐÔI NÉT VỀ GIÁO VIÊN</h4>
+                <p>@Model.Description</p>
+            </div>
+        </div>
+
+        <!-- Ảnh giáo viên -->
+        <div class="col-md-4 text-center">
+            <img src="@Model.ImageUrl" class="img-fluid rounded shadow" style="max-height: 300px;" alt="Ảnh giáo viên" />
+        </div>
+    </div>
+
+    <!-- Nút sửa / xóa giáo viên -->
+    <div class="mt-4">
+        <a asp-action="Update" asp-route-id="@Model.Id" class="btn btn-warning me-2">Sửa</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa giáo viên này không?');">Xóa</a>
+    </div>
+
+    <!-- Form gửi đánh giá -->
+    <form asp-action="AddReview" method="post" class="mt-4">
+        <input type="hidden" name="teacherId" value="@Model.Id" />
+        <textarea name="content" class="form-control" placeholder="Viết đánh giá..."></textarea>
+        <select name="rating" class="form-select mt-2">
+            <option value="5">5 sao</option>
+            <option value="4">4 sao</option>
+            <option value="3">3 sao</option>
+            <option value="2">2 sao</option>
+            <option value="1">1 sao</option>
+        </select>
+        <button type="submit" class="btn btn-primary mt-2">Gửi đánh giá</button>
+    </form>
+
+    <!-- Danh sách đánh giá -->
+    <h4 class="mt-4">Đánh giá:</h4>
+    @foreach (var review in Model.Reviews)
+    {
+        <div class="border p-2 mb-2">
+            <strong>@review.User.UserName</strong> - @review.Rating sao
+            <p>@review.Content</p>
+
+            @if (review.UserId == User.FindFirstValue(ClaimTypes.NameIdentifier))
+            {
+                <!-- Nút xóa -->
+                <form asp-action="DeleteReview" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@review.Id" />
+                    <button class="btn btn-danger btn-sm">Xóa</button>
+                </form>
+
+                <!-- Form sửa đánh giá -->
+                <form asp-action="EditReview" method="post" class="mt-2">
+                    <input type="hidden" name="Id" value="@review.Id" />
+                    <input type="hidden" name="TeacherId" value="@Model.Id" />
+
+                    <textarea name="Content" class="form-control mb-2">@review.Content</textarea>
+
+                    <select name="Rating" class="form-select mb-2">
+                        @if (review.Rating == 1)
+                        {
+                            <option value="1" selected="selected">1 sao</option>
+                        }
+                        else
+                        {
+                            <option value="1">1 sao</option>
+                        }
+
+                        @if (review.Rating == 2)
+                        {
+                            <option value="2" selected="selected">2 sao</option>
+                        }
+                        else
+                        {
+                            <option value="2">2 sao</option>
+                        }
+
+                        @if (review.Rating == 3)
+                        {
+                            <option value="3" selected="selected">3 sao</option>
+                        }
+                        else
+                        {
+                            <option value="3">3 sao</option>
+                        }
+
+                        @if (review.Rating == 4)
+                        {
+                            <option value="4" selected="selected">4 sao</option>
+                        }
+                        else
+                        {
+                            <option value="4">4 sao</option>
+                        }
+
+                        @if (review.Rating == 5)
+                        {
+                            <option value="5" selected="selected">5 sao</option>
+                        }
+                        else
+                        {
+                            <option value="5">5 sao</option>
+                        }
+                    </select>
+
+
+                    <button type="submit" class="btn btn-secondary btn-sm">Sửa</button>
+                </form>
+            }
+        </div>
+    }
+</div>

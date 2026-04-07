@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Gợi Ý Ngành Học - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="recommendation-container">
+    <h1>Kết Quả Gợi Ý Ngành Học</h1>
+    
+    {% if recommendations %}
+        <div class="summary-box">
+            <h2>Phân Tích Điểm Số</h2>
+            <p>Điểm trung bình của bạn: <strong>{{ diem_trung_binh|round(2) }}</strong></p>
+            <p>Chúng tôi đã tìm thấy <strong>{{ recommendations|length }}</strong> ngành học phù hợp với bạn</p>
+        </div>
+        
+        <div class="recommendations-list">
+            {% for rec in recommendations %}
+                <div class="recommendation-item">
+                    <div class="rank-badge">{{ loop.index }}</div>
+                    <div class="rec-content">
+                        <h3>{{ rec.nganh.TenNganh }}</h3>
+                        <p class="school">{{ rec.nganh.truong.TenTruong if rec.nganh.truong else 'N/A' }}</p>
+                        
+                        <div class="match-bar">
+                            <div class="match-fill" style="width: {{ rec.ti_le }}%"></div>
+                        </div>
+                        <p class="match-text">Mức độ phù hợp: <strong>{{ rec.ti_le|round(1) }}%</strong></p>
+                        
+                        <div class="rec-info">
+                            <span>Điểm Chuan: {{ rec.nganh.DiemChuan or 'N/A' }}</span>
+                            <span>Khối: {{ rec.nganh.KhoiThi_YeuCau or 'N/A' }}</span>
+                            <span>Chỉ Tiêu: {{ rec.nganh.ChiTieuTuyen or 'N/A' }}</span>
+                        </div>
+                        
+                        <a href="{{ url_for('major.major_detail', nganh_id=rec.nganh.NganhID) }}" class="btn btn-secondary">
+                            Xem Chi Tiết
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="actions">
+            <button onclick="window.print()" class="btn btn-secondary">In Kết Quả</button>
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-secondary">Cập Nhật Điểm</a>
+            <a href="{{ url_for('recommendation.view_results') }}" class="btn btn-secondary">Lịch Sử Gợi Ý</a>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Chưa tìm thấy ngành học phù hợp.</p>
+            <a href="{{ url_for('student.enter_scores') }}" class="btn btn-primary">Nhập Điểm Thi</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.recommendation-container {
+    padding: 2rem 0;
+}
+
+.summary-box {
+    background: linear-gradient(135deg, #0066cc 0%, #0088ff 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.summary-box h2 {
+    margin-top: 0;
+}
+
+.summary-box p {
+    margin: 0.5rem 0;
+}
+
+.recommendations-list {
+    margin-bottom: 2rem;
+}
+
+.recommendation-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.rank-badge {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #0066cc 0%, #0088ff 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.rec-content h3 {
+    color: #0066cc;
+    margin: 0 0 0.5rem 0;
+}
+
+.school {
+    color: #666;
+    margin: 0 0 1rem 0;
+    font-size: 0.95rem;
+}
+
+.match-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #f0f4f8;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.match-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    transition: width 0.3s;
+}
+
+.match-text {
+    margin: 0.5rem 0 1rem 0;
+    color: #333;
+}
+
+.rec-info {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.rec-info span {
+    padding: 0.5rem;
+    background-color: #f0f4f8;
+    border-radius: 3px;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.empty-state {
+    background: white;
+    padding: 3rem;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .recommendation-item {
+        grid-template-columns: 1fr;
+    }
+    
+    .rank-badge {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .rec-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+@media print {
+    .actions {
+        display: none;
+    }
+    
+    .recommendation-item {
+        page-break-inside: avoid;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,202 @@
+@{
+    ViewData["Title"] = "Trắc Nghiệm Định Hướng Nghề Nghiệp";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-clipboard-check"></i> Trắc Nghiệm Định Hướng Nghề Nghiệp (Holland Code)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Bài trắc nghiệm này sẽ giúp bạn khám phá tính cách và tìm ra ngành học phù hợp nhất với bản thân.</p>
+                    
+                    <div id="testContainer">
+                        <div id="questionContainer"></div>
+                        <div class="mt-4 d-flex justify-content-between">
+                            <button id="prevBtn" class="btn btn-secondary" style="display: none;">
+                                <i class="bi bi-arrow-left"></i> Câu trước
+                            </button>
+                            <button id="nextBtn" class="btn btn-primary ms-auto">
+                                Câu tiếp <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                        <button id="submitBtn" class="btn btn-success w-100 mt-3" style="display: none;">
+                            <i class="bi bi-check-circle"></i> Xem Kết Quả
+                        </button>
+                    </div>
+
+                    <div id="resultContainer" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script>
+        const questions = [
+            { id: 1, text: "Bạn thích làm việc gì nhất?", options: [
+                { value: 1, text: "Làm việc với máy móc, công cụ" },
+                { value: 2, text: "Nghiên cứu, tìm hiểu khoa học" },
+                { value: 3, text: "Sáng tạo nghệ thuật" }
+            ]},
+            { id: 2, text: "Bạn muốn làm nghề gì trong tương lai?", options: [
+                { value: 1, text: "Giúp đỡ, chăm sóc người khác" },
+                { value: 2, text: "Lãnh đạo, quản lý" },
+                { value: 3, text: "Làm việc có tổ chức, hệ thống" }
+            ]},
+            { id: 3, text: "Bạn thích môn học nào nhất?", options: [
+                { value: 1, text: "Toán, Lý, Kỹ thuật" },
+                { value: 2, text: "Sinh, Hóa, Y học" },
+                { value: 3, text: "Văn, Sử, Nghệ thuật" }
+            ]},
+            { id: 4, text: "Tính cách của bạn?", options: [
+                { value: 1, text: "Thực tế, kiên nhẫn" },
+                { value: 2, text: "Tò mò, phân tích" },
+                { value: 3, text: "Sáng tạo, độc lập" }
+            ]},
+            { id: 5, text: "Bạn muốn làm việc ở đâu?", options: [
+                { value: 1, text: "Bệnh viện, trường học" },
+                { value: 2, text: "Văn phòng, công ty" },
+                { value: 3, text: "Môi trường có tổ chức" }
+            ]}
+        ];
+
+        let currentQuestion = 0;
+        const answers = {};
+
+        function renderQuestion() {
+            const question = questions[currentQuestion];
+            const container = document.getElementById('questionContainer');
+            
+            container.innerHTML = `
+                <div class="mb-3">
+                    <h5>Câu ${currentQuestion + 1}/${questions.length}: ${question.text}</h5>
+                </div>
+                <div class="list-group">
+                    ${question.options.map((opt, idx) => `
+                        <label class="list-group-item">
+                            <input type="radio" name="question${question.id}" value="${opt.value}" 
+                                   ${answers[question.id] === opt.value ? 'checked' : ''}>
+                            ${opt.text}
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+
+            // Update buttons
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            const selected = document.querySelector(`input[name="question${questions[currentQuestion].id}"]:checked`);
+            if (selected) {
+                answers[questions[currentQuestion].id] = parseInt(selected.value);
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    renderQuestion();
+                }
+            } else {
+                alert('Vui lòng chọn một đáp án!');
+            }
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            const selected = document.querySelector(`input[name="question${questions[currentQuestion].id}"]:checked`);
+            if (!selected) {
+                alert('Vui lòng chọn một đáp án!');
+                return;
+            }
+
+            answers[questions[currentQuestion].id] = parseInt(selected.value);
+
+            // Prepare data
+            const testAnswers = {
+                answers: Object.keys(answers).map(qId => ({
+                    questionId: parseInt(qId),
+                    choice: answers[qId],
+                    score: 1
+                }))
+            };
+
+            // Submit
+            try {
+                const response = await fetch('/CareerTest/Submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testAnswers)
+                });
+
+                const result = await response.json();
+                displayResult(result);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+            }
+        });
+
+        function displayResult(result) {
+            document.getElementById('testContainer').style.display = 'none';
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.style.display = 'block';
+            
+            const hollandNames = {
+                'R': 'Realistic (Thực tế)',
+                'I': 'Investigative (Nghiên cứu)',
+                'A': 'Artistic (Nghệ thuật)',
+                'S': 'Social (Xã hội)',
+                'E': 'Enterprising (Kinh doanh)',
+                'C': 'Conventional (Tổ chức)'
+            };
+
+            resultContainer.innerHTML = `
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-check-circle"></i> Kết Quả Trắc Nghiệm</h4>
+                    <p><strong>Mã Holland của bạn:</strong> <span class="badge bg-primary fs-6">${result.hollandCode} - ${hollandNames[result.hollandCode]}</span></p>
+                </div>
+                <div class="mt-4">
+                    <h5>Phân tích:</h5>
+                    <p>${result.analysis}</p>
+                </div>
+                <div class="mt-4">
+                    <h5>Ngành học phù hợp:</h5>
+                    <div class="row">
+                        ${result.recommendedMajors.map(m => `
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>${m.name}</h6>
+                                        <p class="small text-muted">${m.description?.substring(0, 100)}...</p>
+                                        <a href="/Major/Details/${m.id}" class="btn btn-sm btn-primary">Xem chi tiết</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="/Major/Index" class="btn btn-primary">Tìm thêm ngành học</a>
+                    <a href="/CareerTest/Index" class="btn btn-secondary">Làm lại bài test</a>
+                </div>
+            `;
+        }
+
+        // Initialize
+        renderQuestion();
+    </script>
+}
+

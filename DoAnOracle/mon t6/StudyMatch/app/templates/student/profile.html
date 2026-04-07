@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Hồ Sơ Cá Nhân - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <h1>Hồ Sơ Cá Nhân</h1>
+    
+    <div class="profile-card">
+        <div class="profile-header">
+            <h2>{{ user.HoTen }}</h2>
+            <p class="user-info">{{ user.LoaiUser }}</p>
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-group">
+                <label>Tên đăng nhập:</label>
+                <p>{{ user.UserName }}</p>
+            </div>
+            
+            <div class="detail-group">
+                <label>Email:</label>
+                <p>{{ user.Email }}</p>
+            </div>
+            
+            <div class="detail-group">
+                <label>Ngày tạo tài khoản:</label>
+                <p>{{ user.NgayTao.strftime('%d/%m/%Y') }}</p>
+            </div>
+            
+            <div class="detail-group">
+                <label>Loại tài khoản:</label>
+                <p>{{ user.LoaiUser }}</p>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="btn btn-secondary" onclick="editProfile()">Chỉnh Sửa Thông Tin</button>
+            <button class="btn btn-secondary" onclick="changePassword()">Đổi Mật Khẩu</button>
+        </div>
+    </div>
+</div>
+<script>
+function editProfile() {
+    alert('Chức năng chỉnh sửa sẽ được cập nhật sớm');
+}
+
+function changePassword() {
+    alert('Chức năng đổi mật khẩu sẽ được cập nhật sớm');
+}
+</script>
+{% endblock %}

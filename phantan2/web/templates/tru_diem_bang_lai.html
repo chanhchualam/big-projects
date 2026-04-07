@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Trừ điểm bằng lái (SP){% endblock %}
+{% block page_title %}Trừ điểm — dbo.usp_TruDiemBangLai{% endblock %}
+{% block content %}
+
+<p style="color:var(--muted);font-size:0.9rem;margin:-0.5rem 0 1rem;">
+  Câu 4: <code>BangLai_HanhChinh</code> (Trung) phải <strong>JOIN</strong> được <code>BangLai_Diem</code> trên <strong>LINK_NAM</strong> (Miền Nam) — cùng <code>SoBangLai</code>.
+  Nếu báo &quot;chưa có bản ghi điểm tại Miền Nam&quot;: thử số bằng demo <code>MN001</code> (xem cuối <code>sql/14_quick_deploy_csgt_mientrung.sql</code>) hoặc bổ sung dữ liệu hai bảng trên.
+  <strong>Bắt buộc:</strong> đã chạy <code>sql/14_quick_deploy_csgt_mientrung.sql</code> trên <code>CSGT_MIENTRUNG</code>.
+  Khác trang &quot;Xử lý vi phạm&quot; (<code>sp_CSGT_TruDiem</code>).
+</p>
+
+<form method="post" class="filter-form" style="margin-bottom:1rem;">
+  <div class="filter-grid">
+    <div class="field">
+      <label for="so_bang">Số bằng lái</label>
+      <input type="text" id="so_bang" name="so_bang" value="{{ so_bang or '' }}" required />
+    </div>
+    <div class="field">
+      <label for="diem_tru">Điểm trừ</label>
+      <input type="number" id="diem_tru" name="diem_tru" value="{{ diem_tru or '1' }}" min="1" required />
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Thực hiện trừ điểm</button>
+</form>
+
+{% if error %}
+<div class="err-box" style="white-space:pre-wrap;">{{ error }}</div>
+{% endif %}
+
+{% if ket_qua %}
+<div class="card card-pad">
+  <table class="data">
+    <tbody>
+      {% for k, v in ket_qua.items() %}
+      <tr>
+        <th style="text-align:left;width:12rem;">{{ k }}</th>
+        <td>{% if v is not none %}{{ v }}{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

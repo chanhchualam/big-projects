@@ -1,0 +1,16 @@
+﻿@model DoAnCoSo.Models.Teacher
+@{
+	ViewData["Title"] = "Delete Teacher";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2>Bạn có chắc chắn muốn xóa giáo viên này không?</h2>
+<div>
+	<h4>Giáo Viên: @Model.Name</h4>
+	<h4>Nơi công tác: @Model.Center.Name</h4>
+	<h4>Mô tả: @Model.Description</h4>
+</div>
+<form asp-action="DeleteConfirmed" method="post">
+	<input type="hidden" asp-for="Id" />
+	<input type="submit" value="Delete" class="btn btn-danger" /> |
+	<a asp-action="Index">Hủy</a>
+</form>
