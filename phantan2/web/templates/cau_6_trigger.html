@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Câu 6 — Trigger bảo vệ LoiViPham{% endblock %}
+{% block page_title %}Câu 6 — Trigger <code>tr_BaoVeLoiViPham</code> (Miền Nam){% endblock %}
+{% block content %}
+
+<div class="prose">
+  <p>Đây là <strong>bài tập trên SQL Server</strong>, không gọi từ Flask. Trigger được tạo trong <strong>SSMS</strong> trên <strong>instance Miền Nam</strong>, database <strong><code>CSGT_MIENNAM</code></strong>.</p>
+
+  <h2>Yêu cầu đề bài</h2>
+  <ul>
+    <li><strong>Sự kiện:</strong> <code>DELETE</code> trên <code>dbo.LoiViPham</code> (xóa một mã lỗi khỏi danh mục).</li>
+    <li><strong>Điều kiện:</strong> chỉ được xóa nếu <code>MaLoi</code> đó <strong>chưa</strong> xuất hiện trong <code>ChiTietPhat</code> ở <strong>bất kỳ miền nào</strong> (lưu vết lịch sử).</li>
+    <li><strong>Kỹ thuật:</strong> trigger trên Nam phải kiểm tra <code>ChiTietPhat</code> tại <strong>Nam</strong> (local) + <strong>Trung</strong> (<code>LINK_TRUNG</code>) + <strong>Bắc</strong> (<code>LINK_BAC</code>).</li>
+  </ul>
+
+  <h2>Thứ tự triển khai</h2>
+  <ol>
+    <li>Trên <strong>instance Miền Nam</strong>: tạo linked server <code>LINK_TRUNG</code>, <code>LINK_BAC</code> — xem khối comment trong <code>sql/13_setup_linked_servers.sql</code> (phần Miền Nam). Script có <code>IF NOT EXISTS</code> để chạy lại an toàn.</li>
+    <li>Mở <code>sql/15_cau_6_trigger_loi_vi_pham_mien_nam.sql</code> (hoặc khối &quot;CÂU 6&quot; trong <code>sql/12_bai_tap_cau_3_den_7_phan_tan.sql</code> — <strong>cùng nội dung</strong>, không phải file lồng nhau).</li>
+    <li>Execute trên database <code>CSGT_MIENNAM</code>.</li>
+    <li>Kiểm tra: <code>SELECT name FROM sys.triggers WHERE parent_id = OBJECT_ID(N'dbo.LoiViPham');</code></li>
+  </ol>
+
+  <h2>Hành vi</h2>
+  <p>Nếu <code>MaLoi</code> vẫn còn trong <code>ChiTietPhat</code> ở một trong ba nơi → <code>RAISERROR</code> và <code>ROLLBACK TRANSACTION</code> → lệnh <code>DELETE</code> bị hủy.</p>
+
+  <p style="margin-top:1.5rem;"><a href="{{ url_for('gioi_thieu') }}#cau-6-trigger">← Đoạn tóm tắt trên trang Giới thiệu</a></p>
+</div>
+{% endblock %}

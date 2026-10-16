@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Giới thiệu · CSGT{% endblock %}
+{% block page_title %}Giới thiệu hệ thống{% endblock %}
+{% block content %}
+
+<div class="prose">
+  <p>Hệ thống web kết nối <strong>SQL Server</strong> theo mô hình <strong>phân tán ba miền</strong> (Linked Server <code>LINK_NAM</code>, <code>LINK_BAC</code>), dùng bảng trong SSMS: <code>DonViCSGT</code>, <code>BangLai</code>, <code>BangLai_HanhChinh</code>, <code>PhuongTien</code>, <code>BienBan</code>, <code>ChiTietPhat</code>, <code>QuyetDinhXuPhat</code>, <code>GiaoDichNopPhat</code>, <code>LoiViPham</code>, …</p>
+  <h2>Chức năng minh họa</h2>
+  <ul>
+    <li><strong>Thống kê toàn quốc:</strong> đơn vị CSGT theo shard + cột nguồn; đếm <code>BienBan</code> ba miền (nếu có).</li>
+    <li><strong>Tra cứu bằng lái:</strong> <code>BangLai_HanhChinh</code> (họ tên, ngày sinh, hạng bằng); điểm thử từ <code>BangLai_Diem</code> / <code>BangLai</code> nếu có.</li>
+    <li><strong>Tra cứu biên bản:</strong> lọc theo mã biên bản, biển số, số bằng — hiển thị JOIN đơn vị, chi tiết phạt, lỗi, quyết định, giao dịch nộp phạt.</li>
+    <li><strong>Phương tiện:</strong> danh mục <code>PhuongTien</code> (SQL tùy chỉnh <code>Demo.ListPhuongTien</code>).</li>
+    <li><strong>Xử lý vi phạm:</strong> <code>dbo.sp_CSGT_TruDiem</code> (<code>@SoBangLai</code>, <code>@MaLoi</code>, <code>@NoiLap</code>) — <code>sql/08_sp_CSGT_TruDiem.sql</code> / <code>sql/14_...</code>.</li>
+    <li><strong>Danh mục lỗi:</strong> <code>LoiViPham</code> (<code>MucPhatTien</code>, <code>DiemTru</code>) tại Trung; đếm thử trên Bắc qua link.</li>
+    <li><strong>Giả lập sự cố:</strong> Stop SQL TEST1 — shard Bắc lỗi, Trung/Nam vẫn được nếu link còn.</li>
+    <li><strong>Bài tập phân tán (câu 3–7):</strong> trước tiên <code>sql/13_setup_linked_servers.sql</code>, rồi <strong><code>sql/14_quick_deploy_csgt_mientrung.sql</code></strong> trên <code>CSGT_MIENTRUNG</code> (tránh lỗi 2812). File <code>sql/12_...</code> là bản đầy đủ cả 3 miền.</li>
+    <li><strong>Web gọi stored procedure:</strong>
+      <a href="{{ url_for('tra_cuu_phat_nguoi') }}">Phạt nguội</a> (câu 3),
+      <a href="{{ url_for('tru_diem_bang_lai_bai_tap') }}">Trừ điểm BL</a> (câu 4),
+      <a href="{{ url_for('thu_ngan_sach_toan_quoc') }}">Thu ngân sách</a> (câu 5),
+      <a href="{{ url_for('dem_tai_xe_nhieu_vu') }}">Tài xế &gt;3 BB/năm</a> (câu 7).
+      <a href="{{ url_for('cau_6_trigger') }}">Câu 6 — Trigger</a> (hướng dẫn + SSMS trên Miền Nam).</li>
+  </ul>
+  <p>Ghi đè câu SQL trong <code>config/connections.json</code> → <code>WebApp.Demo</code> nếu tên cột trong DB khác mặc định.</p>
+
+  <h2 id="cau-6-trigger">Câu 6 — Trigger trên Miền Nam</h2>
+  <p>Trigger <code>dbo.tr_BaoVeLoiViPham</code> (<strong>AFTER DELETE</strong> trên <code>LoiViPham</code>, kiểm tra <code>ChiTietPhat</code> trên cả ba miền qua linked server) — triển khai trong <strong>SSMS</strong>, <code>CSGT_MIENNAM</code>. <strong><a href="{{ url_for('cau_6_trigger') }}">Trang hướng dẫn đầy đủ (câu 6)</a></strong> · file <code>sql/15_cau_6_trigger_loi_vi_pham_mien_nam.sql</code> (bản cùng nội dung trong <code>sql/12_...</code>, khối &quot;CÂU 6&quot;) · linked server: <code>sql/13_setup_linked_servers.sql</code>.</p>
+</div>
+{% endblock %}

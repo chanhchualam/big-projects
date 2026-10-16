@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Giả lập sự cố{% endblock %}
+{% block page_title %}Giả lập sự cố node{% endblock %}
+{% block content %}
+
+<div class="prose" style="margin-bottom:1.5rem;">
+  <h2 style="font-size:1rem;color:var(--text);">Cách demo</h2>
+  <ol style="padding-left:1.2rem;">
+    <li>Trong <strong>SQL Server Configuration Manager</strong> hoặc SSMS: <strong>Stop</strong> dịch vụ SQL của instance <strong>TEST1</strong> (Miền Bắc).</li>
+    <li>Làm mới trang <a href="{{ url_for('thong_ke_toan_quoc') }}">Thống kê toàn quốc</a>: miền Trung & Nam vẫn có dữ liệu; phần <strong>LINK_BAC</strong> báo lỗi trong khung đỏ phía trên bảng.</li>
+    <li>Chứng minh: các node hoạt động <strong>độc lập</strong>; một server chết không làm toàn hệ thống mất kết nối nếu thiết kế phân tán đúng.</li>
+    <li>Nhớ <strong>Start</strong> lại SQL TEST1 sau khi demo.</li>
+  </ol>
+</div>
+
+<div class="card card-pad">
+  <h3 style="margin:0 0 0.75rem;font-size:0.9rem;">Trạng thái shard hiện tại</h3>
+  <p style="font-size:0.9rem;color:var(--muted);margin:0 0 0.5rem;">Đã tải được <strong>{{ row_count }}</strong> dòng đơn vị (từ các shard OK).</p>
+  {% if shard_errors %}
+  <ul style="margin:0;padding-left:1.2rem;color:var(--danger);font-size:0.88rem;">
+    {% for e in shard_errors %}
+    <li><strong>{{ e.title }}</strong><br/><span style="color:var(--muted);">{{ e.message }}</span></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p style="color:var(--success);font-size:0.9rem;margin:0;">Hiện không có shard lỗi (tất cả đều phản hồi).</p>
+  {% endif %}
+</div>
+{% endblock %}

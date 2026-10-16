@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1026">
+    <title>{% block title %}StudyMatch - Gợi ý Chọn Ngành Đại Học{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <a href="#main" class="skip-link">Bỏ qua điều hướng</a>
+    <!-- Navigation Bar -->
+    <nav class="navbar" aria-label="Điều hướng chính">
+        <div class="container">
+            <div class="navbar-brand">
+                <a href="{{ url_for('main.index') }}" class="logo">
+                    <h1>StudyMatch</h1>
+                </a>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('main.index') }}">Trang Chủ</a></li>
+                <li><a href="{{ url_for('major.list_majors') }}">Các Ngành Học</a></li>
+                {% if session.user_id %}
+                    <li><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('student.enter_scores') }}">Nhập Điểm</a></li>
+                    <li><a href="{{ url_for('recommendation.get_recommendation') }}">Gợi Ý</a></li>
+                    <li><a href="{{ url_for('main.logout') }}">Đăng Xuất ({{ session.username }})</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('main.login') }}">Đăng Nhập</a></li>
+                    <li><a href="{{ url_for('main.register') }}">Đăng Ký</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main" class="main-content">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 StudyMatch. Tất cả quyền được bảo lưu.</p>
+            <p>Hệ thống gợi ý chọn ngành cho học sinh bậc THPT</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

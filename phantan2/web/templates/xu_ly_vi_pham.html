@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Xử lý vi phạm{% endblock %}
+{% block page_title %}Xử lý vi phạm & trừ điểm{% endblock %}
+{% block content %}
+
+<div class="prose" style="margin-bottom:1.25rem;">
+  <p>Nút <strong>Lưu</strong> gọi <code>dbo.sp_CSGT_TruDiem</code> trên <strong>CSGT_MIENTRUNG</strong>: kiểm tra <code>SoBangLai</code> trong <code>BangLai</code>; gán <code>BienSo</code> tự động (một biển có trong <code>PhuongTien</code>); ghi <code>BienBan</code>, <code>ChiTietPhat</code>; nếu có bảng <code>LichSuTruDiem</code> thì ghi lịch sử; cập nhật <code>BangLai_Diem</code> (Nam) qua <strong>LINK_NAM</strong>.</p>
+  <p>Triển khai: <code>sql/14_quick_deploy_csgt_mientrung.sql</code> hoặc <code>python scripts/deploy_mientrung_procedures.py</code>.</p>
+</div>
+
+{% if error %}
+<div class="err-box">{{ error }}</div>
+{% endif %}
+
+<form method="post" class="filter-form" style="max-width:480px;">
+  <div class="field">
+    <label for="so_bang">Số bằng lái</label>
+    <input type="text" id="so_bang" name="so_bang" required placeholder="Phải có trong dbo.BangLai (vd MT001)" {% if ds_so_bang %}list="ds-so-bang"{% endif %} autocomplete="off" />
+    {% if ds_so_bang %}
+    <datalist id="ds-so-bang">
+      {% for s in ds_so_bang %}
+      <option value="{{ s }}"></option>
+      {% endfor %}
+    </datalist>
+    {% endif %}
+  </div>
+  <div class="field">
+    <label for="ma_loi">Mã lỗi vi phạm</label>
+    <select id="ma_loi" name="ma_loi" required>
+      <option value="">— Chọn —</option>
+      {% for l in ds_loi %}
+      <option value="{{ l.MaLoi }}">{{ l.MaLoi }} — {{ l.TenLoi }} (trừ {{ l.DiemTru }} điểm)</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="noi_lap">Nơi lập biên bản</label>
+    <input type="text" id="noi_lap" name="noi_lap" required placeholder="VD: Đà Nẵng — QL1A km 12" />
+  </div>
+  <button type="submit" class="btn btn-primary">Lưu & trừ điểm</button>
+</form>
+
+{% if not ds_loi %}
+<p style="margin-top:1rem;color:var(--muted);font-size:0.9rem;">Chưa đọc được danh sách <code>LoiViPham</code> — kiểm tra kết nối hoặc tên cột.</p>
+{% endif %}
+{% endblock %}
