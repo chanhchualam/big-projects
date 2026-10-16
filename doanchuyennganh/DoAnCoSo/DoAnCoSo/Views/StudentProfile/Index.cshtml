@@ -1,0 +1,135 @@
+@model DoAnCoSo.Models.StudentProfile
+@{
+    ViewData["Title"] = "Hồ Sơ Của Tôi";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="bi bi-person-circle"></i> Hồ Sơ Của Tôi
+    </h2>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Thông tin cá nhân</h5>
+                    <a href="@Url.Action("Edit")" class="btn btn-light btn-sm">
+                        <i class="bi bi-pencil"></i> Chỉnh sửa
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Trường THPT:</strong>
+                            <p>@(Model.HighSchoolName ?? "Chưa cập nhật")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Tỉnh/Thành phố:</strong>
+                            <p>@(Model.City ?? "Chưa cập nhật")</p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h6 class="mb-3">Điểm trung bình các môn</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <strong>Toán:</strong> @(Model.MathScore?.ToString("0.0") ?? "-")
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong>Vật lý:</strong> @(Model.PhysicsScore?.ToString("0.0") ?? "-")
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong>Hóa học:</strong> @(Model.ChemistryScore?.ToString("0.0") ?? "-")
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong>Văn:</strong> @(Model.LiteratureScore?.ToString("0.0") ?? "-")
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong>Lịch sử:</strong> @(Model.HistoryScore?.ToString("0.0") ?? "-")
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong>Địa lý:</strong> @(Model.GeographyScore?.ToString("0.0") ?? "-")
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <strong>Tiếng Anh:</strong> @(Model.EnglishScore?.ToString("0.0") ?? "-")
+                        </div>
+                    </div>
+
+                    @if (Model.ExpectedScore.HasValue)
+                    {
+                        <hr />
+                        <div>
+                            <strong>Điểm dự kiến thi THPT:</strong>
+                            <span class="badge bg-primary fs-6">@Model.ExpectedScore.Value.ToString("0.0")</span>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.Interests))
+                    {
+                        <hr />
+                        <div>
+                            <strong>Sở thích:</strong>
+                            <p>@Model.Interests</p>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.CareerGoal))
+                    {
+                        <hr />
+                        <div>
+                            <strong>Mục tiêu nghề nghiệp:</strong>
+                            <p>@Model.CareerGoal</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Quick Stats -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">Thống kê</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-heart"></i> Ngành đã lưu:</span>
+                            <strong>@ViewBag.FavoriteMajorsCount</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-clipboard-check"></i> Kết quả trắc nghiệm:</span>
+                            <strong>@ViewBag.TestResultsCount</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">Thao tác nhanh</h6>
+                </div>
+                <div class="card-body">
+                    <a href="@Url.Action("Favorites")" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-heart-fill"></i> Ngành đã lưu
+                    </a>
+                    <a href="@Url.Action("Index", "Major")" class="btn btn-outline-success w-100 mb-2">
+                        <i class="bi bi-search"></i> Tìm ngành học
+                    </a>
+                    <a href="@Url.Action("Index", "Chat")" class="btn btn-outline-info w-100">
+                        <i class="bi bi-chat-dots"></i> Chat AI
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+}
+

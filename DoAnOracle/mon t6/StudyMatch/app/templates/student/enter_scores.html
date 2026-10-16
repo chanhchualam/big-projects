@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Nhập Điểm Số - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="enter-scores-container">
+    <h1>Nhập Điểm Thi THPT</h1>
+    
+    <form method="POST" action="{{ url_for('student.enter_scores') }}" class="scores-form">
+        <div class="form-section">
+            <label for="khoi_id">Chọn khối thi:</label>
+            <select id="khoi_id" name="khoi_id" required onchange="loadMonHoc()">
+                <option value="">-- Chọn khối --</option>
+                {% for khoi in khoi_list %}
+                    <option value="{{ khoi.KhoiID }}">{{ khoi.TenKhoi }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-section" id="mon-hoc-section" style="display: none;">
+            <h3>Nhập điểm các môn học</h3>
+            <table class="scores-table">
+                <thead>
+                    <tr>
+                        <th>Tên Môn</th>
+                        <th>Điểm Thi</th>
+                        <th>Điểm Thưởng</th>
+                    </tr>
+                </thead>
+                <tbody id="mon-hoc-body">
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Lưu Điểm</button>
+            <a href="{{ url_for('student.view_scores') }}" class="btn btn-secondary">Xem Điểm Đã Lưu</a>
+        </div>
+    </form>
+</div>
+<script>
+async function loadMonHoc() {
+    const khoiId = document.getElementById('khoi_id').value;
+    
+    if (!khoiId) {
+        document.getElementById('mon-hoc-section').style.display = 'none';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/major/api/subjects-by-khoi/${khoiId}`);
+        const monList = await response.json();
+        
+        if (!monList || monList.length === 0) {
+            alert('Không có môn học nào cho khối thi này');
+            return;
+        }
+        
+        const tbody = document.getElementById('mon-hoc-body');
+        tbody.innerHTML = '';
+        
+        monList.forEach((mon, index) => {
+            const row = `
+                <tr>
+                    <td>${mon.name}</td>
+                    <td>
+                        <input type="hidden" name="mon_id" value="${mon.id}">
+                        <input type="number" name="score" step="0.1" min="0" max="10" placeholder="0-10" required>
+                    </td>
+                    <td>
+                        <input type="number" name="bonus" step="0.1" min="0" max="1" placeholder="0-1">
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+        
+        document.getElementById('mon-hoc-section').style.display = 'block';
+    } catch (error) {
+        console.error('Error loading subjects:', error);
+        alert('Lỗi tải danh sách môn học');
+    }
+}
+</script>
+{% endblock %}

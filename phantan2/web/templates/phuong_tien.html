@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Phương tiện{% endblock %}
+{% block page_title %}Danh mục phương tiện{% endblock %}
+{% block content %}
+
+<p style="color:var(--muted);font-size:0.9rem;margin:-0.5rem 0 1rem;">
+  Đọc từ <code>CSGT_MIENTRUNG.dbo.PhuongTien</code>. Ghi đè câu SQL trong <code>WebApp.Demo.ListPhuongTien</code> nếu cần lọc / sắp xếp.
+</p>
+
+{% if error %}
+<div class="err-box">{{ error }}</div>
+{% endif %}
+
+{% if columns and rows %}
+<div class="card table-wrap">
+  <table class="data">
+    <thead>
+      <tr>
+        {% for c in columns[:12] %}
+        <th>{{ c }}</th>
+        {% endfor %}
+        {% if columns|length > 12 %}<th>…</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for c in columns[:12] %}
+        <td>{{ row.get(c) }}</td>
+        {% endfor %}
+        {% if columns|length > 12 %}<td style="color:var(--muted);">+{{ columns|length - 12 }}</td>{% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p style="font-size:0.8rem;color:var(--muted);">Hiển thị tối đa 12 cột đầu; tổng {{ rows|length }} dòng.</p>
+{% elif not error %}
+<p style="color:var(--muted);">Không có dữ liệu.</p>
+{% endif %}
+{% endblock %}

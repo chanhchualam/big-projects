@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Tìm Kiếm Ngành Học - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="search-results-container">
+    <h1>Kết Quả Tìm Kiếm</h1>
+    <p class="search-query">Tìm kiếm: "<strong>{{ keyword }}</strong>"</p>
+    
+    {% if results %}
+        <div class="results-grid">
+            {% for n in results %}
+                <div class="result-card">
+                    <h3>{{ n.TenNganh }}</h3>
+                    <p class="school-name">{{ n.truong.TenTruong if n.truong else 'N/A' }}</p>
+                    
+                    <div class="result-info">
+                        <span>Điểm Chuan: {{ n.DiemChuan or 'N/A' }}</span>
+                        <span>Khối: {{ n.KhoiThi_YeuCau or 'N/A' }}</span>
+                    </div>
+                    
+                    {% if n.MoTa %}
+                        <p class="description">{{ n.MoTa[:80] }}...</p>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('major.major_detail', nganh_id=n.NganhID) }}" class="btn btn-secondary">
+                        Xem Chi Tiết
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-results">
+            <p>Không tìm thấy ngành học nào khớp với "<strong>{{ keyword }}</strong>"</p>
+            
+            <div class="suggestions">
+                <p>Hãy thử:</p>
+                <ul>
+                    <li>Tìm kiếm với từ khóa khác</li>
+                    <li><a href="{{ url_for('major.list_majors') }}">Xem danh sách tất cả các ngành</a></li>
+                    <li><a href="{{ url_for('recommendation.get_recommendation') }}">Nhận gợi ý ngành dựa trên điểm</a></li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="back-action">
+        <a href="{{ url_for('major.list_majors') }}" class="btn btn-secondary">← Quay Lại</a>
+    </div>
+</div>
+{% endblock %}

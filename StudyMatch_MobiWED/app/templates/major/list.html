@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Danh Sách Ngành Học - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="majors-container">
+    <h1>Danh Sách Các Ngành Học</h1>
+    
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Tìm kiếm ngành học...">
+        <button onclick="searchMajors()" class="btn btn-primary">Tìm Kiếm</button>
+    </div>
+    
+    {% if nganh.items %}
+        <div class="majors-grid">
+            {% for n in nganh.items %}
+                <div class="major-card">
+                    <h3>{{ n.TenNganh }}</h3>
+                    <p class="school-name">{{ n.truong.TenTruong if n.truong else 'N/A' }}</p>
+                    
+                    <div class="major-info">
+                        <span class="info-item">
+                            <strong>Điểm Chuan:</strong> {{ n.DiemChuan or 'N/A' }}
+                        </span>
+                        <span class="info-item">
+                            <strong>Khối Thi:</strong> {{ n.KhoiThi_YeuCau or 'N/A' }}
+                        </span>
+                        <span class="info-item">
+                            <strong>Chỉ Tiêu:</strong> {{ n.ChiTieuTuyen or 'N/A' }}
+                        </span>
+                    </div>
+                    
+                    {% if n.MoTa %}
+                        <p class="description">{{ n.MoTa[:100] }}...</p>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('major.major_detail', nganh_id=n.NganhID) }}" class="btn btn-secondary">
+                        Xem Chi Tiết
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            {% if nganh.has_prev %}
+                <a href="{{ url_for('major.list_majors', page=nganh.prev_num) }}" class="btn btn-secondary">← Trang Trước</a>
+            {% endif %}
+            
+            <span class="page-info">Trang {{ nganh.page }} / {{ nganh.pages }}</span>
+            
+            {% if nganh.has_next %}
+                <a href="{{ url_for('major.list_majors', page=nganh.next_num) }}" class="btn btn-secondary">Trang Sau →</a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Không có ngành học nào được tìm thấy.</p>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.majors-container {
+    padding: 2rem 0;
+}
+
+.search-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.majors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.major-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.major-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.major-card h3 {
+    color: #0066cc;
+    margin-bottom: 0.5rem;
+}
+
+.school-name {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.major-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.info-item {
+    padding: 0.5rem;
+    background-color: #f0f4f8;
+    border-radius: 3px;
+}
+
+.description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.page-info {
+    color: #666;
+}
+
+.empty-state {
+    background: white;
+    padding: 3rem;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

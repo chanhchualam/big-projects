@@ -1,0 +1,48 @@
+{
+  "ConnectionStrings": {
+    "Bac": "Driver={ODBC Driver 18 for SQL Server};Server=LAPTOP-96O50AKP\\TEST1;Database=CSGT_MIENBAC;Trusted_Connection=yes;TrustServerCertificate=yes;",
+    "Trung": "Driver={ODBC Driver 18 for SQL Server};Server=LAPTOP-96O50AKP;Database=CSGT_MIENTRUNG;Trusted_Connection=yes;TrustServerCertificate=yes;",
+    "Nam": "Driver={ODBC Driver 18 for SQL Server};Server=LAPTOP-96O50AKP\\TEST2;Database=CSGT_MIENNAM;Trusted_Connection=yes;TrustServerCertificate=yes;",
+    "Coordinator": "Driver={ODBC Driver 18 for SQL Server};Server=LAPTOP-96O50AKP;Database=CSGT_MIENTRUNG;Trusted_Connection=yes;TrustServerCertificate=yes;"
+  },
+  "WebApp": {
+    "ConnectionString": "Driver={ODBC Driver 18 for SQL Server};Server=LAPTOP-96O50AKP;Database=CSGT_MIENTRUNG;Trusted_Connection=yes;TrustServerCertificate=yes;",
+    "SecretKey": "thay-bang-chuoi-ngau-nhien-dai-khi-trien-khai-that",
+    "Auth": {
+      "Users": [
+        {
+          "Username": "admin",
+          "Password": "123123",
+          "Regions": null
+        },
+        {
+          "Username": "csgt_nam",
+          "Password": "nam123",
+          "Regions": ["Miền Nam"]
+        },
+        {
+          "Username": "csgt_bac",
+          "Password": "bac123",
+          "Regions": ["Miền Bắc"]
+        }
+      ]
+    },
+    "Demo": {
+      "TraCuuBangLai": "",
+      "ListLoiViPham": "",
+      "InsertLoiViPham": "",
+      "ProcTruDiem": "dbo.sp_CSGT_TruDiem",
+      "CountLoiBac": "",
+      "CountBienBanTrung": "",
+      "CountBienBanNam": "",
+      "CountBienBanBac": "",
+      "ListPhuongTien": "",
+      "ListBienBan": "",
+      "QueryPhatTren10TrieuTrung": "",
+      "QueryThuNganSachToanQuoc": "",
+      "ProcTraCuuPhatNguoi": "",
+      "ProcTruDiemBangLai": "",
+      "ProcDemTaiXeVuPhamTren3Lan": ""
+    }
+  }
+}

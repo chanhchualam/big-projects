@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Tài xế nhiều biên bản{% endblock %}
+{% block page_title %}Đếm tài xế &gt; 3 biên bản/năm — dbo.usp_DemTaiXeVuPhamTren3Lan{% endblock %}
+{% block content %}
+
+<p style="color:var(--muted);font-size:0.9rem;margin:-0.5rem 0 1rem;">
+  Câu 7: COUNT gộp từng trạm. Chạy <code>sql/14_quick_deploy_csgt_mientrung.sql</code> để tạo <code>dbo.usp_DemTaiXeVuPhamTren3Lan</code>.
+</p>
+
+<form method="post" class="filter-form" style="margin-bottom:1rem;">
+  <div class="filter-grid">
+    <div class="field">
+      <label for="nam">Năm</label>
+      <input type="number" id="nam" name="nam" value="{{ nam or '' }}" min="2000" max="2100" required />
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Chạy thống kê</button>
+</form>
+
+{% if error %}
+<div class="err-box" style="white-space:pre-wrap;">{{ error }}</div>
+{% endif %}
+
+{% if chay and total_row %}
+<div class="card card-pad" style="margin-bottom:1rem;">
+  <p style="margin:0;"><strong>Tổng số tài xế (có &gt; 3 biên bản trong năm):</strong>
+    {% set v = total_row.get('SoTaiXeNhieuVu') %}
+    {{ v if v is not none else '—' }}
+  </p>
+</div>
+{% endif %}
+
+{% if chay and detail_columns and detail_rows %}
+<div class="card table-wrap">
+  <table class="data">
+    <thead>
+      <tr>{% for c in detail_columns %}<th>{{ c }}</th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+      {% for row in detail_rows %}
+      <tr>{% for c in detail_columns %}<td>{{ row.get(c) if row.get(c) is not none else '—' }}</td>{% endfor %}</tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% elif chay and not error and total_row and (total_row.get('SoTaiXeNhieuVu') == 0) %}
+<p style="color:var(--muted);">Không có tài xế nào vượt ngưỡng trong năm đã chọn.</p>
+{% endif %}
+{% endblock %}
