@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Thống kê toàn quốc{% endblock %}
+{% block page_title %}Thống kê toàn quốc — phân mảnh ngang{% endblock %}
+{% block content %}
+
+<div class="prose" style="margin-bottom:1.25rem;">
+  <p><strong>Trình bày:</strong> Web đặt tại <strong>Miền Trung</strong> (<code>CSGT_MIENTRUNG</code>). Khi tải bảng, ứng dụng lần lượt gọi dữ liệu từ
+  <strong>LINK_BAC</strong> (TEST1 — Miền Bắc) và <strong>LINK_NAM</strong> (TEST2 — Miền Nam) cùng bảng cục bộ — giống câu <code>UNION ALL</code> nhưng <strong>tách từng shard</strong> để một node lỗi không chặn hết hệ thống.</p>
+  <p>Cột <strong>Nguồn dữ liệu</strong> cho biết bản ghi đến từ server nào (minh họa phân mảnh ngang).</p>
+</div>
+
+{% if error %}
+<div class="err-box">{{ error }}</div>
+{% endif %}
+
+{% if shard_errors %}
+<div class="card card-pad" style="margin-bottom:1rem;border-color:rgba(248,113,113,0.4);">
+  <h3 style="margin:0 0 0.5rem;font-size:0.9rem;color:var(--danger);">Shard không phản hồi (giả lập sự cố / mất kết nối)</h3>
+  <ul style="margin:0;padding-left:1.2rem;color:var(--muted);font-size:0.88rem;">
+    {% for e in shard_errors %}
+    <li><strong>{{ e.title }}</strong>: {{ e.message }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if bb_stats %}
+<div class="grid-stats" style="margin-bottom:1.25rem;">
+  <div class="stat-card">
+    <h3>Biên bản · Trung</h3>
+    <div class="num">{{ bb_stats.trung if bb_stats.trung is not none else '—' }}</div>
+    <div class="hint">COUNT BienBan</div>
+  </div>
+  <div class="stat-card">
+    <h3>Biên bản · Nam</h3>
+    <div class="num">{{ bb_stats.nam if bb_stats.nam is not none else '—' }}</div>
+    <div class="hint">qua LINK_NAM</div>
+  </div>
+  <div class="stat-card">
+    <h3>Biên bản · Bắc</h3>
+    <div class="num">{{ bb_stats.bac if bb_stats.bac is not none else '—' }}</div>
+    <div class="hint">qua LINK_BAC</div>
+  </div>
+</div>
+{% if bb_stats.errors %}
+<p style="color:var(--muted);font-size:0.85rem;">{{ bb_stats.errors | join(' · ') }}</p>
+{% endif %}
+{% endif %}
+
+<div class="card table-wrap">
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Mã đơn vị</th>
+        <th>Tên đơn vị</th>
+        <th>Khu vực</th>
+        <th>Nguồn dữ liệu</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td><strong>{{ r.MaDonVi }}</strong></td>
+        <td>{{ r.TenDonVi }}</td>
+        <td>{{ r.KhuVuc }}</td>
+        <td style="font-size:0.82rem;color:var(--muted);max-width:280px;">{{ r.NguonDuLieu }}</td>
+      </tr>
+      {% endfor %}
+      {% if not rows and not error %}
+      <tr><td colspan="4" style="color:var(--muted);">Không có dòng (hoặc tất cả shard lỗi).</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<p style="margin-top:1rem;font-size:0.85rem;color:var(--muted);">
+  <a href="{{ url_for('don_vi') }}">→ Danh sách có lọc nâng cao</a>
+  &nbsp;·&nbsp;
+  <a href="{{ url_for('giai_lap_su_co') }}">→ Giả lập sự cố node</a>
+</p>
+{% endblock %}

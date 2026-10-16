@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Tìm Kiếm Ngành Học - StudyMatch{% endblock %}
+
+{% block content %}
+<div class="search-results-container">
+    <h1>Kết Quả Tìm Kiếm</h1>
+    <p class="search-query">Tìm kiếm: "<strong>{{ keyword }}</strong>"</p>
+    
+    {% if results %}
+        <div class="results-grid">
+            {% for n in results %}
+                <div class="result-card">
+                    <h3>{{ n.TenNganh }}</h3>
+                    <p class="school-name">{{ n.truong.TenTruong if n.truong else 'N/A' }}</p>
+                    
+                    <div class="result-info">
+                        <span>Điểm Chuan: {{ n.DiemChuan or 'N/A' }}</span>
+                        <span>Khối: {{ n.KhoiThi_YeuCau or 'N/A' }}</span>
+                    </div>
+                    
+                    {% if n.MoTa %}
+                        <p class="description">{{ n.MoTa[:80] }}...</p>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('major.major_detail', nganh_id=n.NganhID) }}" class="btn btn-secondary">
+                        Xem Chi Tiết
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-results">
+            <p>Không tìm thấy ngành học nào khớp với "<strong>{{ keyword }}</strong>"</p>
+            
+            <div class="suggestions">
+                <p>Hãy thử:</p>
+                <ul>
+                    <li>Tìm kiếm với từ khóa khác</li>
+                    <li><a href="{{ url_for('major.list_majors') }}">Xem danh sách tất cả các ngành</a></li>
+                    <li><a href="{{ url_for('recommendation.get_recommendation') }}">Nhận gợi ý ngành dựa trên điểm</a></li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="back-action">
+        <a href="{{ url_for('major.list_majors') }}" class="btn btn-secondary">← Quay Lại</a>
+    </div>
+</div>
+
+<style>
+.search-results-container {
+    padding: 2rem 0;
+}
+
+.search-query {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.result-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.result-card:hover {
+    transform: translateY(-3px);
+}
+
+.result-card h3 {
+    color: #0066cc;
+    margin-bottom: 0.5rem;
+}
+
+.school-name {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.result-info {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.result-info span {
+    background-color: #f0f4f8;
+    padding: 0.3rem 0.6rem;
+    border-radius: 3px;
+}
+
+.description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.no-results {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.no-results p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.suggestions {
+    text-align: left;
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.suggestions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.suggestions li {
+    padding: 0.5rem 0;
+}
+
+.suggestions a {
+    color: #0066cc;
+    font-weight: 500;
+}
+
+.back-action {
+    text-align: center;
+    margin-top: 2rem;
+}
+</style>
+{% endblock %}

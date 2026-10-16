@@ -1,0 +1,70 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\ADMIN\\Downloads\\doanchuyennganh\\DoAnCoSo\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{639914B9-42A5-4EDC-819B-1F7E0C55BC6F}|DoAnCoSo\\DoAnCoSo.csproj|c:\\users\\admin\\downloads\\doanchuyennganh\\doancoso\\doancoso\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{639914B9-42A5-4EDC-819B-1F7E0C55BC6F}|DoAnCoSo\\DoAnCoSo.csproj|solutionrelative:doancoso\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{639914B9-42A5-4EDC-819B-1F7E0C55BC6F}|DoAnCoSo\\DoAnCoSo.csproj|c:\\users\\admin\\downloads\\doanchuyennganh\\doancoso\\doancoso\\views\\teacher\\display.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{639914B9-42A5-4EDC-819B-1F7E0C55BC6F}|DoAnCoSo\\DoAnCoSo.csproj|solutionrelative:doancoso\\views\\teacher\\display.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{639914B9-42A5-4EDC-819B-1F7E0C55BC6F}|DoAnCoSo\\DoAnCoSo.csproj|c:\\users\\admin\\downloads\\doanchuyennganh\\doancoso\\doancoso\\controllers\\teachercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{639914B9-42A5-4EDC-819B-1F7E0C55BC6F}|DoAnCoSo\\DoAnCoSo.csproj|solutionrelative:doancoso\\controllers\\teachercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\Downloads\\doanchuyennganh\\DoAnCoSo\\DoAnCoSo\\appsettings.json",
+              "RelativeDocumentMoniker": "DoAnCoSo\\appsettings.json",
+              "ToolTip": "C:\\Users\\ADMIN\\Downloads\\doanchuyennganh\\DoAnCoSo\\DoAnCoSo\\appsettings.json",
+              "RelativeToolTip": "DoAnCoSo\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-01-25T05:27:37.641Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Display.cshtml",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\Downloads\\doanchuyennganh\\DoAnCoSo\\DoAnCoSo\\Views\\Teacher\\Display.cshtml",
+              "RelativeDocumentMoniker": "DoAnCoSo\\Views\\Teacher\\Display.cshtml",
+              "ToolTip": "C:\\Users\\ADMIN\\Downloads\\doanchuyennganh\\DoAnCoSo\\DoAnCoSo\\Views\\Teacher\\Display.cshtml",
+              "RelativeToolTip": "DoAnCoSo\\Views\\Teacher\\Display.cshtml",
+              "ViewState": "AgIAAD4AAAAAAAAAAAAkwFIAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-08T11:40:43.758Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "TeacherController.cs",
+              "DocumentMoniker": "C:\\Users\\ADMIN\\Downloads\\doanchuyennganh\\DoAnCoSo\\DoAnCoSo\\Controllers\\TeacherController.cs",
+              "RelativeDocumentMoniker": "DoAnCoSo\\Controllers\\TeacherController.cs",
+              "ToolTip": "C:\\Users\\ADMIN\\Downloads\\doanchuyennganh\\DoAnCoSo\\DoAnCoSo\\Controllers\\TeacherController.cs",
+              "RelativeToolTip": "DoAnCoSo\\Controllers\\TeacherController.cs",
+              "ViewState": "AgIAAMIAAAAAAAAAAAAkwNYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-08T11:35:57.468Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

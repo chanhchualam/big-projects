@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Hệ thống CSGT{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-title">Quản lý CSGT</div>
+        <div class="brand-sub">CSDL phân tán · Bắc · Trung · Nam</div>
+      </div>
+      <nav aria-label="Menu chính">
+        <div class="nav-section-title">Tổng quan</div>
+        <a class="nav-link {% if active == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">Bảng điều khiển</a>
+
+        <div class="nav-section-title">Danh mục &amp; tra cứu</div>
+        <a class="nav-link {% if active == 'don_vi' %}active{% endif %}" href="{{ url_for('don_vi') }}">Đơn vị CSGT</a>
+        <a class="nav-link {% if active == 'phuong_tien' %}active{% endif %}" href="{{ url_for('phuong_tien') }}">Phương tiện</a>
+        <a class="nav-link {% if active == 'bien_ban' %}active{% endif %}" href="{{ url_for('bien_ban') }}">Tra cứu biên bản</a>
+        <a class="nav-link {% if active == 'tra_cuu' %}active{% endif %}" href="{{ url_for('tra_cuu_bang_lai') }}">Tra cứu BL hành chính</a>
+        <a class="nav-link {% if active == 'danh_muc' %}active{% endif %}" href="{{ url_for('danh_muc_loi') }}">Danh mục lỗi</a>
+
+        <div class="nav-section-title">Nghiệp vụ</div>
+        <a class="nav-link {% if active == 'xu_ly' %}active{% endif %}" href="{{ url_for('xu_ly_vi_pham') }}">Xử lý vi phạm</a>
+
+        <div class="nav-section-title">Thống kê</div>
+        <a class="nav-link {% if active == 'thong_ke' %}active{% endif %}" href="{{ url_for('thong_ke_toan_quoc') }}">TK toàn quốc</a>
+        <a class="nav-link {% if active == 'phat_10t' %}active{% endif %}" href="{{ url_for('phat_tren_10_trieu_mien_trung') }}">Phạt &gt; 10tr (Trung)</a>
+
+        <div class="nav-section-title">Bài tập câu 3–7 · phân tán</div>
+        <a class="nav-link {% if active == 'phat_nguoi' %}active{% endif %}" href="{{ url_for('tra_cuu_phat_nguoi') }}">Câu 3 — Phạt nguội (SP)</a>
+        <a class="nav-link {% if active == 'tru_diem_bt' %}active{% endif %}" href="{{ url_for('tru_diem_bang_lai_bai_tap') }}">Câu 4 — Trừ điểm (SP)</a>
+        <a class="nav-link {% if active == 'thu_ns' %}active{% endif %}" href="{{ url_for('thu_ngan_sach_toan_quoc') }}">Câu 5 — Thu ngân sách</a>
+        <a class="nav-link {% if active == 'cau_6' %}active{% endif %}" href="{{ url_for('cau_6_trigger') }}">Câu 6 — Trigger (SSMS · Nam)</a>
+        <a class="nav-link {% if active == 'dem_tx' %}active{% endif %}" href="{{ url_for('dem_tai_xe_nhieu_vu') }}">Câu 7 — Tài xế &gt;3 BB</a>
+
+        <div class="nav-section-title">Công cụ</div>
+        <a class="nav-link {% if active == 'su_co' %}active{% endif %}" href="{{ url_for('giai_lap_su_co') }}">Giả lập sự cố</a>
+        <a class="nav-link {% if active == 'gioi_thieu' %}active{% endif %}" href="{{ url_for('gioi_thieu') }}">Giới thiệu</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
+        <div class="user-pill">
+          {% if session.user %}
+          Xin chào, <strong>{{ session.user }}</strong>
+          {% if session.region_scope and session.region_scope != 'all' %}
+          <span style="color:var(--muted);font-size:0.85rem;"> · Phạm vi: {{ session.region_scope | join(', ') }}</span>
+          {% endif %}
+          ·
+          <a href="{{ url_for('dang_xuat') }}">Đăng xuất</a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-wrap">
+        {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+
+      <footer class="app-footer">
+        {% block footer %}Phiên bản nội bộ · Kết nối SQL Server qua ODBC{% endblock %}
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

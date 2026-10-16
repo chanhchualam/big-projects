@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Tra cứu biên bản{% endblock %}
+{% block page_title %}Tra cứu biên bản vi phạm{% endblock %}
+{% block content %}
+
+<p style="color:var(--muted);font-size:0.9rem;margin:-0.5rem 0 1rem;">
+  Gộp <strong>ba miền</strong>: <code>CSGT_MIENTRUNG</code> + <code>LINK_NAM</code> + <code>LINK_BAC</code> — cột <strong>NguonMien</strong>. Tra cứu luôn xuyên miền (mọi tài khoản). Khi <strong>không lọc</strong>, có thể ghi đè một nguồn qua <code>WebApp.Demo.ListBienBan</code>.
+</p>
+
+<form method="get" action="{{ url_for('bien_ban') }}" class="filter-form" style="margin-bottom:1.25rem;">
+  <div class="filter-grid">
+    <div class="field">
+      <label for="ma_bien_ban">Mã biên bản</label>
+      <input type="text" id="ma_bien_ban" name="ma_bien_ban" value="{{ ma_bien_ban or '' }}" placeholder="VD: 2001" inputmode="numeric" />
+    </div>
+    <div class="field">
+      <label for="bien_so">Biển số (gồm một phần)</label>
+      <input type="text" id="bien_so" name="bien_so" value="{{ bien_so or '' }}" placeholder="VD: 43A" />
+    </div>
+    <div class="field">
+      <label for="so_bang">Số bằng lái</label>
+      <input type="text" id="so_bang" name="so_bang" value="{{ so_bang or '' }}" placeholder="VD: MT001" />
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Tra cứu</button>
+  <a href="{{ url_for('bien_ban') }}" class="btn btn-ghost" style="margin-left:0.5rem;">Xóa lọc</a>
+</form>
+
+{% if error %}
+<div class="err-box">{{ error }}</div>
+{% endif %}
+
+{% if columns and rows %}
+<div class="card table-wrap">
+  <table class="data">
+    <thead>
+      <tr>
+        {% for c in columns[:14] %}
+        <th>{{ c }}</th>
+        {% endfor %}
+        {% if columns|length > 14 %}<th>…</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for c in columns[:14] %}
+        <td>{% set v = row.get(c) %}{% if v is not none %}{{ v }}{% else %}—{% endif %}</td>
+        {% endfor %}
+        {% if columns|length > 14 %}<td style="color:var(--muted);">+{{ columns|length - 14 }}</td>{% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p style="font-size:0.8rem;color:var(--muted);">{{ rows|length }} dòng · tối đa 14 cột hiển thị.</p>
+{% elif not error %}
+<p style="color:var(--muted);">Không có dữ liệu khớp điều kiện.</p>
+{% endif %}
+{% endblock %}
