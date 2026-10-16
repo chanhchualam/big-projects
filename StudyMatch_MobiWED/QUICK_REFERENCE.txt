@@ -1,0 +1,160 @@
+╔═══════════════════════════════════════════════════════════════════════╗
+║  StudyMatch - SQL Server Quick Reference Card                         ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🚀 QUICK START                                                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+PowerShell:
+  cd "c:\Users\ADMIN\Downloads\mon t6\StudyMatch"
+  .\setup_sqlserver.ps1
+
+Command Prompt:
+  cd c:\Users\ADMIN\Downloads\mon t6\StudyMatch
+  setup_sqlserver.bat
+
+Manual:
+  pip install -r requirements.txt
+  [Create StudyMatch database in SQL Server]
+  [Run 6 SQL scripts in order]
+  python run.py
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 📊 DATABASE INFO                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+Server:      LAPTOP-96O50AKP
+Database:    StudyMatch
+Auth:        Windows (Trusted_Connection=yes)
+Tables:      10
+Views:       5
+Procedures:  5
+Functions:   7
+Triggers:    8
+Sample Data: 50+ records
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 📁 FILES TO EXECUTE (In Order)                                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+1. database\schema_sqlserver.sql        [300+ lines]
+2. database\views_sqlserver.sql         [150+ lines]
+3. database\procedures_sqlserver.sql    [200+ lines]
+4. database\functions_sqlserver.sql     [150+ lines]
+5. database\triggers_sqlserver.sql      [200+ lines]
+6. database\sample_data_sqlserver.sql   [200+ lines]
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 📚 DOCUMENTATION                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+COMPLETE_SETUP_SUMMARY.txt  ← Detailed overview
+SQL_SERVER_SETUP.md         ← Step-by-step guide
+README_SQLSERVER.txt        ← Technical details
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🔌 CONNECTION STRING                                                 │
+└─────────────────────────────────────────────────────────────────────┘
+
+mssql+pyodbc://LAPTOP-96O50AKP/StudyMatch?driver=ODBC+Driver+17+
+for+SQL+Server&Trusted_Connection=yes
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ ✅ VERIFICATION                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+
+Test Python Connection:
+  python -c "import pyodbc; print(pyodbc.connect('...'))"
+
+Test Database:
+  # In SQL Server Management Studio:
+  SELECT * FROM UserThi;  -- Should show 5 students
+
+Check Flask:
+  python run.py           -- Should start without errors
+
+Visit Application:
+  http://localhost:5000
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🆘 COMMON ISSUES                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+No ODBC Driver:
+  → Install from Microsoft website
+  
+No Database:
+  → CREATE DATABASE StudyMatch; (in SSMS)
+
+SQL Script Errors:
+  → Check error message, fix, re-run
+
+Flask Connection Error:
+  → Verify SQL Server is running
+  → Check database exists
+  → Test: python -c "import pyodbc"
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 📊 TABLE NAMES                                                       │
+└─────────────────────────────────────────────────────────────────────┘
+
+UserThi              - Students/Accounts
+KhoiThi              - Test Blocks (A,B,C,D)
+MonTrongKhoiThi      - Subjects in Blocks
+MonHoc               - All Subjects
+Diem                 - Scores
+TruongDH             - Universities
+Nganh                - Majors
+GiaoVien             - Teachers
+ThongTinTuyenSinh    - Admission Info
+DanhGia              - Ratings
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🔧 PYTHON REQUIREMENTS                                               │
+└─────────────────────────────────────────────────────────────────────┘
+
+Flask==2.3.0
+Flask-SQLAlchemy==3.0.3
+pyodbc==5.0.1                ← SQL Server driver
+python-dotenv==1.0.0
+Werkzeug==2.3.0
+Jinja2==3.1.2
+MarkupSafe==2.1.1
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ ⚡ USEFUL SQL COMMANDS                                               │
+└─────────────────────────────────────────────────────────────────────┘
+
+Create Database:
+  CREATE DATABASE StudyMatch;
+
+Check Tables:
+  SELECT name FROM sys.tables WHERE database_id = DB_ID('StudyMatch');
+
+View Data:
+  SELECT * FROM UserThi;
+
+Count Records:
+  SELECT COUNT(*) FROM UserThi;  -- Should be 5
+
+Run Procedure:
+  EXEC sp_GetStudentRecommendations @UserId = 1;
+
+┌─────────────────────────────────────────────────────────────────────┐
+│ 🎯 WHAT'S BEEN DONE                                                  │
+└─────────────────────────────────────────────────────────────────────┘
+
+✅ Configuration updated for SQL Server
+✅ Python dependencies updated (pyodbc)
+✅ 1,200+ lines of SQL Server scripts created
+✅ 30+ database objects created
+✅ Sample data loaded
+✅ Setup automation scripts created
+✅ Complete documentation provided
+
+STATUS: READY TO DEPLOY! 🚀
+
+═══════════════════════════════════════════════════════════════════════
+Last Updated: 2024 | Version 1.0 | SQL Server Edition
+═══════════════════════════════════════════════════════════════════════

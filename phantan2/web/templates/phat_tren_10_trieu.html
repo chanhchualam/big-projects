@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Phạt &gt; 10 triệu · Miền Trung{% endblock %}
+{% block page_title %}Báo cáo: phạt chi tiết &gt; 10.000.000 đ (Miền Trung){% endblock %}
+{% block content %}
+
+<p style="color:var(--muted);font-size:0.9rem;margin:-0.5rem 0 1rem;">
+  Dữ liệu từ <strong>CSGT_MIENTRUNG</strong>: <code>ChiTietPhat.SoTien &gt; 10.000.000</code>,
+  join <code>LoiViPham</code>, <code>QuyetDinhXuPhat</code> (số QĐ, tổng tiền theo QĐ). Có thể ghi đè câu SQL trong
+  <code>WebApp.Demo.QueryPhatTren10TrieuTrung</code> — file mẫu: <code>sql/11_query_mien_trung_phat_tren_10_trieu.sql</code>.
+</p>
+
+{% if error %}
+<div class="err-box">{{ error }}</div>
+{% endif %}
+
+{% if columns and rows %}
+<div class="card table-wrap">
+  <table class="data">
+    <thead>
+      <tr>
+        {% for c in columns %}
+        <th>{{ c }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        {% for c in columns %}
+        <td>{% set v = row.get(c) %}{% if v is not none %}{{ v }}{% else %}—{% endif %}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p style="font-size:0.8rem;color:var(--muted);">{{ rows|length }} dòng.</p>
+{% elif not error %}
+<p style="color:var(--muted);">Không có bản ghi thỏa điều kiện hoặc bảng/cột khác tên trong CSDL.</p>
+{% endif %}
+{% endblock %}

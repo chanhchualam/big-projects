@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đăng nhập · Hệ thống CSGT</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <h1>Đăng nhập</h1>
+    <p class="lead">Hệ thống quản lý đơn vị CSGT (phân tán)</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for cat, msg in messages %}
+      <div class="flash {{ cat }}" style="margin-bottom:1rem;">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('dang_nhap') }}">
+      <input type="hidden" name="next" value="{{ next or '' }}" />
+      <div class="field">
+        <label for="username">Tên đăng nhập</label>
+        <input type="text" id="username" name="username" autocomplete="username" required autofocus />
+      </div>
+      <div class="field">
+        <label for="password">Mật khẩu</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;">Đăng nhập</button>
+    </form>
+    <p class="login-hint">Danh sách tài khoản: <code>WebApp.Auth.Users</code> trong <code>config/connections.json</code> (mỗi user có <code>Regions</code>: <code>null</code> = toàn quốc, hoặc <code>[&quot;Miền Nam&quot;]</code>…). Biến môi trường <code>CSGT_WEB_USER</code> / <code>CSGT_WEB_PASS</code> ghi đè và mở full miền.</p>
+  </div>
+</body>
+</html>

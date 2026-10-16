@@ -1,0 +1,78 @@
+@model DoAnCoSo.Models.AdmissionScore
+@{
+    var formAction = ViewData["AdmissionScoreFormAction"] as string ?? "CreateAdmissionScore";
+    var submitText = ViewData["AdmissionScoreSubmitText"] as string ?? "Lưu";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">@ViewData["AdmissionScoreHeading"]</h2>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="@formAction" method="post">
+                        @if (Model?.Id > 0)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                        }
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="MajorId" class="form-label">Ngành học *</label>
+                            <select asp-for="MajorId" class="form-select" asp-items="ViewBag.Majors">
+                                <option value="">-- Chọn ngành học --</option>
+                            </select>
+                            <span asp-validation-for="MajorId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="UniversityId" class="form-label">Trường đại học *</label>
+                            <select asp-for="UniversityId" class="form-select" asp-items="ViewBag.Universities">
+                                <option value="">-- Chọn trường --</option>
+                            </select>
+                            <span asp-validation-for="UniversityId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="ExamBlockId" class="form-label">Khối thi *</label>
+                                <select asp-for="ExamBlockId" class="form-select" asp-items="ViewBag.ExamBlocks">
+                                    <option value="">-- Chọn khối thi --</option>
+                                </select>
+                                <span asp-validation-for="ExamBlockId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Year" class="form-label">Năm tuyển sinh *</label>
+                                <input asp-for="Year" class="form-control" type="number" min="2020" max="2030" />
+                                <span asp-validation-for="Year" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Score" class="form-label">Điểm chuẩn *</label>
+                                <input asp-for="Score" class="form-control" type="number" step="0.1" min="0" max="30" />
+                                <span asp-validation-for="Score" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Quota" class="form-label">Chỉ tiêu</label>
+                                <input asp-for="Quota" class="form-control" type="number" min="0" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">Ghi chú</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("AdmissionScores")" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary">@submitText</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
