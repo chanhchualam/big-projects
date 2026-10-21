@@ -23,6 +23,7 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { recolorStoreFrame } from '../products';
 
 // -------------------------------------------------------------
 // 1. BẢNG PRODUCTS (SẢN PHẨM)
@@ -32,12 +33,20 @@ export async function fetchProductsFromDb() {
   try {
     const snap = await getDocs(collection(db, 'products'));
     const list = [];
-    snap.forEach((d) => list.push({ ...d.data(), id: d.id }));
+    snap.forEach((d) => list.push(recolorProductImages({ ...d.data(), id: d.id })));
     return list;
   } catch (err) {
     console.warn('Firestore fetchProducts fallback to local:', err.message);
     return null;
   }
+}
+
+// Ảnh khung đỏ cũ (SVG) hiển thị bằng khung xanh; ảnh thu nhỏ JPEG được trang admin tạo lại
+function recolorProductImages(data) {
+  const out = { ...data };
+  if (out.image) out.image = recolorStoreFrame(out.image);
+  if (Array.isArray(out.gallery)) out.gallery = out.gallery.map(recolorStoreFrame);
+  return out;
 }
 
 export async function saveProductToDb(product) {
@@ -77,7 +86,7 @@ export async function applyOrderStock(order, direction) {
 export async function fetchProductMedia(productId) {
   try {
     const snap = await getDoc(doc(db, 'product_media', String(productId)));
-    return snap.exists() ? snap.data() : null;
+    return snap.exists() ? recolorProductImages(snap.data()) : null;
   } catch (err) {
     console.warn('Firestore fetchProductMedia error:', err.message);
     return null;

@@ -5764,8 +5764,8 @@
 
 .pdp-thumb-btn:hover,
 .pdp-thumb-btn.active {
-  border: 2px solid #dc2626;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+  border: 2px solid #0053e2;
+  box-shadow: 0 2px 8px rgba(0, 83, 226, 0.2);
 }
 
 .pdp-thumb-img {
@@ -5778,7 +5778,7 @@
 .pdp-main-image-frame {
   position: relative;
   flex: 1;
-  border: 3.5px solid #dc2626;
+  border: 3.5px solid #0053e2;
   border-radius: 12px;
   background: #ffffff;
   overflow: hidden;
@@ -5789,7 +5789,7 @@
 }
 
 .pdp-frame-header-banner {
-  background-color: #dc2626;
+  background-color: #0053e2;
   color: #ffffff;
   font-size: 0.8rem;
   font-weight: 900;
@@ -5803,7 +5803,7 @@
   position: absolute;
   top: 38px;
   left: 10px;
-  background-color: #dc2626;
+  background-color: #0053e2;
   color: #ffffff;
   padding: 3px 8px;
   border-radius: 4px;
@@ -5865,7 +5865,7 @@
 
 .pdp-arrow-btn:hover {
   background: #ffffff;
-  color: #dc2626;
+  color: #0053e2;
   transform: translateY(-50%) scale(1.1);
 }
 
@@ -5906,7 +5906,7 @@
 }
 
 .console-pill.switch {
-  background: #e60012;
+  background: #1d4ed8;
   color: #ffffff;
 }
 
@@ -6009,7 +6009,7 @@
 }
 
 .sku-code {
-  color: #dc2626;
+  color: #0053e2;
   font-weight: 700;
 }
 
@@ -6019,12 +6019,12 @@
 }
 
 .status-out {
-  color: #dc2626;
+  color: #0053e2;
   font-weight: 700;
 }
 
 .brand-name-tag {
-  color: #dc2626;
+  color: #0053e2;
   font-weight: 700;
 }
 
@@ -6053,7 +6053,7 @@
 .pdp-current-price {
   font-size: 1.9rem;
   font-weight: 900;
-  color: #dc2626;
+  color: #0053e2;
   letter-spacing: -0.5px;
 }
 
@@ -6066,9 +6066,9 @@
 .pdp-discount-badge {
   font-size: 0.8rem;
   font-weight: 800;
-  color: #dc2626;
-  border: 1px solid #fca5a5;
-  background-color: #fef2f2;
+  color: #0053e2;
+  border: 1px solid #93c5fd;
+  background-color: #eff6ff;
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -6141,7 +6141,7 @@
 /* Big Red CTA */
 .pdp-big-buy-now-btn {
   width: 100%;
-  background-color: #dc2626;
+  background-color: #0053e2;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -6150,11 +6150,11 @@
   text-align: center;
   margin-bottom: 14px;
   transition: background-color 0.15s, transform 0.1s;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 83, 226, 0.25);
 }
 
 .pdp-big-buy-now-btn:hover:not(:disabled) {
-  background-color: #b91c1c;
+  background-color: #0043b8;
   transform: translateY(-1px);
 }
 
@@ -6222,7 +6222,7 @@
 
 .hpl-badge {
   font-weight: 800;
-  color: #dc2626;
+  color: #0053e2;
 }
 
 /* Promotion Box (Home PayLater) */
@@ -6247,7 +6247,7 @@
 }
 
 .hpl-red-text {
-  color: #dc2626;
+  color: #0053e2;
 }
 
 .pdp-promo-header-sub {
@@ -6280,7 +6280,7 @@
 }
 
 .pdp-hpl-icon {
-  background-color: #dc2626;
+  background-color: #0053e2;
   color: #ffffff;
   font-size: 0.62rem;
   font-weight: 900;
@@ -6304,12 +6304,12 @@
 }
 
 .pdp-promo-pill.red {
-  background-color: #dc2626;
+  background-color: #0053e2;
   color: #ffffff;
 }
 
 .pdp-promo-pill.super {
-  background-color: #e11d48;
+  background-color: #2563eb;
   color: #ffffff;
 }
 
@@ -6342,22 +6342,22 @@
 
 .pdp-secondary-btn.add-to-cart {
   background-color: #ffffff;
-  color: #dc2626;
-  border: 2px solid #dc2626;
+  color: #0053e2;
+  border: 2px solid #0053e2;
 }
 
 .pdp-secondary-btn.add-to-cart:hover:not(:disabled) {
-  background-color: #fef2f2;
+  background-color: #eff6ff;
 }
 
 .pdp-secondary-btn.buy-now {
-  background-color: #dc2626;
+  background-color: #0053e2;
   color: #ffffff;
-  border: 2px solid #dc2626;
+  border: 2px solid #0053e2;
 }
 
 .pdp-secondary-btn.buy-now:hover:not(:disabled) {
-  background-color: #b91c1c;
+  background-color: #0043b8;
 }
 
 .pdp-secondary-btn:disabled {
@@ -6417,9 +6417,9 @@
 }
 
 .pdp-tab-nav-btn.active {
-  color: #dc2626;
+  color: #0053e2;
   background-color: #ffffff;
-  border-bottom: 3px solid #dc2626;
+  border-bottom: 3px solid #0053e2;
   margin-bottom: -2px;
 }
 
@@ -6430,7 +6430,7 @@
 .pdp-desc-heading {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #dc2626;
+  color: #0053e2;
   text-align: center;
   margin-bottom: 20px;
 }
@@ -6480,7 +6480,7 @@
 }
 
 .pdp-yt-logo {
-  color: #dc2626;
+  color: #0053e2;
   font-size: 18px;
 }
 
@@ -6488,7 +6488,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: rgba(220, 38, 38, 0.9);
+  background-color: rgba(0, 83, 226, 0.9);
   border: none;
   display: flex;
   align-items: center;
@@ -6500,7 +6500,7 @@
 
 .pdp-yt-play-button:hover {
   transform: scale(1.1);
-  background-color: #dc2626;
+  background-color: #0053e2;
 }
 
 .pdp-desc-text-wrapper {
@@ -6553,8 +6553,8 @@
 
 .pdp-toggle-expand-btn {
   background: #ffffff;
-  border: 1px solid #dc2626;
-  color: #dc2626;
+  border: 1px solid #0053e2;
+  color: #0053e2;
   padding: 8px 24px;
   border-radius: 20px;
   font-weight: 700;
@@ -6564,7 +6564,7 @@
 }
 
 .pdp-toggle-expand-btn:hover {
-  background: #dc2626;
+  background: #0053e2;
   color: #ffffff;
 }
 
@@ -6581,7 +6581,7 @@
 .pdp-score-big {
   font-size: 3rem;
   font-weight: 900;
-  color: #dc2626;
+  color: #0053e2;
 }
 
 .pdp-score-stars {
@@ -6697,7 +6697,7 @@
 }
 
 .pdp-showcase-card {
-  border: 2px solid #dc2626;
+  border: 2px solid #0053e2;
   border-radius: 8px;
   overflow: hidden;
   background: #ffffff;
@@ -6709,7 +6709,7 @@
 
 .pdp-showcase-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.12);
+  box-shadow: 0 8px 20px rgba(0, 83, 226, 0.12);
 }
 
 .card-frame-visual {
@@ -6720,7 +6720,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-bottom: 1px solid #fee2e2;
+  border-bottom: 1px solid #dbeafe;
 }
 
 .card-top-red-band {
@@ -6728,7 +6728,7 @@
   top: 0;
   left: 0;
   right: 0;
-  background-color: #dc2626;
+  background-color: #0053e2;
   color: #ffffff;
   font-size: 0.62rem;
   font-weight: 900;
@@ -6741,7 +6741,7 @@
   position: absolute;
   top: 24px;
   left: 6px;
-  background-color: #dc2626;
+  background-color: #0053e2;
   color: #ffffff;
   font-size: 0.72rem;
   font-weight: 900;
@@ -6777,7 +6777,7 @@
 .card-brand-label {
   font-size: 0.7rem;
   font-weight: 800;
-  color: #dc2626;
+  color: #0053e2;
   letter-spacing: 0.5px;
 }
 
@@ -6804,7 +6804,7 @@
 .card-current-price {
   font-size: 0.98rem;
   font-weight: 900;
-  color: #dc2626;
+  color: #0053e2;
 }
 
 .card-was-price {
@@ -6816,7 +6816,7 @@
 .card-quick-add-btn {
   margin-top: auto;
   width: 100%;
-  background-color: #dc2626;
+  background-color: #0053e2;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -6832,7 +6832,7 @@
 }
 
 .card-quick-add-btn:hover {
-  background-color: #b91c1c;
+  background-color: #0043b8;
 }
 
 /* 6. Newsletter Subscription Bar */
@@ -8091,12 +8091,12 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #dc2626, #991b1b);
+  background: radial-gradient(circle at 35% 35%, #0053e2, #003a9e);
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.45);
+  box-shadow: 0 4px 14px rgba(0, 58, 158, 0.45);
   pointer-events: auto;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -8105,7 +8105,7 @@
 
 .floating-red-btn:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 18px rgba(185, 28, 28, 0.55);
+  box-shadow: 0 6px 18px rgba(0, 58, 158, 0.55);
 }
 
 .floating-red-content {
@@ -8138,7 +8138,7 @@
   left: -6px;
   right: -6px;
   bottom: -6px;
-  border: 2px solid rgba(220, 38, 38, 0.7);
+  border: 2px solid rgba(0, 83, 226, 0.7);
   border-radius: 50%;
   animation: contactPulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
   pointer-events: none;
