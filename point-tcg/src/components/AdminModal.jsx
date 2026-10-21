@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createCardSvg, PRESET_CARD_STYLES, allProducts, getProductCatalogImage, embedImageInStoreFrame } from '../products';
 import { saveNewOrder, changePassword } from '../utils/auth';
+import { checkOrderPricing } from '../utils/orderCheck';
 import { auth } from '../firebase';
 import {
   getQrConfig,
@@ -1850,6 +1851,7 @@ export default function AdminModal({
                       const isShipping = order.status === 'Đang giao hàng';
                       const isCompleted = order.status === 'Giao thành công';
                       const isCancelled = order.status === 'Đã huỷ';
+                      const pricing = checkOrderPricing(order, [...openDrawings, ...closedDrawings]);
 
                       return (
                         <div key={order.id} className={`shopper-order-card ${isQrWaiting ? 'card-qr-waiting' : isPending ? 'card-pending-new' : ''}`}>
@@ -1916,6 +1918,21 @@ export default function AdminModal({
                             </div>
                           </div>
 
+                          {/* Cảnh báo giá: giá trong đơn do khách gửi lên, có thể đã bị sửa */}
+                          {pricing.warnings.length > 0 && (
+                            <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', padding: '10px 14px', borderRadius: '8px', fontSize: '0.84rem', margin: '10px 0' }}>
+                              <div style={{ fontWeight: 800, marginBottom: '4px' }}>
+                                ⚠️ Giá trong đơn không khớp — kiểm tra số tiền thực nhận trước khi xác nhận
+                              </div>
+                              <ul style={{ margin: '0 0 6px 18px', padding: 0 }}>
+                                {pricing.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                              </ul>
+                              <div>
+                                Số tiền đúng theo giá hiện tại: <strong>${pricing.expectedTotal.toFixed(2)} (~{pricing.expectedVnd.toLocaleString('vi-VN')} đ)</strong>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Items Checklist for Packing */}
                           <div className="shopper-items-checklist">
                             <div className="checklist-heading">
@@ -1949,7 +1966,15 @@ export default function AdminModal({
                               <select
                                 className="status-select-dropdown"
                                 value={order.status}
-                                onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
+                                onChange={(e) => {
+                                  const next = e.target.value;
+                                  const confirming = ['Đã thanh toán (Chờ chuẩn bị hàng)', 'Đang chuẩn bị hàng', 'Đang giao hàng', 'Giao thành công'].includes(next);
+                                  if (confirming && pricing.warnings.length > 0
+                                    && !window.confirm(`Đơn #${order.id} có giá không khớp:\n- ${pricing.warnings.join('\n- ')}\n\nBạn đã kiểm tra số tiền thực nhận và vẫn muốn đổi trạng thái?`)) {
+                                    return;
+                                  }
+                                  handleUpdateStatus(order.id, next);
+                                }}
                               >
                                 <option value="Chờ thanh toán QR (Đơn mới)">🟡 Chờ thanh toán QR (Đơn mới)</option>
                                 <option value="Khách báo đã chuyển khoản (Chờ xác nhận)">🟠 Khách báo đã chuyển khoản (kiểm tra sao kê)</option>
