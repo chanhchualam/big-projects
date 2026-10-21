@@ -9745,3 +9745,15 @@ body {
   color: #ffffff;
   font-weight: 700;
 }
+
+.signin-required-notice {
+  margin: 0 36px 14px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.45;
+}

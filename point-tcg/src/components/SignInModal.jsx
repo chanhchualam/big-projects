@@ -10,7 +10,8 @@ export default function SignInModal({
   isOpen,
   onClose,
   onSignInSuccess,
-  initialMode = 'login' // 'login' | 'register'
+  initialMode = 'login', // 'login' | 'register'
+  notice = '' // lý do cần đăng nhập (VD: xem chi tiết / đặt hàng)
 }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
 
@@ -179,6 +180,8 @@ export default function SignInModal({
         >
           ✕
         </button>
+
+        {notice && <div className="signin-required-notice">{notice}</div>}
 
         {/* 3 Main Switcher Tabs */}
         <div className="signin-tabs">
