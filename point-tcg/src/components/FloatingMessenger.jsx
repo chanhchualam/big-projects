@@ -29,9 +29,9 @@ export default function FloatingMessenger() {
               d="M20 2H4C2.9 2 2 2.9 2 4V16C2 17.1 2.9 18 4 18H18L22 22V4C22 2.9 21.1 2 20 2Z"
               fill="#ffffff"
             />
-            <circle cx="8" cy="10" r="1.5" fill="#b91c1c" />
-            <circle cx="12" cy="10" r="1.5" fill="#b91c1c" />
-            <circle cx="16" cy="10" r="1.5" fill="#b91c1c" />
+            <circle cx="8" cy="10" r="1.5" fill="#0043b8" />
+            <circle cx="12" cy="10" r="1.5" fill="#0043b8" />
+            <circle cx="16" cy="10" r="1.5" fill="#0043b8" />
           </svg>
           <span className="floating-red-text">Liên hệ</span>
         </div>

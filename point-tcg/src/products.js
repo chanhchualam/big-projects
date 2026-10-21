@@ -341,18 +341,18 @@ export const createShowcaseBoxSvg = (options = {}) => {
     <rect width="500" height="500" rx="14" fill="#ffffff"/>
 
     <!-- 2. Outer Red Border Frame (Exact Match to Bánh Mì Games Store Showcase) -->
-    <rect x="8" y="8" width="484" height="484" rx="14" fill="none" stroke="#d32f2f" stroke-width="3.5"/>
+    <rect x="8" y="8" width="484" height="484" rx="14" fill="none" stroke="#0053e2" stroke-width="3.5"/>
 
     <!-- 3. Top Banner Header: CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG -->
-    <text x="250" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif" font-size="14.5" font-weight="900" fill="#d32f2f" text-anchor="middle" letter-spacing="1.2">CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</text>
-    <line x1="45" y1="42" x2="455" y2="42" stroke="#fecaca" stroke-width="1"/>
+    <text x="250" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif" font-size="14.5" font-weight="900" fill="#0053e2" text-anchor="middle" letter-spacing="1.2">CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</text>
+    <line x1="45" y1="42" x2="455" y2="42" stroke="#bfdbfe" stroke-width="1"/>
 
     <!-- 4. Top-Left Red Discount / Sale Tag -->
     ${safeBadge ? `
-    <g transform="translate(16, 16)" filter="drop-shadow(0 2px 5px rgba(211,47,47,0.35))">
-      <rect x="0" y="0" width="58" height="42" rx="6" fill="#d32f2f"/>
+    <g transform="translate(16, 16)" filter="drop-shadow(0 2px 5px rgba(0,83,226,0.35))">
+      <rect x="0" y="0" width="58" height="42" rx="6" fill="#0053e2"/>
       <text x="29" y="22" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="15.5" font-weight="900" fill="#ffffff" text-anchor="middle">${safeBadge}</text>
-      <text x="29" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9" font-weight="800" fill="#fee2e2" text-anchor="middle" letter-spacing="0.5">${safeBadgeSub}</text>
+      <text x="29" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9" font-weight="800" fill="#dbeafe" text-anchor="middle" letter-spacing="0.5">${safeBadgeSub}</text>
     </g>` : ''}
 
     <!-- 5. Studio Floor Contact Drop Shadow -->
@@ -368,14 +368,14 @@ export const createShowcaseBoxSvg = (options = {}) => {
       <text x="14" y="19" font-family="-apple-system, sans-serif" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">TCG</text>
 
       <!-- Red Nintendo Switch Icon -->
-      <rect x="34" y="0" width="28" height="28" rx="6" fill="#e60012"/>
+      <rect x="34" y="0" width="28" height="28" rx="6" fill="#1d4ed8"/>
       <circle cx="43" cy="14" r="5" fill="#ffffff"/>
-      <circle cx="53" cy="14" r="5" fill="#e60012"/>
+      <circle cx="53" cy="14" r="5" fill="#1d4ed8"/>
       <rect x="47" y="9" width="7" height="10" rx="2" fill="#ffffff"/>
 
       <!-- Pokémon Official Pokéball Seal Icon -->
       <rect x="68" y="0" width="28" height="28" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
-      <circle cx="82" cy="14" r="9" fill="#ef4444"/>
+      <circle cx="82" cy="14" r="9" fill="#2563eb"/>
       <circle cx="82" cy="14" r="4" fill="#ffffff"/>
       <line x1="73" y1="14" x2="91" y2="14" stroke="#ffffff" stroke-width="2"/>
       <circle cx="82" cy="14" r="2" fill="#0f172a"/>
@@ -386,7 +386,7 @@ export const createShowcaseBoxSvg = (options = {}) => {
       <circle cx="-102" cy="13" r="11" fill="#ffc220"/>
       <polygon points="-104,7 -99,13 -105,13 -99,19 -101,14 -97,14" fill="#0053e2"/>
       <text x="-86" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="14.5" font-weight="900" fill="#0f172a" text-anchor="start">Point TCG</text>
-      <text x="-86" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9" font-weight="800" fill="#dc2626" text-anchor="start" letter-spacing="1">GAMESTORE</text>
+      <text x="-86" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9" font-weight="800" fill="#0053e2" text-anchor="start" letter-spacing="1">GAMESTORE</text>
     </g>
   </svg>`;
 
@@ -765,12 +765,27 @@ export const getProductCatalogImage = (idOrItem) => {
 
 /**
  * Wraps any custom image (uploaded file data URL or external URL)
- * inside the official Point TCG red retail showcase frame (Bánh Mì Games style)
+ * inside the official Point TCG blue retail showcase frame (Bánh Mì Games style)
  */
-// Ảnh đã nằm trong khung đỏ của shop (ảnh mẫu hoặc ảnh admin tải lên có bật khung)
+// Ảnh đã nằm trong khung của shop (ảnh mẫu hoặc ảnh admin tải lên có bật khung)
 const FRAME_MARKER = encodeURIComponent('CHÍNH HÃNG - UY TÍN');
 export const isStoreFramed = (src) =>
   typeof src === 'string' && src.startsWith('data:image/svg') && src.includes(FRAME_MARKER);
+
+// Khung cũ màu đỏ → đổi sang khung xanh của shop (chỉ đổi màu, giữ nguyên ảnh bên trong)
+const FRAME_RECOLOR = [
+  ['%23d32f2f', '%230053e2'],
+  ['%23fecaca', '%23bfdbfe'],
+  ['%23fee2e2', '%23dbeafe'],
+  ['%23e60012', '%231d4ed8'],
+  ['%23ef4444', '%232563eb'],
+  ['%23dc2626', '%230053e2'],
+  ['rgba(211%2C47%2C47', 'rgba(0%2C83%2C226']
+];
+export const recolorStoreFrame = (src) => {
+  if (!isStoreFramed(src) || !src.includes('%23d32f2f')) return src;
+  return FRAME_RECOLOR.reduce((out, [from, to]) => out.split(from).join(to), src);
+};
 
 // Nhãn giảm giá trên khung: badge admin nhập, nếu trống thì % giảm thật từ giá cũ → giá mới
 export const getFrameBadge = ({ badge, price, wasPrice } = {}) => {
@@ -805,18 +820,18 @@ export const embedImageInStoreFrame = (imageUrl, options = {}) => {
     <rect width="500" height="500" rx="14" fill="#ffffff"/>
 
     <!-- 2. Outer Red Border Frame -->
-    <rect x="8" y="8" width="484" height="484" rx="14" fill="none" stroke="#d32f2f" stroke-width="3.5"/>
+    <rect x="8" y="8" width="484" height="484" rx="14" fill="none" stroke="#0053e2" stroke-width="3.5"/>
 
     <!-- 3. Top Banner: CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG -->
-    <text x="250" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif" font-size="14.5" font-weight="900" fill="#d32f2f" text-anchor="middle" letter-spacing="1.2">CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</text>
-    <line x1="45" y1="42" x2="455" y2="42" stroke="#fecaca" stroke-width="1"/>
+    <text x="250" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif" font-size="14.5" font-weight="900" fill="#0053e2" text-anchor="middle" letter-spacing="1.2">CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</text>
+    <line x1="45" y1="42" x2="455" y2="42" stroke="#bfdbfe" stroke-width="1"/>
 
     <!-- 4. Top-Left Red Discount / Sale Tag -->
     ${safeBadge ? `
-    <g transform="translate(16, 16)" filter="drop-shadow(0 2px 5px rgba(211,47,47,0.35))">
-      <rect x="0" y="0" width="58" height="42" rx="6" fill="#d32f2f"/>
+    <g transform="translate(16, 16)" filter="drop-shadow(0 2px 5px rgba(0,83,226,0.35))">
+      <rect x="0" y="0" width="58" height="42" rx="6" fill="#0053e2"/>
       <text x="29" y="22" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="15.5" font-weight="900" fill="#ffffff" text-anchor="middle">${safeBadge}</text>
-      <text x="29" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9" font-weight="800" fill="#fee2e2" text-anchor="middle" letter-spacing="0.5">${safeBadgeSub}</text>
+      <text x="29" y="36" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9" font-weight="800" fill="#dbeafe" text-anchor="middle" letter-spacing="0.5">${safeBadgeSub}</text>
     </g>` : ''}
 
     <!-- 5. Studio Floor Contact Drop Shadow -->
@@ -832,13 +847,13 @@ export const embedImageInStoreFrame = (imageUrl, options = {}) => {
       <rect x="0" y="0" width="28" height="28" rx="6" fill="#003791"/>
       <text x="14" y="19" font-family="-apple-system, sans-serif" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">TCG</text>
 
-      <rect x="34" y="0" width="28" height="28" rx="6" fill="#e60012"/>
+      <rect x="34" y="0" width="28" height="28" rx="6" fill="#1d4ed8"/>
       <circle cx="43" cy="14" r="5" fill="#ffffff"/>
-      <circle cx="53" cy="14" r="5" fill="#e60012"/>
+      <circle cx="53" cy="14" r="5" fill="#1d4ed8"/>
       <rect x="47" y="9" width="7" height="10" rx="2" fill="#ffffff"/>
 
       <rect x="68" y="0" width="28" height="28" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
-      <circle cx="82" cy="14" r="9" fill="#ef4444"/>
+      <circle cx="82" cy="14" r="9" fill="#2563eb"/>
       <circle cx="82" cy="14" r="4" fill="#ffffff"/>
       <line x1="73" y1="14" x2="91" y2="14" stroke="#ffffff" stroke-width="2"/>
       <circle cx="82" cy="14" r="2" fill="#0f172a"/>
@@ -849,7 +864,7 @@ export const embedImageInStoreFrame = (imageUrl, options = {}) => {
       <circle cx="-102" cy="13" r="11" fill="#ffc220"/>
       <polygon points="-104,7 -99,13 -105,13 -99,19 -101,14 -97,14" fill="#0053e2"/>
       <text x="-86" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="14.5" font-weight="900" fill="#0f172a" text-anchor="start">Point TCG</text>
-      <text x="-86" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9" font-weight="800" fill="#dc2626" text-anchor="start" letter-spacing="1">GAMESTORE</text>
+      <text x="-86" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif" font-size="9" font-weight="800" fill="#0053e2" text-anchor="start" letter-spacing="1">GAMESTORE</text>
     </g>
   </svg>`;
 

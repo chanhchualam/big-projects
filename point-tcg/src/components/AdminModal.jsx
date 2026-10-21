@@ -1012,6 +1012,32 @@ export default function AdminModal({
     })();
   }, [openDrawings, closedDrawings]);
 
+  // Một lần: sản phẩm có khung shop màu đỏ cũ → tạo lại ảnh thu nhỏ từ ảnh gốc đã đổi sang khung xanh
+  const recoloredRef = useRef(new Set());
+  useEffect(() => {
+    const pending = [
+      ...openDrawings.map((p) => [p, 'open']),
+      ...closedDrawings.map((p) => [p, 'closed'])
+    ].filter(([p]) => p.hasMedia && p.framed && p.frameColor !== 'blue' && !recoloredRef.current.has(p.id));
+    if (pending.length === 0) return;
+    pending.forEach(([p]) => recoloredRef.current.add(p.id));
+    (async () => {
+      let done = 0;
+      for (const [p, section] of pending) {
+        // fetchProductMedia đã đổi khung sang màu xanh
+        const media = await fetchProductMedia(p.id);
+        if (!media?.image) continue;
+        const { productFields, media: nextMedia } = await splitProductImages(media.image, media.gallery || []);
+        onUpdateProduct({ ...p, ...productFields }, section, nextMedia);
+        done++;
+      }
+      if (done) {
+        setUploadToast(`Đã đổi khung ảnh sang màu xanh cho ${done} sản phẩm.`);
+        setTimeout(() => setUploadToast(''), 5000);
+      }
+    })();
+  }, [openDrawings, closedDrawings]);
+
   // -------------------------------------------------------------
   // ADMIN CREDENTIALS HANDLERS
   // -------------------------------------------------------------

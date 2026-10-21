@@ -78,7 +78,7 @@ export async function splitProductImages(fullImage, gallery = []) {
   ]);
   return {
     // framed: ảnh gốc đã có khung shop → trang chi tiết không vẽ thêm khung (ảnh thu nhỏ là JPEG, không nhận ra được)
-    productFields: { image, thumbs, gallery: [], hasMedia: true, mediaCount: 1 + gallery.length, framed: isStoreFramed(fullImage) },
+    productFields: { image, thumbs, gallery: [], hasMedia: true, mediaCount: 1 + gallery.length, framed: isStoreFramed(fullImage), frameColor: 'blue' },
     media: { image: fullImage, gallery }
   };
 }
