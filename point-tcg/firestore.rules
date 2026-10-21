@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Tài khoản thật (email/password), không tính khách vãng lai đăng nhập ẩn danh
+    function signedInWithAccount() {
+      return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    // Quản trị viên = có document admins/{uid}. Chỉ tạo được từ Firebase Console.
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function onlyChanges(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+
+    // Trạng thái khách được phép tạo đơn / được tự huỷ
+    function newOrderStatuses() {
+      return ['Chờ thanh toán QR (Đơn mới)', 'Chờ xác nhận (Đơn mới)'];
+    }
+    function customerCancellableStatuses() {
+      return ['Chờ thanh toán QR (Đơn mới)', 'Chờ xác nhận (Đơn mới)', 'Khách báo đã chuyển khoản (Chờ xác nhận)'];
+    }
+
+    // ---------------- ADMINS ----------------
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // ---------------- PRODUCTS ----------------
+    match /products/{productId} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      // Khách chỉ được GIẢM tồn kho (khi đặt hàng), không được sửa giá/thông tin khác
+      allow update: if isAdmin()
+        || (signedIn()
+            && onlyChanges(['stock'])
+            && request.resource.data.stock is int
+            && request.resource.data.stock >= 0
+            && request.resource.data.stock < resource.data.stock);
+    }
+
+    // ---------------- ORDERS ----------------
+    match /orders/{orderId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.uid == request.auth.uid);
+
+      allow create: if isAdmin()
+        || (signedIn()
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.status in newOrderStatuses());
+
+      // Khách: chỉ đổi trạng thái đơn của chính mình sang "Đã huỷ" hoặc "Khách báo đã chuyển khoản"
+      allow update: if isAdmin()
+        || (signedIn()
+            && resource.data.uid == request.auth.uid
+            && onlyChanges(['status', 'updatedAt'])
+            && (
+              (resource.data.status in customerCancellableStatuses()
+                && request.resource.data.status == 'Đã huỷ')
+              || (resource.data.status == 'Chờ thanh toán QR (Đơn mới)'
+                && request.resource.data.status == 'Khách báo đã chuyển khoản (Chờ xác nhận)')
+            ));
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------------- USERS (hồ sơ khách hàng, KHÔNG chứa mật khẩu) ----------------
+    match /users/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create: if signedInWithAccount()
+        && request.auth.uid == uid
+        && request.resource.data.role == 'customer'
+        && !('password' in request.resource.data);
+      allow update: if isAdmin()
+        || (signedInWithAccount()
+            && request.auth.uid == uid
+            && onlyChanges(['name', 'phone', 'address', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+
+    // ---------------- SETTINGS (QR ngân hàng, thông tin shop) ----------------
+    match /settings/{key} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

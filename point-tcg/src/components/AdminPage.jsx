@@ -1,15 +1,11 @@
 // src/components/AdminPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import AdminModal from './AdminModal';
-import {
-  getAdminSession,
-  setAdminSession,
-  authenticateAdmin,
-  getAdminCredentials
-} from '../utils/auth';
+import { authenticateAdmin } from '../utils/auth';
 
 export default function AdminPage({
   currentUser = null,
+  authReady = true,
   openDrawings = [],
   closedDrawings = [],
   orders = [],
@@ -24,61 +20,29 @@ export default function AdminPage({
   onSignOut = null,
   initialProductToEdit = null
 }) {
-  const [adminUser, setAdminUser] = useState(() => {
-    // If the active user in the app is a customer, they can NEVER access admin
-    if (currentUser && currentUser.role === 'customer') {
-      return null;
-    }
-    if (currentUser && currentUser.role === 'admin') {
-      return currentUser;
-    }
-    return getAdminSession();
-  });
-  const [adminUsername, setAdminUsername] = useState('');
+  // Quyền admin chỉ đến từ Firebase Auth + collection 'admins' (xem buildSessionUser).
+  // Dữ liệu thật sự được bảo vệ bởi firestore.rules; phần này chỉ điều khiển giao diện.
+  const adminUser = currentUser && currentUser.role === 'admin' ? currentUser : null;
+  const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Sync admin session if changes happen in other tabs or currentUser changes
-  useEffect(() => {
-    if (currentUser && currentUser.role === 'customer') {
-      setAdminUser(null);
-      setAdminSession(null);
-    } else if (currentUser && currentUser.role === 'admin') {
-      setAdminUser(currentUser);
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'point-tcg-admin-session') {
-        if (currentUser && currentUser.role === 'customer') {
-          setAdminUser(null);
-        } else {
-          setAdminUser(getAdminSession());
-        }
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [currentUser]);
-
   // Handle Admin Login submission
-  const handleAdminLoginSubmit = (e) => {
+  const handleAdminLoginSubmit = async (e) => {
     e.preventDefault();
     setLoginError('');
 
-    if (!adminUsername.trim() || !adminPassword.trim()) {
-      setLoginError('Vui lòng nhập đầy đủ tài khoản và mật khẩu quản trị!');
+    if (!adminEmail.trim() || !adminPassword) {
+      setLoginError('Vui lòng nhập đầy đủ email và mật khẩu quản trị!');
       return;
     }
 
     setIsSubmitting(true);
-    const result = authenticateAdmin(adminUsername.trim(), adminPassword.trim());
+    const result = await authenticateAdmin(adminEmail.trim(), adminPassword);
     setIsSubmitting(false);
 
     if (result.success) {
-      setAdminUser(result.user);
       setAdminPassword('');
       setLoginError('');
       if (onAdminLoginSuccess) {
@@ -92,15 +56,24 @@ export default function AdminPage({
   // Handle Admin Logout
   const handleAdminLogout = () => {
     if (confirm('Bạn có chắc muốn đăng xuất khỏi trang Quản Trị?')) {
-      setAdminSession(null);
-      setAdminUser(null);
-      setAdminUsername('');
+      setAdminEmail('');
       setAdminPassword('');
       if (onSignOut) onSignOut();
       if (onNavigateToStore) onNavigateToStore();
       else window.location.hash = '';
     }
   };
+
+  // Waiting for Firebase Auth to restore the session
+  if (!authReady) {
+    return (
+      <div className="admin-page-login-wrapper">
+        <div className="admin-login-card" style={{ textAlign: 'center' }}>
+          <p className="admin-login-sub">⏳ Đang kiểm tra phiên đăng nhập...</p>
+        </div>
+      </div>
+    );
+  }
 
   // -------------------------------------------------------------
   // VIEW 0: ACCESS DENIED (WHEN LOGGED IN AS CUSTOMER)
@@ -140,8 +113,6 @@ export default function AdminPage({
               style={{ width: '100%', padding: '11px', fontWeight: 600 }}
               onClick={() => {
                 if (onSignOut) onSignOut();
-                setAdminSession(null);
-                setAdminUser(null);
               }}
             >
               🚪 Đăng Xuất Tài Khoản Này Để Đăng Nhập Admin
@@ -184,16 +155,17 @@ export default function AdminPage({
           <form onSubmit={handleAdminLoginSubmit} className="admin-login-form">
             <div className="admin-input-group">
               <label htmlFor="admin-page-username">
-                Tài Khoản Quản Trị <span style={{ color: '#ef4444' }}>*</span>
+                Email Quản Trị <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div className="admin-input-icon-wrap">
                 <span className="input-icon">👤</span>
                 <input
                   id="admin-page-username"
-                  type="text"
-                  placeholder="Nhập tài khoản admin..."
-                  value={adminUsername}
-                  onChange={(e) => setAdminUsername(e.target.value)}
+                  type="email"
+                  autoComplete="username"
+                  placeholder="admin@email.com"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
                   autoFocus
                   required
                 />
@@ -209,6 +181,7 @@ export default function AdminPage({
                 <input
                   id="admin-page-password"
                   type="password"
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}

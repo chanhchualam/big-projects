@@ -1,24 +1,24 @@
 // src/components/AdminModal.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { createCardSvg, PRESET_CARD_STYLES, allProducts, getProductCatalogImage, embedImageInStoreFrame } from '../products';
-import {
-  getAdminCredentials,
-  saveAdminCredentials,
-  resetAdminCredentials,
-  getOrdersList,
-  saveNewOrder,
-  updateOrderStatus,
-  deleteOrder,
-  getRegisteredUsers,
-  deleteCustomer
-} from '../utils/auth';
+import { saveNewOrder, changePassword } from '../utils/auth';
+import { auth } from '../firebase';
 import {
   getQrConfig,
+  loadQrConfig,
   saveQrConfig,
   resetQrConfig,
   POPULAR_BANKS,
   generateQrUrl
 } from '../utils/qrConfig';
+import {
+  fetchProductsFromDb,
+  fetchOrdersFromDb,
+  fetchUsersFromDb,
+  fetchSettingsFromDb,
+  deleteUserFromDb,
+  syncAllLocalDataToFirebase
+} from '../services/firestoreService';
 
 export default function AdminModal({
   isOpen,
@@ -42,7 +42,7 @@ export default function AdminModal({
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   // Orders State (Shopper / Shopee fulfillment)
-  const [localOrders, setLocalOrders] = useState(() => getOrdersList());
+  const [localOrders, setLocalOrders] = useState([]);
   const orders = propOrders || localOrders;
   const [orderFilter, setOrderFilter] = useState('all'); // 'all' | 'Chờ thanh toán QR' | 'Chờ xác nhận' | 'Đang chuẩn bị hàng' | 'Đang giao hàng' | 'Giao thành công' | 'Đã huỷ'
   const [orderSearch, setOrderSearch] = useState('');
@@ -66,23 +66,160 @@ export default function AdminModal({
   });
 
   // Customers State
-  const [customers, setCustomers] = useState(() => getRegisteredUsers());
+  const [customers, setCustomers] = useState([]);
   const [customerSearch, setCustomerSearch] = useState('');
 
-  // Admin Account State
-  const [adminCreds, setAdminCreds] = useState(getAdminCredentials());
-  const [accountFormData, setAccountFormData] = useState({
-    username: adminCreds.username,
-    name: adminCreds.name,
-    email: adminCreds.email,
-    password: adminCreds.password
-  });
+  // Auto-sync registered customers from Firebase Firestore (Supports registrations from other laptops)
+  useEffect(() => {
+    let isMounted = true;
+    const syncCustomers = async () => {
+      try {
+        const cloudUsers = await fetchUsersFromDb();
+        if (!isMounted) return;
+        if (Array.isArray(cloudUsers)) {
+          setCustomers(cloudUsers);
+        }
+      } catch (e) {}
+    };
+
+    if (activeTab === 'customers' || activeTab === 'firebase_db') {
+      syncCustomers();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab]);
+
+  // Admin Account State (password is managed by Firebase Authentication)
+  const [passwordForm, setPasswordForm] = useState({ current: '', next: '', confirm: '' });
   const [accountSuccessMsg, setAccountSuccessMsg] = useState('');
+  const [accountErrorMsg, setAccountErrorMsg] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // QR Code & Bank Transfer Settings State
   const [qrSettings, setQrSettings] = useState(() => getQrConfig());
   const [qrSaveToast, setQrSaveToast] = useState('');
   const qrImageFileInputRef = useRef(null);
+
+  // Firebase Database State & Handlers
+  const [firebaseActiveSubTab, setFirebaseActiveSubTab] = useState('overview'); // 'overview' | 'products' | 'orders' | 'users' | 'settings'
+  const [firebaseSyncing, setFirebaseSyncing] = useState(false);
+  const [firebaseToast, setFirebaseToast] = useState(null);
+  const [firebaseDbData, setFirebaseDbData] = useState({
+    products: null,
+    orders: null,
+    users: null,
+    settings: null
+  });
+  const [loadingFirebaseTable, setLoadingFirebaseTable] = useState(false);
+
+  const handleLoadFirebaseCollection = async (collName) => {
+    setLoadingFirebaseTable(true);
+    try {
+      if (collName === 'products') {
+        const data = await fetchProductsFromDb();
+        setFirebaseDbData(prev => ({ ...prev, products: data || [] }));
+      } else if (collName === 'orders') {
+        const data = await fetchOrdersFromDb();
+        setFirebaseDbData(prev => ({ ...prev, orders: data || [] }));
+      } else if (collName === 'users') {
+        const data = await fetchUsersFromDb();
+        setFirebaseDbData(prev => ({ ...prev, users: data || [] }));
+      } else if (collName === 'settings') {
+        const [qr, store] = await Promise.all([
+          fetchSettingsFromDb('bank_qr_config'),
+          fetchSettingsFromDb('store_info')
+        ]);
+        setFirebaseDbData(prev => ({
+          ...prev,
+          settings: { bank_qr_config: qr, store_info: store }
+        }));
+      }
+    } catch (err) {
+      console.error('Error loading Firebase collection:', err);
+    } finally {
+      setLoadingFirebaseTable(false);
+    }
+  };
+
+  const handleSyncToFirebase = async () => {
+    setFirebaseSyncing(true);
+    setFirebaseToast({ type: 'info', message: 'Đang đẩy dữ liệu lên Firebase Cloud Firestore...' });
+    try {
+      const allProds = [...openDrawings, ...closedDrawings];
+      const res = await syncAllLocalDataToFirebase({
+        products: allProds,
+        orders: orders,
+        users: customers,
+        bankQrConfig: qrSettings
+      });
+
+      if (res.success) {
+        setFirebaseToast({
+          type: 'success',
+          message: `Đã đẩy thành công lên Firebase! (${res.productsCount} sản phẩm, ${res.ordersCount} đơn hàng, ${res.usersCount} tài khoản, cài đặt cấu hình).`
+        });
+        if (firebaseActiveSubTab !== 'overview') {
+          handleLoadFirebaseCollection(firebaseActiveSubTab);
+        }
+      } else {
+        setFirebaseToast({
+          type: 'error',
+          message: `Có lỗi khi đồng bộ: ${res.error || 'Vui lòng thử lại'}`
+        });
+      }
+    } catch (err) {
+      setFirebaseToast({
+        type: 'error',
+        message: `Lỗi kết nối Firebase: ${err.message}`
+      });
+    } finally {
+      setFirebaseSyncing(false);
+    }
+  };
+
+  const handlePullFromFirebase = async () => {
+    setFirebaseSyncing(true);
+    setFirebaseToast({ type: 'info', message: 'Đang nạp dữ liệu từ Firebase Firestore về máy...' });
+    try {
+      const [remoteProducts, remoteOrders, remoteUsers, remoteQr] = await Promise.all([
+        fetchProductsFromDb(),
+        fetchOrdersFromDb(),
+        fetchUsersFromDb(),
+        fetchSettingsFromDb('bank_qr_config')
+      ]);
+
+      let pulledCount = 0;
+      if (Array.isArray(remoteProducts) && remoteProducts.length > 0) {
+        pulledCount += remoteProducts.length;
+      }
+      if (Array.isArray(remoteOrders) && remoteOrders.length > 0) {
+        setLocalOrders(remoteOrders);
+        pulledCount += remoteOrders.length;
+      }
+      if (Array.isArray(remoteUsers) && remoteUsers.length > 0) {
+        setCustomers(remoteUsers);
+        pulledCount += remoteUsers.length;
+      }
+      if (remoteQr) {
+        setQrSettings(remoteQr);
+        localStorage.setItem('point-tcg-qr-config', JSON.stringify(remoteQr));
+      }
+
+      setFirebaseToast({
+        type: 'success',
+        message: `Đã nạp thành công ${pulledCount} bản ghi từ Firebase Firestore về máy!`
+      });
+    } catch (err) {
+      setFirebaseToast({
+        type: 'error',
+        message: `Lỗi khi tải từ Firebase: ${err.message}`
+      });
+    } finally {
+      setFirebaseSyncing(false);
+    }
+  };
 
   // Product Form State
   const [formData, setFormData] = useState({
@@ -114,21 +251,12 @@ export default function AdminModal({
     selectedPresetIdx: 0
   });
 
-  // Reload data and listen for live orders when modal is open
+  // Load the live QR / bank settings from Firestore when the panel opens
   useEffect(() => {
-    if (isOpen) {
-      setLocalOrders(getOrdersList());
-      setCustomers(getRegisteredUsers());
-      const freshAdmin = getAdminCredentials();
-      setAdminCreds(freshAdmin);
-      setAccountFormData({
-        username: freshAdmin.username,
-        name: freshAdmin.name,
-        email: freshAdmin.email,
-        password: freshAdmin.password
-      });
+    if (isOpen || isFullPage) {
+      loadQrConfig().then(setQrSettings).catch(() => {});
     }
-  }, [isOpen]);
+  }, [isOpen, isFullPage]);
 
   const playNotificationSound = () => {
     try {
@@ -212,10 +340,7 @@ export default function AdminModal({
     if (propUpdateStatus) {
       propUpdateStatus(orderId, newStatus);
     } else {
-      const updated = updateOrderStatus(orderId, newStatus);
-      if (updated) {
-        setLocalOrders(updated);
-      }
+      setLocalOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
     }
   };
 
@@ -236,8 +361,7 @@ export default function AdminModal({
       if (propDeleteOrder) {
         propDeleteOrder(orderId);
       } else {
-        const remaining = deleteOrder(orderId);
-        setLocalOrders(remaining);
+        setLocalOrders(prev => prev.filter(o => o.id !== orderId));
       }
     }
   };
@@ -374,7 +498,6 @@ export default function AdminModal({
           createdAt: '09/10/2026, 16:45:22'
         }
       ];
-      localStorage.setItem('point-tcg-orders', JSON.stringify(sampleOrders));
       window.dispatchEvent(new CustomEvent('point-tcg-order-updated', { detail: { updated: sampleOrders } }));
       setLocalOrders(sampleOrders);
     }
@@ -383,10 +506,16 @@ export default function AdminModal({
   // -------------------------------------------------------------
   // CUSTOMER ACTIONS
   // -------------------------------------------------------------
-  const handleDeleteCustomerClick = (customerId, name) => {
-    if (confirm(`Bạn có chắc muốn xoá tài khoản khách hàng "${name}"?`)) {
-      deleteCustomer(customerId);
-      setCustomers(getRegisteredUsers());
+  // Removes the customer's Firestore profile. The Firebase Auth login itself must be
+  // disabled/deleted from Firebase Console > Authentication.
+  const handleDeleteCustomerClick = async (customerId, name) => {
+    if (confirm(`Bạn có chắc muốn xoá hồ sơ khách hàng "${name}"?`)) {
+      const ok = await deleteUserFromDb(customerId);
+      if (ok) {
+        setCustomers(prev => prev.filter(c => c.id !== customerId));
+      } else {
+        alert('Không thể xoá hồ sơ khách hàng. Vui lòng thử lại!');
+      }
     }
   };
 
@@ -757,46 +886,36 @@ export default function AdminModal({
   // -------------------------------------------------------------
   // ADMIN CREDENTIALS HANDLERS
   // -------------------------------------------------------------
-  const handleSaveAccount = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
-    if (!accountFormData.username.trim() || !accountFormData.password.trim()) {
-      alert('Tên đăng nhập và mật khẩu không được để trống!');
+    setAccountSuccessMsg('');
+    setAccountErrorMsg('');
+    if (passwordForm.next.length < 8) {
+      setAccountErrorMsg('Mật khẩu mới phải có tối thiểu 8 ký tự!');
+      return;
+    }
+    if (passwordForm.next !== passwordForm.confirm) {
+      setAccountErrorMsg('Mật khẩu xác nhận không khớp!');
       return;
     }
 
-    const updated = saveAdminCredentials({
-      username: accountFormData.username.trim(),
-      name: accountFormData.name.trim() || 'Quản Trị Viên Point TCG',
-      email: accountFormData.email.trim() || 'admin@pointtcg.com',
-      password: accountFormData.password.trim()
-    });
+    setIsChangingPassword(true);
+    const res = await changePassword(passwordForm.current, passwordForm.next);
+    setIsChangingPassword(false);
 
-    if (updated) {
-      setAdminCreds(updated);
-      setAccountSuccessMsg('✅ Đã lưu thay đổi thông tin Admin thành công!');
+    if (res.success) {
+      setPasswordForm({ current: '', next: '', confirm: '' });
+      setAccountSuccessMsg('✅ Đã đổi mật khẩu quản trị thành công!');
       setTimeout(() => setAccountSuccessMsg(''), 4000);
-    }
-  };
-
-  const handleResetAccount = () => {
-    if (confirm('Khôi phục tài khoản Admin về mặc định (admin / admin123)?')) {
-      const reset = resetAdminCredentials();
-      setAdminCreds(reset);
-      setAccountFormData({
-        username: reset.username,
-        name: reset.name,
-        email: reset.email,
-        password: reset.password
-      });
-      setAccountSuccessMsg('✅ Đã khôi phục tài khoản Admin về: admin / admin123');
-      setTimeout(() => setAccountSuccessMsg(''), 4000);
+    } else {
+      setAccountErrorMsg(res.error);
     }
   };
 
   // -------------------------------------------------------------
   // QR & BANK TRANSFER HANDLERS
   // -------------------------------------------------------------
-  const handleSaveQrSettings = (e) => {
+  const handleSaveQrSettings = async (e) => {
     e.preventDefault();
     if (!qrSettings.accountNumber.trim()) {
       alert('Vui lòng nhập số tài khoản ngân hàng!');
@@ -806,16 +925,22 @@ export default function AdminModal({
       alert('Vui lòng nhập tên chủ tài khoản!');
       return;
     }
-    const saved = saveQrConfig(qrSettings);
+    const saved = await saveQrConfig(qrSettings);
     if (saved) {
       setQrSaveToast('🎉 Đã lưu cài đặt mã QR & thông tin ngân hàng thành công! Khách mua hàng sẽ thấy mã QR mới này.');
       setTimeout(() => setQrSaveToast(''), 4500);
+    } else {
+      alert('Không thể lưu cài đặt QR lên Firestore (không có quyền hoặc ảnh QR quá lớn).');
     }
   };
 
-  const handleResetQrSettings = () => {
+  const handleResetQrSettings = async () => {
     if (confirm('Khôi phục mã QR về tài khoản mặc định MB Bank ban đầu?')) {
-      const def = resetQrConfig();
+      const def = await resetQrConfig();
+      if (!def) {
+        alert('Không thể khôi phục cài đặt QR trên Firestore.');
+        return;
+      }
       setQrSettings(def);
       setQrSaveToast('🔄 Đã khôi phục mã QR về mặc định.');
       setTimeout(() => setQrSaveToast(''), 3000);
@@ -825,8 +950,9 @@ export default function AdminModal({
   const handleQrImageUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Dung lượng ảnh tối đa là 2MB!');
+    // Firestore documents are capped at 1MB, and base64 adds ~33%
+    if (file.size > 700 * 1024) {
+      alert('Dung lượng ảnh QR tối đa là 700KB!');
       return;
     }
     const reader = new FileReader();
@@ -1410,7 +1536,7 @@ export default function AdminModal({
                               🖼️ Đóng khung đỏ trưng bày chuẩn Shop Point TCG (Khuyên dùng)
                             </div>
                             <div className="admin-frame-toggle-desc">
-                              Tự động bọc ảnh trong khung viền đỏ #d32f2f, tiêu đề <strong>CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</strong>, tag giảm giá và logo chứng nhận TCG chuẩn Bánh Mì Games.
+                              Tự động bọc ảnh trong khung viền đỏ #d32f2f, tiêu đề <strong>CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</strong>, tag giảm giá và logo chứng nhận TCG chuẩn POINT TCG.
                             </div>
                           </div>
                         </label>
@@ -1586,6 +1712,27 @@ export default function AdminModal({
                 }}
               >
                 💳 Cài Đặt Mã QR & Ngân Hàng
+              </button>
+
+              <button
+                type="button"
+                className={`admin-tab-btn ${activeTab === 'firebase_db' ? 'active' : ''}`}
+                style={{
+                  background: activeTab === 'firebase_db' ? '#fff7ed' : '',
+                  borderColor: activeTab === 'firebase_db' ? '#f97316' : '',
+                  color: activeTab === 'firebase_db' ? '#ea580c' : '',
+                  fontWeight: 800
+                }}
+                onClick={() => {
+                  setActiveTab('firebase_db');
+                  setEditingProduct(null);
+                  setIsCreatingNew(false);
+                  if (!firebaseDbData.products) {
+                    handleLoadFirebaseCollection('products');
+                  }
+                }}
+              >
+                🔥 Firebase Database
               </button>
 
               <button
@@ -1805,6 +1952,7 @@ export default function AdminModal({
                                 onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
                               >
                                 <option value="Chờ thanh toán QR (Đơn mới)">🟡 Chờ thanh toán QR (Đơn mới)</option>
+                                <option value="Khách báo đã chuyển khoản (Chờ xác nhận)">🟠 Khách báo đã chuyển khoản (kiểm tra sao kê)</option>
                                 <option value="Đã thanh toán (Chờ chuẩn bị hàng)">🟢 Đã thanh toán (Chờ chuẩn bị hàng)</option>
                                 <option value="Chờ xác nhận (Đơn mới)">Chờ xác nhận (Đơn mới)</option>
                                 <option value="Đang chuẩn bị hàng">Đang chuẩn bị hàng</option>
@@ -2101,7 +2249,7 @@ export default function AdminModal({
                       Thiết Lập Tài Khoản Quản Trị Viên (Admin)
                     </h3>
                     <p style={{ color: '#64748b', fontSize: '0.88rem' }}>
-                      Đổi tên đăng nhập, tên hiển thị và mật khẩu quản trị shop. Dữ liệu lưu an toàn trên máy của bạn.
+                      Đổi mật khẩu đăng nhập quản trị. Mật khẩu được Firebase Authentication quản lý, không lưu trong website.
                     </p>
                   </div>
                 </div>
@@ -2111,68 +2259,57 @@ export default function AdminModal({
                     {accountSuccessMsg}
                   </div>
                 )}
+                {accountErrorMsg && (
+                  <div className="admin-login-error-alert" role="alert">
+                    <span>⚠️</span>
+                    <span>{accountErrorMsg}</span>
+                  </div>
+                )}
 
                 <div className="admin-account-current-badge">
-                  <span>Tài khoản: <strong>{adminCreds.username}</strong></span>
-                  <span>•</span>
-                  <span>Tên: <strong>{adminCreds.name}</strong></span>
-                  <span>•</span>
-                  <span>Mật khẩu: <strong>{adminCreds.password}</strong></span>
+                  <span>Đăng nhập với: <strong>{auth.currentUser?.email || '—'}</strong></span>
                 </div>
 
-                <form onSubmit={handleSaveAccount} className="admin-account-form">
+                <form onSubmit={handleChangePassword} className="admin-account-form">
                   <div className="form-group">
-                    <label className="form-label">Tên Đăng Nhập (Username) <span style={{ color: '#ef4444' }}>*</span></label>
+                    <label className="form-label">Mật Khẩu Hiện Tại <span style={{ color: '#ef4444' }}>*</span></label>
                     <input
-                      type="text"
+                      type="password"
+                      autoComplete="current-password"
                       className="form-input"
-                      value={accountFormData.username}
-                      onChange={(e) => setAccountFormData({ ...accountFormData, username: e.target.value })}
+                      value={passwordForm.current}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
                       required
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Mật Khẩu Mới (Password) <span style={{ color: '#ef4444' }}>*</span></label>
+                    <label className="form-label">Mật Khẩu Mới (tối thiểu 8 ký tự) <span style={{ color: '#ef4444' }}>*</span></label>
                     <input
-                      type="text"
+                      type="password"
+                      autoComplete="new-password"
                       className="form-input"
-                      value={accountFormData.password}
-                      onChange={(e) => setAccountFormData({ ...accountFormData, password: e.target.value })}
+                      value={passwordForm.next}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, next: e.target.value })}
                       required
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Tên Quản Trị Viên Hiển Thị</label>
+                    <label className="form-label">Nhập Lại Mật Khẩu Mới <span style={{ color: '#ef4444' }}>*</span></label>
                     <input
-                      type="text"
+                      type="password"
+                      autoComplete="new-password"
                       className="form-input"
-                      value={accountFormData.name}
-                      onChange={(e) => setAccountFormData({ ...accountFormData, name: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Email Liên Hệ</label>
-                    <input
-                      type="email"
-                      className="form-input"
-                      value={accountFormData.email}
-                      onChange={(e) => setAccountFormData({ ...accountFormData, email: e.target.value })}
+                      value={passwordForm.confirm}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                      required
                     />
                   </div>
 
                   <div className="admin-account-actions">
-                    <button type="submit" className="btn-admin-save-account">
-                      💾 Lưu Thay Đổi Tài Khoản
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-admin-reset-account"
-                      onClick={handleResetAccount}
-                    >
-                      ↺ Khôi phục mặc định (admin / admin123)
+                    <button type="submit" className="btn-admin-save-account" disabled={isChangingPassword}>
+                      {isChangingPassword ? '⏳ Đang đổi mật khẩu...' : '🔐 Đổi Mật Khẩu'}
                     </button>
                   </div>
                 </form>
@@ -2450,6 +2587,670 @@ export default function AdminModal({
                     <div style={{ marginTop: '10px', fontSize: '0.78rem', color: '#16a34a', fontWeight: 600 }}>
                       ✓ Bạn có thể dùng điện thoại quét thử mã QR này ngay bây giờ!
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* =========================================================================
+                TAB 6: FIREBASE CLOUD FIRESTORE DATABASE
+               ========================================================================= */}
+            {activeTab === 'firebase_db' && (
+              <div className="admin-account-panel" style={{ maxWidth: '980px' }}>
+                {/* Header Card */}
+                <div className="admin-account-header" style={{
+                  background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+                  border: '1.5px solid #fed7aa',
+                  borderRadius: '16px',
+                  padding: '20px 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '16px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ fontSize: '2.5rem' }}>🔥</div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#9a3412', margin: 0 }}>
+                          Firebase Cloud Firestore Database
+                        </h3>
+                        <span style={{
+                          background: '#dcfce7',
+                          color: '#15803d',
+                          border: '1px solid #86efac',
+                          borderRadius: '20px',
+                          padding: '3px 10px',
+                          fontSize: '0.75rem',
+                          fontWeight: 800,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+                          ONLINE (Live)
+                        </span>
+                      </div>
+                      <p style={{ color: '#c2410c', fontSize: '0.88rem', margin: '4px 0 0 0', fontWeight: 500 }}>
+                        Dự án: <strong>point-tcg</strong> | Cơ sở dữ liệu: <strong>(default)</strong> | 4 Bảng: <code>products</code>, <code>orders</code>, <code>users</code>, <code>settings</code>
+                      </p>
+                    </div>
+                  </div>
+
+                  <a
+                    href="https://console.firebase.google.com/project/point-tcg/firestore"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      background: '#ea580c',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      fontWeight: 800,
+                      fontSize: '0.86rem',
+                      padding: '10px 18px',
+                      borderRadius: '10px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <span>Mở Firebase Console</span>
+                    <span>↗</span>
+                  </a>
+                </div>
+
+                {/* Toast Notification */}
+                {firebaseToast && (
+                  <div style={{
+                    marginTop: '16px',
+                    padding: '12px 18px',
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    fontSize: '0.88rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    background: firebaseToast.type === 'error' ? '#fef2f2' : firebaseToast.type === 'info' ? '#eff6ff' : '#ecfdf5',
+                    color: firebaseToast.type === 'error' ? '#991b1b' : firebaseToast.type === 'info' ? '#1d4ed8' : '#065f46',
+                    border: `1.5px solid ${firebaseToast.type === 'error' ? '#fecaca' : firebaseToast.type === 'info' ? '#bfdbfe' : '#a7f3d0'}`
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>{firebaseToast.type === 'error' ? '❌' : firebaseToast.type === 'info' ? '⏳' : '✅'}</span>
+                      <span>{firebaseToast.message}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFirebaseToast(null)}
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: '1rem', color: 'inherit' }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                {/* Primary Actions Row */}
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  flexWrap: 'wrap',
+                  marginTop: '20px',
+                  padding: '16px',
+                  background: '#ffffff',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '14px'
+                }}>
+                  <button
+                    type="button"
+                    disabled={firebaseSyncing}
+                    onClick={handleSyncToFirebase}
+                    style={{
+                      flex: '1 1 240px',
+                      padding: '12px 20px',
+                      background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: 800,
+                      fontSize: '0.92rem',
+                      cursor: firebaseSyncing ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 14px rgba(234, 88, 12, 0.3)',
+                      opacity: firebaseSyncing ? 0.7 : 1
+                    }}
+                  >
+                    <span>{firebaseSyncing ? '⏳' : '🚀'}</span>
+                    <span>Đẩy Dữ Liệu Hiện Tại Lên Firebase</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={firebaseSyncing}
+                    onClick={handlePullFromFirebase}
+                    style={{
+                      flex: '1 1 220px',
+                      padding: '12px 20px',
+                      background: '#f8fafc',
+                      color: '#0f172a',
+                      border: '1.5px solid #cbd5e1',
+                      borderRadius: '10px',
+                      fontWeight: 700,
+                      fontSize: '0.92rem',
+                      cursor: firebaseSyncing ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <span>⬇️</span>
+                    <span>Nạp Dữ Liệu Từ Firebase Về Máy</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={loadingFirebaseTable}
+                    onClick={() => handleLoadFirebaseCollection(firebaseActiveSubTab === 'overview' ? 'products' : firebaseActiveSubTab)}
+                    style={{
+                      padding: '12px 18px',
+                      background: '#ffffff',
+                      color: '#475569',
+                      border: '1.5px solid #cbd5e1',
+                      borderRadius: '10px',
+                      fontWeight: 700,
+                      fontSize: '0.92rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <span>🔄</span>
+                    <span>Làm Mới</span>
+                  </button>
+                </div>
+
+                {/* 4 Collections Overview Grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                  gap: '16px',
+                  marginTop: '20px'
+                }}>
+                  {/* Table 1: Products */}
+                  <div
+                    onClick={() => {
+                      setFirebaseActiveSubTab('products');
+                      handleLoadFirebaseCollection('products');
+                    }}
+                    style={{
+                      background: firebaseActiveSubTab === 'products' ? '#fff7ed' : '#ffffff',
+                      border: firebaseActiveSubTab === 'products' ? '2px solid #ea580c' : '1.5px solid #e2e8f0',
+                      borderRadius: '14px',
+                      padding: '18px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: firebaseActiveSubTab === 'products' ? '0 6px 20px rgba(234,88,12,0.15)' : 'none'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '1.8rem' }}>📦</span>
+                      <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>
+                        collection
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>products</div>
+                    <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>Sản phẩm thẻ Pokémon</div>
+                    <div style={{ marginTop: '12px', fontSize: '1.25rem', fontWeight: 900, color: '#ea580c' }}>
+                      {openDrawings.length + closedDrawings.length} mục
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: 700, marginTop: '4px' }}>
+                      ✓ Đã đồng bộ với Cloud
+                    </div>
+                  </div>
+
+                  {/* Table 2: Orders */}
+                  <div
+                    onClick={() => {
+                      setFirebaseActiveSubTab('orders');
+                      handleLoadFirebaseCollection('orders');
+                    }}
+                    style={{
+                      background: firebaseActiveSubTab === 'orders' ? '#fff7ed' : '#ffffff',
+                      border: firebaseActiveSubTab === 'orders' ? '2px solid #ea580c' : '1.5px solid #e2e8f0',
+                      borderRadius: '14px',
+                      padding: '18px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: firebaseActiveSubTab === 'orders' ? '0 6px 20px rgba(234,88,12,0.15)' : 'none'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '1.8rem' }}>🛍️</span>
+                      <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>
+                        collection
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>orders</div>
+                    <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>Đơn đặt hàng Shopper</div>
+                    <div style={{ marginTop: '12px', fontSize: '1.25rem', fontWeight: 900, color: '#ea580c' }}>
+                      {orders.length} đơn
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: 700, marginTop: '4px' }}>
+                      ✓ Tự động lưu khi khách đặt
+                    </div>
+                  </div>
+
+                  {/* Table 3: Users */}
+                  <div
+                    onClick={() => {
+                      setFirebaseActiveSubTab('users');
+                      handleLoadFirebaseCollection('users');
+                    }}
+                    style={{
+                      background: firebaseActiveSubTab === 'users' ? '#fff7ed' : '#ffffff',
+                      border: firebaseActiveSubTab === 'users' ? '2px solid #ea580c' : '1.5px solid #e2e8f0',
+                      borderRadius: '14px',
+                      padding: '18px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: firebaseActiveSubTab === 'users' ? '0 6px 20px rgba(234,88,12,0.15)' : 'none'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '1.8rem' }}>👥</span>
+                      <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>
+                        collection
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>users</div>
+                    <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>Khách hàng & Quản trị</div>
+                    <div style={{ marginTop: '12px', fontSize: '1.25rem', fontWeight: 900, color: '#ea580c' }}>
+                      {customers.length + 1} tài khoản
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: 700, marginTop: '4px' }}>
+                      ✓ Phân quyền Admin / Customer
+                    </div>
+                  </div>
+
+                  {/* Table 4: Settings */}
+                  <div
+                    onClick={() => {
+                      setFirebaseActiveSubTab('settings');
+                      handleLoadFirebaseCollection('settings');
+                    }}
+                    style={{
+                      background: firebaseActiveSubTab === 'settings' ? '#fff7ed' : '#ffffff',
+                      border: firebaseActiveSubTab === 'settings' ? '2px solid #ea580c' : '1.5px solid #e2e8f0',
+                      borderRadius: '14px',
+                      padding: '18px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: firebaseActiveSubTab === 'settings' ? '0 6px 20px rgba(234,88,12,0.15)' : 'none'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '1.8rem' }}>⚙️</span>
+                      <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>
+                        collection
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>settings</div>
+                    <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>VietQR & Thông tin Shop</div>
+                    <div style={{ marginTop: '12px', fontSize: '1.25rem', fontWeight: 900, color: '#ea580c' }}>
+                      2 cấu hình
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: '#16a34a', fontWeight: 700, marginTop: '4px' }}>
+                      ✓ bank_qr & store_info
+                    </div>
+                  </div>
+                </div>
+
+                {/* SubTab Data Table / Document Explorer */}
+                <div style={{
+                  marginTop: '24px',
+                  background: '#ffffff',
+                  border: '1.5px solid #e2e8f0',
+                  borderRadius: '16px',
+                  overflow: 'hidden'
+                }}>
+                  {/* Explorer Tab Bar */}
+                  <div style={{
+                    display: 'flex',
+                    borderBottom: '1.5px solid #e2e8f0',
+                    background: '#f8fafc',
+                    overflowX: 'auto',
+                    padding: '8px 12px',
+                    gap: '8px'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setFirebaseActiveSubTab('overview')}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: firebaseActiveSubTab === 'overview' ? '#ffffff' : 'transparent',
+                        color: firebaseActiveSubTab === 'overview' ? '#0f172a' : '#64748b',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                        boxShadow: firebaseActiveSubTab === 'overview' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none'
+                      }}
+                    >
+                      📊 Tổng Quan Cấu Trúc
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFirebaseActiveSubTab('products');
+                        if (!firebaseDbData.products) handleLoadFirebaseCollection('products');
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: firebaseActiveSubTab === 'products' ? '#ea580c' : 'transparent',
+                        color: firebaseActiveSubTab === 'products' ? '#ffffff' : '#64748b',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      📦 products ({openDrawings.length + closedDrawings.length})
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFirebaseActiveSubTab('orders');
+                        if (!firebaseDbData.orders) handleLoadFirebaseCollection('orders');
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: firebaseActiveSubTab === 'orders' ? '#ea580c' : 'transparent',
+                        color: firebaseActiveSubTab === 'orders' ? '#ffffff' : '#64748b',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      🛍️ orders ({orders.length})
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFirebaseActiveSubTab('users');
+                        if (!firebaseDbData.users) handleLoadFirebaseCollection('users');
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: firebaseActiveSubTab === 'users' ? '#ea580c' : 'transparent',
+                        color: firebaseActiveSubTab === 'users' ? '#ffffff' : '#64748b',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      👥 users ({customers.length + 1})
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFirebaseActiveSubTab('settings');
+                        if (!firebaseDbData.settings) handleLoadFirebaseCollection('settings');
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: firebaseActiveSubTab === 'settings' ? '#ea580c' : 'transparent',
+                        color: firebaseActiveSubTab === 'settings' ? '#ffffff' : '#64748b',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ⚙️ settings (2 docs)
+                    </button>
+                  </div>
+
+                  {/* Explorer Content */}
+                  <div style={{ padding: '20px' }}>
+                    {loadingFirebaseTable ? (
+                      <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '8px' }}>⏳</div>
+                        <div>Đang tải dữ liệu từ Firebase Cloud Firestore...</div>
+                      </div>
+                    ) : firebaseActiveSubTab === 'overview' ? (
+                      /* Overview Tab */
+                      <div>
+                        <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                          Cấu trúc các bảng dữ liệu trên Cloud Firestore
+                        </h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                          <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontWeight: 800, color: '#ea580c' }}>📁 collection: products</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
+                              Lưu trữ toàn bộ danh sách sản phẩm thẻ bài Pokémon, giá bán USD/VND, số lượng tồn kho, trạng thái Open/Closed, đếm ngược thời gian và hình ảnh.
+                            </div>
+                            <div style={{ marginTop: '8px', fontSize: '0.78rem', background: '#ffffff', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                              <code>id, title, price, wasPrice, stock, category, status, statusTime, description</code>
+                            </div>
+                          </div>
+
+                          <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontWeight: 800, color: '#ea580c' }}>📁 collection: orders</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
+                              Lưu trữ chi tiết các đơn đặt hàng của khách: họ tên, email, số điện thoại, địa chỉ nhận hàng, phương thức thanh toán VietQR / COD, danh sách sản phẩm và trạng thái đơn.
+                            </div>
+                            <div style={{ marginTop: '8px', fontSize: '0.78rem', background: '#ffffff', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                              <code>id, customerName, customerEmail, customerPhone, shippingAddress, items, total, status, createdAt</code>
+                            </div>
+                          </div>
+
+                          <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontWeight: 800, color: '#ea580c' }}>📁 collection: users</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
+                              Lưu trữ hồ sơ tài khoản khách hàng và tài khoản quản trị viên hệ thống (phân quyền role <code>admin</code> và <code>customer</code>).
+                            </div>
+                            <div style={{ marginTop: '8px', fontSize: '0.78rem', background: '#ffffff', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                              <code>id, name, username, email, phone, address, role, createdAt</code>
+                            </div>
+                          </div>
+
+                          <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontWeight: 800, color: '#ea580c' }}>📁 collection: settings</div>
+                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
+                              Lưu trữ cài đặt hệ thống: thông tin ngân hàng tạo mã VietQR động (MBBank, STK, Tên chủ thẻ) và thông tin cửa hàng Point TCG.
+                            </div>
+                            <div style={{ marginTop: '8px', fontSize: '0.78rem', background: '#ffffff', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
+                              <code>settings/bank_qr_config, settings/store_info</code>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Collection Data Table & JSON Inspector */
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
+                            Dữ liệu trực tiếp bảng <code>{firebaseActiveSubTab}</code>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const dataToCopy = firebaseDbData[firebaseActiveSubTab] || (
+                                firebaseActiveSubTab === 'products' ? [...openDrawings, ...closedDrawings] :
+                                firebaseActiveSubTab === 'orders' ? orders :
+                                firebaseActiveSubTab === 'users' ? customers : qrSettings
+                              );
+                              navigator.clipboard.writeText(JSON.stringify(dataToCopy, null, 2));
+                              alert('Đã sao chép toàn bộ dữ liệu JSON vào bộ nhớ đệm!');
+                            }}
+                            style={{
+                              padding: '6px 12px',
+                              background: '#f1f5f9',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '6px',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            📋 Sao chép JSON
+                          </button>
+                        </div>
+
+                        {/* Render Items */}
+                        <div style={{ maxHeight: '420px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
+                          {firebaseActiveSubTab === 'products' && (
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                              <thead>
+                                <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', textAlign: 'left' }}>
+                                  <th style={{ padding: '10px 12px' }}>Document ID</th>
+                                  <th style={{ padding: '10px 12px' }}>Tên Sản Phẩm</th>
+                                  <th style={{ padding: '10px 12px' }}>Giá</th>
+                                  <th style={{ padding: '10px 12px' }}>Tồn kho</th>
+                                  <th style={{ padding: '10px 12px' }}>Phân loại</th>
+                                  <th style={{ padding: '10px 12px' }}>Trạng thái</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(firebaseDbData.products || [...openDrawings, ...closedDrawings]).map((prod) => (
+                                  <tr key={prod.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                    <td style={{ padding: '10px 12px' }}><code style={{ color: '#0053e2', fontWeight: 700 }}>{prod.id}</code></td>
+                                    <td style={{ padding: '10px 12px', fontWeight: 600, maxWidth: '280px' }}>{prod.title}</td>
+                                    <td style={{ padding: '10px 12px', fontWeight: 700, color: '#16a34a' }}>${prod.price}</td>
+                                    <td style={{ padding: '10px 12px', fontWeight: 700 }}>{prod.stock ?? 20}</td>
+                                    <td style={{ padding: '10px 12px' }}>{prod.category || 'Booster Box'}</td>
+                                    <td style={{ padding: '10px 12px' }}>
+                                      <span style={{
+                                        background: prod.status === 'open' ? '#dcfce7' : '#f1f5f9',
+                                        color: prod.status === 'open' ? '#15803d' : '#475569',
+                                        padding: '2px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.74rem',
+                                        fontWeight: 800
+                                      }}>
+                                        {prod.status}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          )}
+
+                          {firebaseActiveSubTab === 'orders' && (
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                              <thead>
+                                <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', textAlign: 'left' }}>
+                                  <th style={{ padding: '10px 12px' }}>Mã Đơn</th>
+                                  <th style={{ padding: '10px 12px' }}>Khách Hàng</th>
+                                  <th style={{ padding: '10px 12px' }}>Số Điện Thoại</th>
+                                  <th style={{ padding: '10px 12px' }}>Tổng Tiền</th>
+                                  <th style={{ padding: '10px 12px' }}>Thanh Toán</th>
+                                  <th style={{ padding: '10px 12px' }}>Trạng Thái</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(firebaseDbData.orders || orders).map((ord) => (
+                                  <tr key={ord.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                    <td style={{ padding: '10px 12px' }}><code style={{ color: '#ea580c', fontWeight: 800 }}>#{ord.id}</code></td>
+                                    <td style={{ padding: '10px 12px', fontWeight: 700 }}>{ord.customerName}</td>
+                                    <td style={{ padding: '10px 12px' }}>{ord.customerPhone}</td>
+                                    <td style={{ padding: '10px 12px', fontWeight: 800, color: '#16a34a' }}>${ord.total}</td>
+                                    <td style={{ padding: '10px 12px', fontSize: '0.75rem' }}>{ord.paymentMethod?.slice(0, 20)}...</td>
+                                    <td style={{ padding: '10px 12px' }}>
+                                      <span style={{
+                                        background: ord.status?.includes('Giao thành công') ? '#dcfce7' : '#eff6ff',
+                                        color: ord.status?.includes('Giao thành công') ? '#15803d' : '#1d4ed8',
+                                        padding: '2px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.74rem',
+                                        fontWeight: 800
+                                      }}>
+                                        {ord.status}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          )}
+
+                          {firebaseActiveSubTab === 'users' && (
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                              <thead>
+                                <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', textAlign: 'left' }}>
+                                  <th style={{ padding: '10px 12px' }}>ID / Username</th>
+                                  <th style={{ padding: '10px 12px' }}>Họ Và Tên</th>
+                                  <th style={{ padding: '10px 12px' }}>Email</th>
+                                  <th style={{ padding: '10px 12px' }}>Số Điện Thoại</th>
+                                  <th style={{ padding: '10px 12px' }}>Phân Quyền (Role)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(firebaseDbData.users || customers).map((usr, idx) => (
+                                  <tr key={usr.id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                    <td style={{ padding: '10px 12px' }}><code style={{ color: '#0053e2', fontWeight: 700 }}>{usr.id || usr.username}</code></td>
+                                    <td style={{ padding: '10px 12px', fontWeight: 700 }}>{usr.name}</td>
+                                    <td style={{ padding: '10px 12px' }}>{usr.email}</td>
+                                    <td style={{ padding: '10px 12px' }}>{usr.phone || 'Chưa cập nhật'}</td>
+                                    <td style={{ padding: '10px 12px' }}>
+                                      <span style={{
+                                        background: usr.role === 'admin' ? '#fee2e2' : '#f1f5f9',
+                                        color: usr.role === 'admin' ? '#b91c1c' : '#334155',
+                                        padding: '2px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.74rem',
+                                        fontWeight: 800
+                                      }}>
+                                        {usr.role || 'customer'}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          )}
+
+                          {firebaseActiveSubTab === 'settings' && (
+                            <div style={{ padding: '16px', background: '#f8fafc' }}>
+                              <pre style={{ margin: 0, fontSize: '0.82rem', color: '#0f172a', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                                {JSON.stringify(firebaseDbData.settings || {
+                                  bank_qr_config: qrSettings,
+                                  store_info: {
+                                    storeName: 'Point TCG',
+                                    email: 'kiba14123@gmail.com',
+                                    hotline: '0901 234 567',
+                                    messenger: 'https://m.me/1429099050281227',
+                                    website: 'https://point-tcg.web.app'
+                                  }
+                                }, null, 2)}
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

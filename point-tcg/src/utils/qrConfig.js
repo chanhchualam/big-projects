@@ -1,7 +1,10 @@
 // src/utils/qrConfig.js
 // Manage dynamic QR code and Bank Transfer configuration for Point TCG
 
+import { fetchSettingsFromDb, saveSettingsToDb } from '../services/firestoreService';
+
 export const STORAGE_QR_KEY = 'point-tcg-qr-config';
+const QR_SETTINGS_DOC = 'bank_qr_config';
 
 export const POPULAR_BANKS = [
   { code: 'MB', name: 'MB Bank (Ngân hàng Quân Đội)' },
@@ -34,6 +37,7 @@ export const DEFAULT_QR_CONFIG = {
   customQrImage: '' // Base64 data URL or external URL
 };
 
+// Bản cache cục bộ để hiển thị ngay; nguồn dữ liệu chính là Firestore settings/bank_qr_config
 export function getQrConfig() {
   try {
     const raw = localStorage.getItem(STORAGE_QR_KEY);
@@ -50,29 +54,49 @@ export function getQrConfig() {
   return DEFAULT_QR_CONFIG;
 }
 
-export function saveQrConfig(newConfig) {
-  try {
-    const sanitized = {
-      ...DEFAULT_QR_CONFIG,
-      ...newConfig
-    };
-    localStorage.setItem(STORAGE_QR_KEY, JSON.stringify(sanitized));
-    window.dispatchEvent(new CustomEvent('qr-config-updated', { detail: sanitized }));
-    return sanitized;
-  } catch (err) {
-    console.error('Error saving qr config:', err);
-    return null;
-  }
+// Chấp nhận cả định dạng cũ do scripts/seedFirebase.js tạo (bankId, accountNo, template)
+function normalizeQrConfig(data) {
+  return {
+    ...DEFAULT_QR_CONFIG,
+    ...data,
+    bankCode: data.bankCode || data.bankId || DEFAULT_QR_CONFIG.bankCode,
+    accountNumber: data.accountNumber || data.accountNo || DEFAULT_QR_CONFIG.accountNumber,
+    qrTemplate: data.qrTemplate || data.template || DEFAULT_QR_CONFIG.qrTemplate
+  };
 }
 
-export function resetQrConfig() {
+function cacheQrConfig(config) {
   try {
-    localStorage.removeItem(STORAGE_QR_KEY);
-    window.dispatchEvent(new CustomEvent('qr-config-updated', { detail: DEFAULT_QR_CONFIG }));
+    localStorage.setItem(STORAGE_QR_KEY, JSON.stringify(config));
   } catch (err) {
-    console.error('Error resetting qr config:', err);
+    console.warn('Error caching qr config:', err);
   }
-  return DEFAULT_QR_CONFIG;
+  window.dispatchEvent(new CustomEvent('qr-config-updated', { detail: config }));
+}
+
+// Tải cấu hình QR mới nhất từ Firestore (ai cũng đọc được, chỉ admin ghi được)
+export async function loadQrConfig() {
+  const remote = await fetchSettingsFromDb(QR_SETTINGS_DOC);
+  if (!remote) return getQrConfig();
+  const config = normalizeQrConfig(remote);
+  cacheQrConfig(config);
+  return config;
+}
+
+// Lưu cấu hình QR lên Firestore (bị rules từ chối nếu không phải admin)
+export async function saveQrConfig(newConfig) {
+  const sanitized = {
+    ...DEFAULT_QR_CONFIG,
+    ...newConfig
+  };
+  const ok = await saveSettingsToDb(QR_SETTINGS_DOC, sanitized);
+  if (!ok) return null;
+  cacheQrConfig(sanitized);
+  return sanitized;
+}
+
+export async function resetQrConfig() {
+  return saveQrConfig(DEFAULT_QR_CONFIG);
 }
 
 /**
