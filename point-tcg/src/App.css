@@ -7038,7 +7038,7 @@
 
 /* 1. Top Green Announcement Bar */
 .cop-top-announcement {
-  background-color: #3f5344;
+  background-color: #0053e2;
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 600;
@@ -7150,7 +7150,7 @@
 }
 
 .cop-btn-signin {
-  background: #3f5344;
+  background: #0053e2;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -7161,7 +7161,7 @@
 }
 
 .cop-btn-signin:hover {
-  background: #2e3e33;
+  background: #0043b8;
 }
 
 /* 3. Main Container */
@@ -7223,7 +7223,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #4a6753;
+  background: #0053e2;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -7410,8 +7410,8 @@
 }
 
 .cop-search-input:focus {
-  border-color: #3f5344;
-  box-shadow: 0 0 0 3px rgba(63, 83, 68, 0.12);
+  border-color: #0053e2;
+  box-shadow: 0 0 0 3px rgba(0, 83, 226, 0.12);
 }
 
 .cop-clear-search-btn {
@@ -7459,7 +7459,7 @@
 }
 
 .cop-status-tab.active {
-  color: #3f5344;
+  color: #0053e2;
   font-weight: 700;
 }
 
@@ -7470,7 +7470,7 @@
   left: 0;
   right: 0;
   height: 2.5px;
-  background-color: #3f5344;
+  background-color: #0053e2;
   border-radius: 2px;
 }
 
@@ -7518,7 +7518,7 @@
 .cop-btn-shop-now {
   padding: 9px 20px;
   border-radius: 20px;
-  background: #3f5344;
+  background: #0053e2;
   color: #ffffff;
   border: none;
   font-size: 0.86rem;
@@ -7528,7 +7528,7 @@
 }
 
 .cop-btn-shop-now:hover {
-  background: #2e3e33;
+  background: #0043b8;
 }
 
 /* Order Cards List */
@@ -7795,8 +7795,8 @@
 .cop-btn-view-detail {
   padding: 6px 14px;
   border-radius: 8px;
-  border: 1px solid #3f5344;
-  background: #3f5344;
+  border: 1px solid #0053e2;
+  background: #0053e2;
   color: #ffffff;
   font-size: 0.82rem;
   font-weight: 600;
@@ -7805,7 +7805,7 @@
 }
 
 .cop-btn-view-detail:hover {
-  background: #2e3e33;
+  background: #0043b8;
 }
 
 /* TAB 2, 3, 4: Profile, Addresses, Reviews */
@@ -7832,7 +7832,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #4a6753;
+  background: #0053e2;
   color: #fff;
   display: flex;
   align-items: center;
@@ -7900,7 +7900,7 @@
 .cop-btn-edit-profile {
   padding: 8px 18px;
   border-radius: 8px;
-  background: #3f5344;
+  background: #0053e2;
   color: #fff;
   border: none;
   font-weight: 600;
