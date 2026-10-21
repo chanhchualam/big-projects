@@ -27,18 +27,17 @@ import { db } from '../firebase';
 // -------------------------------------------------------------
 // 1. BẢNG PRODUCTS (SẢN PHẨM)
 // -------------------------------------------------------------
+// Trả về danh sách sản phẩm (có thể rỗng nếu admin đã xoá hết); null chỉ khi lỗi kết nối
 export async function fetchProductsFromDb() {
   try {
     const snap = await getDocs(collection(db, 'products'));
-    if (!snap.empty) {
-      const list = [];
-      snap.forEach((d) => list.push({ ...d.data(), id: d.id }));
-      return list;
-    }
+    const list = [];
+    snap.forEach((d) => list.push({ ...d.data(), id: d.id }));
+    return list;
   } catch (err) {
     console.warn('Firestore fetchProducts fallback to local:', err.message);
+    return null;
   }
-  return null;
 }
 
 export async function saveProductToDb(product) {
