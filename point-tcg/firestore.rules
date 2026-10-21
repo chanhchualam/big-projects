@@ -43,7 +43,8 @@ service cloud.firestore {
 
     // ---------------- PRODUCT MEDIA (ảnh gốc + ảnh phụ, tải khi mở trang chi tiết) ----------------
     match /product_media/{productId} {
-      allow read: if true;
+      // Ảnh gốc / trang chi tiết: chỉ khách đã đăng nhập
+      allow read: if signedInWithAccount() || isAdmin();
       allow write: if isAdmin();
     }
 
@@ -52,8 +53,9 @@ service cloud.firestore {
       allow read: if isAdmin()
         || (signedIn() && resource.data.uid == request.auth.uid);
 
+      // Chỉ tài khoản đã đăng nhập (không phải phiên ẩn danh) mới đặt hàng được
       allow create: if isAdmin()
-        || (signedIn()
+        || (signedInWithAccount()
             && request.resource.data.uid == request.auth.uid
             && request.resource.data.status in newOrderStatuses()
             && request.resource.data.get('stockDeducted', false) == false

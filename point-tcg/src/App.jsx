@@ -311,9 +311,40 @@ export default function App() {
     };
   }, []);
 
+  // -------------------------------------------------------------
+  // BẮT BUỘC ĐĂNG NHẬP để xem chi tiết và đặt hàng
+  // -------------------------------------------------------------
+  // Ghi nhớ việc khách định làm, đăng nhập xong thì làm tiếp
+  const [pendingAction, setPendingAction] = useState(null); // { type: 'detail' | 'cart' | 'buy' | 'checkout', product, qty }
+  const [signInNotice, setSignInNotice] = useState('');
+  const requireLogin = (action) => {
+    if (user) return true;
+    setPendingAction(action);
+    setSignInNotice('Vui lòng đăng nhập để xem chi tiết và đặt hàng sản phẩm của shop.');
+    setSignInMode('login');
+    setIsSignInOpen(true);
+    return false;
+  };
+  // SignInModal gọi onClose ngay sau khi đăng nhập thành công → chỉ bỏ việc đang chờ khi khách tự đóng
+  const justSignedInRef = useRef(false);
+  const closeSignIn = () => {
+    setIsSignInOpen(false);
+    if (justSignedInRef.current) {
+      justSignedInRef.current = false;
+      return;
+    }
+    setSignInNotice('');
+    setPendingAction(null);
+  };
+
   // Open / Close dedicated Product Detail Page
   const handleOpenProductDetail = (product) => {
     if (!product) return;
+    if (!requireLogin({ type: 'detail', product })) return;
+    openProductDetailNow(product);
+  };
+
+  const openProductDetailNow = (product) => {
     setSelectedProduct(product);
     setCurrentRoute('product');
     window.location.hash = `#product-${product.id}`;
@@ -755,6 +786,11 @@ export default function App() {
   // CART OPERATIONS WITH INVENTORY STOCK CHECKING
   // -------------------------------------------------------------
   const handleAddToCart = (product, qtyToAdd = 1) => {
+    if (!requireLogin({ type: 'cart', product, qty: qtyToAdd })) return;
+    addToCartNow(product, qtyToAdd);
+  };
+
+  const addToCartNow = (product, qtyToAdd = 1) => {
     const currentStock = typeof product.stock === 'number' ? product.stock : 20;
     if (currentStock <= 0) {
       alert(`Sản phẩm "${product.title}" hiện tại đã hết hàng!`);
@@ -798,6 +834,11 @@ export default function App() {
   };
 
   const handleBuyNow = (product, qtyToAdd = 1) => {
+    if (!requireLogin({ type: 'buy', product, qty: qtyToAdd })) return;
+    buyNowNow(product, qtyToAdd);
+  };
+
+  const buyNowNow = (product, qtyToAdd = 1) => {
     const currentStock = typeof product.stock === 'number' ? product.stock : 20;
     if (currentStock <= 0) {
       alert(`Sản phẩm "${product.title}" hiện tại đã hết hàng!`);
@@ -953,6 +994,32 @@ export default function App() {
   const productTypes = useMemo(() => {
     return [...new Set(allProductsCombined.map(getProductCategory))].sort();
   }, [allProductsCombined]);
+
+  // Đăng nhập xong: làm tiếp việc khách đã bấm
+  useEffect(() => {
+    if (!user || !pendingAction) return;
+    const { type, product, qty } = pendingAction;
+    setPendingAction(null);
+    setSignInNotice('');
+    if (type === 'detail') openProductDetailNow(product);
+    else if (type === 'cart') addToCartNow(product, qty);
+    else if (type === 'buy') buyNowNow(product, qty);
+    else if (type === 'checkout') setIsCheckoutOpen(true);
+  }, [user]);
+
+  // Mở thẳng link sản phẩm khi chưa đăng nhập → về trang chủ và yêu cầu đăng nhập
+  useEffect(() => {
+    if (!authReady || user || currentRoute !== 'product' || !selectedProduct) return;
+    const product = selectedProduct;
+    setSelectedProduct(null);
+    setCurrentRoute('store');
+    try {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    } catch {
+      window.location.hash = '';
+    }
+    requireLogin({ type: 'detail', product });
+  }, [authReady, user, currentRoute, selectedProduct]);
 
   // Request to join drawing handler
   const handleRequestJoin = (product) => {
@@ -1124,9 +1191,11 @@ export default function App() {
         </Suspense>
         <SignInModal
           isOpen={isSignInOpen}
-          onClose={() => setIsSignInOpen(false)}
+          onClose={closeSignIn}
           initialMode={signInMode}
+          notice={signInNotice}
           onSignInSuccess={(userData) => {
+            justSignedInRef.current = true;
             setUser(userData);
             setIsSignInOpen(false);
           }}
@@ -1140,7 +1209,7 @@ export default function App() {
           cartTotal={cartTotal}
           onProceedCheckout={() => {
             setIsCartOpen(false);
-            setIsCheckoutOpen(true);
+            if (requireLogin({ type: 'checkout' })) setIsCheckoutOpen(true);
           }}
         />
         <FloatingMessenger />
@@ -1464,7 +1533,7 @@ export default function App() {
         cartTotal={cartTotal}
         onProceedCheckout={() => {
           setIsCartOpen(false);
-          setIsCheckoutOpen(true);
+          if (requireLogin({ type: 'checkout' })) setIsCheckoutOpen(true);
         }}
       />
 
@@ -1498,21 +1567,19 @@ export default function App() {
 
       <SignInModal
         isOpen={isSignInOpen}
-        onClose={() => setIsSignInOpen(false)}
+        onClose={closeSignIn}
         initialMode={signInMode}
+        notice={signInNotice}
         onSignInSuccess={(userData) => {
+          justSignedInRef.current = true;
           setUser(userData);
-          if (userData.role === 'admin') {
+          // Admin đăng nhập từ trang khách (không phải để mua hàng) → chuyển sang trang quản trị
+          if (userData.role === 'admin' && !pendingAction) {
             window.location.hash = '#admin';
             setCurrentRoute('admin');
-          } else {
-            if (currentRoute === 'admin') {
-              setCurrentRoute('store');
-              window.location.hash = '';
-            }
-            if (selectedProduct && selectedProduct.status === 'open') {
-              handleRequestJoin(selectedProduct);
-            }
+          } else if (currentRoute === 'admin') {
+            setCurrentRoute('store');
+            window.location.hash = '';
           }
         }}
       />
