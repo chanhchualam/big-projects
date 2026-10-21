@@ -1959,6 +1959,14 @@ export default function AdminModal({
                             </div>
                           </div>
 
+                          {/* Kết quả Cloud Functions (khi đã bật gói Blaze) */}
+                          {order.priceVerified === true && pricing.warnings.length === 0 && (
+                            <div className="xadmin-pill-green" style={{ margin: '8px 0' }}>✓ Server đã kiểm tra giá: khớp</div>
+                          )}
+                          {order.paymentNote && (
+                            <div className="xadmin-pill-amber" style={{ margin: '8px 0', whiteSpace: 'normal' }}>💳 {order.paymentNote}</div>
+                          )}
+
                           {/* Cảnh báo giá: giá trong đơn do khách gửi lên, có thể đã bị sửa */}
                           {pricing.warnings.length > 0 && (
                             <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', padding: '10px 14px', borderRadius: '8px', fontSize: '0.84rem', margin: '10px 0' }}>
