@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'rea
 import Header, { normalizeSearchText } from './components/Header';
 import SubNav from './components/SubNav';
 import ProductCard from './components/ProductCard';
+import { getProductSeries, groupProductsBySeries } from './utils/productSeries';
 import Carousel from './components/Carousel';
 import CartDrawer from './components/CartDrawer';
 import SavedModal from './components/SavedModal';
@@ -138,6 +139,7 @@ export default function App() {
   const [priceMin, setPriceMin] = useState('');
   const [priceMax, setPriceMax] = useState('');
   const [stockFilter, setStockFilter] = useState('in');
+  const [activeSeries, setActiveSeries] = useState('all'); // lọc theo dòng sản phẩm (30th Celebration, Ascended Heroes...)
   const deductedOrderIdsRef = useRef(new Set());
 
   // Hash-based Page Routing (Trang chủ Store vs Trang Quản Trị Admin vs Trang Chi tiết Sản phẩm vs Trang Đơn Hàng)
@@ -1116,6 +1118,17 @@ export default function App() {
     return sortProducts(list.map(withReviewStats));
   }, [closedDrawings, searchQuery, sortBy, activeCategory, productType, priceMin, priceMax, stockFilter, reviewStats]);
 
+  // Dòng sản phẩm có trong kết quả hiện tại → thanh chọn nhanh; nếu dòng đang chọn biến mất thì coi như "Tất cả"
+  const seriesChips = useMemo(
+    () => groupProductsBySeries([...filteredOpenDrawings, ...filteredClosedDrawings]).map((g) => ({ name: g.name, count: g.items.length })),
+    [filteredOpenDrawings, filteredClosedDrawings]
+  );
+  const selectedSeries = seriesChips.some((c) => c.name === activeSeries) ? activeSeries : 'all';
+  const bySelectedSeries = (list) => (selectedSeries === 'all' ? list : list.filter((p) => getProductSeries(p) === selectedSeries));
+  const openGroups = groupProductsBySeries(bySelectedSeries(filteredOpenDrawings));
+  const closedGroups = groupProductsBySeries(bySelectedSeries(filteredClosedDrawings));
+  const visibleClosedCount = closedGroups.reduce((sum, g) => sum + g.items.length, 0);
+
   const totalResultsCount = filteredOpenDrawings.length + filteredClosedDrawings.length;
 
   // Complete catalog of available products for header search autocomplete
@@ -1385,10 +1398,32 @@ export default function App() {
           )}
         </div>
 
+        {seriesChips.length > 1 && (
+          <div className="series-chip-row" role="group" aria-label="Chọn dòng sản phẩm">
+            <button
+              type="button"
+              className={`series-chip ${selectedSeries === 'all' ? 'active' : ''}`}
+              onClick={() => setActiveSeries('all')}
+            >
+              Tất cả dòng
+            </button>
+            {seriesChips.map((chip) => (
+              <button
+                key={chip.name}
+                type="button"
+                className={`series-chip ${selectedSeries === chip.name ? 'active' : ''}`}
+                onClick={() => setActiveSeries(chip.name)}
+              >
+                {chip.name} <span className="series-chip-count">{chip.count}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* -------------------------------------------------------------
             3. SECTION "OPEN DRAWINGS" (Placed above Closed drawings)
            ------------------------------------------------------------- */}
-        {filteredOpenDrawings.length > 0 && (
+        {openGroups.length > 0 && (
           <section className="drawings-section" aria-labelledby="open-drawings-heading">
             <div className="section-header">
               <div className="section-title-wrap">
@@ -1405,8 +1440,13 @@ export default function App() {
               </div>
             </div>
 
+            {openGroups.map((group) => (
+            <div key={group.name} className="series-group">
+              <h3 className="series-group-title">
+                {group.name} <span className="series-group-count">{group.items.length} sản phẩm</span>
+              </h3>
             <div className="open-drawings-grid">
-              {filteredOpenDrawings.map((product) => (
+              {group.items.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -1422,13 +1462,15 @@ export default function App() {
                 />
               ))}
             </div>
+            </div>
+            ))}
           </section>
         )}
 
         {/* -------------------------------------------------------------
             4. SECTION "CLOSED DRAWINGS" (Horizontal Carousel)
            ------------------------------------------------------------- */}
-        {filteredClosedDrawings.length > 0 && (
+        {closedGroups.length > 0 && (
           <section className="drawings-section" aria-labelledby="closed-drawings-heading">
             <div className="section-header">
               <div className="section-title-wrap">
@@ -1444,17 +1486,22 @@ export default function App() {
                   className="section-view-all"
                   onClick={(e) => {
                     e.preventDefault();
-                    alert(`Hiển thị tất cả ${filteredClosedDrawings.length} sản phẩm closed drawings còn hàng.`);
+                    alert(`Hiển thị tất cả ${visibleClosedCount} sản phẩm closed drawings còn hàng.`);
                   }}
                 >
-                  View all ({filteredClosedDrawings.length})
+                  View all ({visibleClosedCount})
                 </a>
               </div>
             </div>
 
             {/* Horizontal Carousel with Circular White Arrows & Scroll-Snap */}
+            {closedGroups.map((group) => (
+            <div key={group.name} className="series-group">
+              <h3 className="series-group-title">
+                {group.name} <span className="series-group-count">{group.items.length} sản phẩm</span>
+              </h3>
             <Carousel
-              products={filteredClosedDrawings}
+              products={group.items}
               savedIds={savedIds}
               onToggleSave={handleToggleSave}
               onAddToCart={handleAddToCart}
@@ -1464,6 +1511,8 @@ export default function App() {
               onRequestRestock={handleRequestRestock}
               defaultEmail={user?.email}
             />
+            </div>
+            ))}
           </section>
         )}
 

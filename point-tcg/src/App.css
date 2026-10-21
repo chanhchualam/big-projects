@@ -9830,3 +9830,80 @@ body {
   border: none;
   border-radius: 0;
 }
+
+/* Cửa hàng: nhóm sản phẩm theo dòng (series) */
+.series-chip-row {
+  display: flex;
+  gap: 8px;
+  margin: -6px 0 22px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.series-chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.series-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.series-chip:hover {
+  border-color: #0053e2;
+  color: #0053e2;
+}
+
+.series-chip.active {
+  background: #0053e2;
+  border-color: #0053e2;
+  color: #ffffff;
+}
+
+.series-chip-count {
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.series-chip.active .series-chip-count {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.series-group + .series-group {
+  margin-top: 26px;
+}
+
+.series-group-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0 0 12px;
+  padding-left: 10px;
+  border-left: 4px solid #0053e2;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.series-group-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
