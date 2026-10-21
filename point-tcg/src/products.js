@@ -1,6 +1,6 @@
 // src/products.js
 // Point TCG - Pokémon Card Drawings Catalog
-// E-commerce Storeframe Showcase Images (inspired by Bánh Mì Games & Top TCG Retailers)
+// E-commerce Storeframe Showcase Images
 
 const escapeXml = (str) =>
   String(str || '')
@@ -11,7 +11,7 @@ const escapeXml = (str) =>
     .replace(/'/g, '&apos;');
 
 /**
- * Generates an authentic E-Commerce Game Store Product Showcase Image (Matching Bánh Mì Games format):
+ * Generates an authentic E-Commerce Game Store Product Showcase Image:
  *  - 1:1 Clean Studio White Canvas with realistic contact drop shadow.
  *  - Bold Red Outer Border Frame with rounded corners.
  *  - Top Header: "CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG".
@@ -49,7 +49,7 @@ export const createShowcaseBoxSvg = (options = {}) => {
   let productPackagingMarkup = '';
 
   if (boxType === 'blister') {
-    // 3-Pack Blister with Promo Card (Matching Bánh Mì Games blister packs)
+    // 3-Pack Blister with Promo Card
     productPackagingMarkup = `
       <!-- BLISTER CARD BACKING -->
       <g filter="url(#dropShadow)">
@@ -340,7 +340,7 @@ export const createShowcaseBoxSvg = (options = {}) => {
     <!-- 1. Pure White Canvas Background -->
     <rect width="500" height="500" rx="14" fill="#ffffff"/>
 
-    <!-- 2. Outer Red Border Frame (Exact Match to Bánh Mì Games Store Showcase) -->
+    <!-- 2. Outer Red Border Frame -->
     <rect x="8" y="8" width="484" height="484" rx="14" fill="none" stroke="#0053e2" stroke-width="3.5"/>
 
     <!-- 3. Top Banner Header: CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG -->
@@ -381,7 +381,7 @@ export const createShowcaseBoxSvg = (options = {}) => {
       <circle cx="82" cy="14" r="2" fill="#0f172a"/>
     </g>
 
-    <!-- 8. Bottom Bar: Store Name & Logo (Right) (Matches Bánh Mì Gamestore layout) -->
+    <!-- 8. Bottom Bar: Store Name & Logo (Right) -->
     <g transform="translate(482, 455)">
       <circle cx="-102" cy="13" r="11" fill="#ffc220"/>
       <polygon points="-104,7 -99,13 -105,13 -99,19 -101,14 -97,14" fill="#0053e2"/>
@@ -765,7 +765,7 @@ export const getProductCatalogImage = (idOrItem) => {
 
 /**
  * Wraps any custom image (uploaded file data URL or external URL)
- * inside the official Point TCG blue retail showcase frame (Bánh Mì Games style)
+ * inside the official Point TCG blue retail showcase frame
  */
 // Ảnh đã nằm trong khung của shop (ảnh mẫu hoặc ảnh admin tải lên có bật khung)
 const FRAME_MARKER = encodeURIComponent('CHÍNH HÃNG - UY TÍN');

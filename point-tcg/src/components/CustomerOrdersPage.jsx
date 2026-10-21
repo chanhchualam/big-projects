@@ -169,7 +169,7 @@ export default function CustomerOrdersPage({
     <div className="cop-page-wrapper">
       {/* 1. Top Green Announcement Bar (Matching Screenshot) */}
       <div className="cop-top-announcement">
-        POINT TCG | Cắn Game Chất, Nhai Đam Mê!
+        POINT TCG | Pokémon TCG Chính Hãng - Uy Tín - Chất Lượng
       </div>
 
       {/* 2. Top Navigation Bar */}
@@ -265,16 +265,6 @@ export default function CustomerOrdersPage({
               <span className="cop-menu-arrow">›</span>
             </button>
 
-            {/* Email Liên hệ */}
-            <div className="cop-info-item">
-              <div className="cop-info-content">
-                <span className="cop-info-label">Email liên hệ</span>
-                <span className="cop-info-value" title="banhmigamestore@gmail.com">
-                  banhmigamestore@gmail.c...
-                </span>
-              </div>
-            </div>
-
             {/* Website */}
             <div className="cop-info-item">
               <div className="cop-info-content">
@@ -285,7 +275,7 @@ export default function CustomerOrdersPage({
                   rel="noreferrer"
                   className="cop-info-value cop-link"
                 >
-                  https://banhmigames.vn
+                  point-tcg.web.app
                 </a>
               </div>
             </div>
