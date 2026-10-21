@@ -102,7 +102,8 @@ export const safeSaveProducts = (key, products) => {
 
 // Helper to sanitize products loaded from localStorage and ensure images and stock are 100% synchronized
 const sanitizeLoadedProducts = (savedList, fallbackList) => {
-  if (!Array.isArray(savedList) || savedList.length === 0) return fallbackList;
+  // Danh sách rỗng là hợp lệ (admin đã xoá hết) — không được thay bằng sản phẩm mẫu
+  if (!Array.isArray(savedList)) return fallbackList;
   return savedList.map(item => {
     const fallback = fallbackList.find(f => f.id === item.id || f.title?.toLowerCase().trim() === item.title?.toLowerCase().trim());
     const catalogImg = getProductCatalogImage(item);
@@ -291,11 +292,10 @@ export default function App() {
         const cloudProducts = await fetchProductsFromDb();
         if (!isMounted) return;
 
-        if (Array.isArray(cloudProducts) && cloudProducts.length > 0) {
-          const cloudOpen = cloudProducts.filter(p => p.status !== 'closed');
-          const cloudClosed = cloudProducts.filter(p => p.status === 'closed');
-          if (cloudOpen.length > 0) setOpenDrawings(cloudOpen);
-          if (cloudClosed.length > 0) setClosedDrawings(cloudClosed);
+        // Firestore là nguồn chính: nhóm nào trống thì hiện trống, không quay về sản phẩm mẫu
+        if (Array.isArray(cloudProducts)) {
+          setOpenDrawings(cloudProducts.filter(p => p.status !== 'closed'));
+          setClosedDrawings(cloudProducts.filter(p => p.status === 'closed'));
           setProductsLoaded(true);
         }
       } catch (err) {
@@ -721,12 +721,17 @@ export default function App() {
     }
     setCart(prev => prev.filter(item => item.id !== productId));
     setSavedIds(prev => prev.filter(id => id !== productId));
-    deleteProductFromDb(productId);
+    deleteProductFromDb(productId).then((ok) => {
+      if (!ok) alert('Không xoá được sản phẩm trên hệ thống (không có quyền hoặc lỗi kết nối). Tải lại trang để kiểm tra.');
+    });
   };
 
+  // Ghi lại các sản phẩm mẫu lên Firestore (không xoá sản phẩm admin đã tạo)
   const handleResetDefaults = () => {
-    setOpenDrawings(initialOpenDrawings);
-    setClosedDrawings(initialClosedDrawings);
+    setOpenDrawings(prev => [...initialOpenDrawings, ...prev.filter(p => !initialOpenDrawings.some(i => i.id === p.id))]);
+    setClosedDrawings(prev => [...initialClosedDrawings, ...prev.filter(p => !initialClosedDrawings.some(i => i.id === p.id))]);
+    initialOpenDrawings.forEach((p) => saveProductToDb({ ...p, status: 'open' }));
+    initialClosedDrawings.forEach((p) => saveProductToDb({ ...p, status: 'closed' }));
     localStorage.removeItem(STORAGE_KEYS.OPEN_PRODUCTS);
     localStorage.removeItem(STORAGE_KEYS.CLOSED_PRODUCTS);
     const map = {};
