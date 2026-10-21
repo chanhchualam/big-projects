@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createCardSvg, PRESET_CARD_STYLES, allProducts, getProductCatalogImage, embedImageInStoreFrame } from '../products';
 import { saveNewOrder, changePassword } from '../utils/auth';
 import { checkOrderPricing } from '../utils/orderCheck';
-import { StatsTab, CouponsTab, RestockTab, TrackingEditor } from './AdminExtraTabs';
+import { StatsTab, CouponsTab, RestockTab, AnnouncementsTab, TrackingEditor } from './AdminExtraTabs';
 import { auth } from '../firebase';
 import {
   getQrConfig,
@@ -1706,6 +1706,14 @@ export default function AdminModal({
 
               <button
                 type="button"
+                className={`admin-tab-btn ${activeTab === 'announcements' ? 'active' : ''}`}
+                onClick={() => setActiveTab('announcements')}
+              >
+                📢 Thông Báo Shop
+              </button>
+
+              <button
+                type="button"
                 className={`admin-tab-btn ${activeTab === 'restock' ? 'active' : ''}`}
                 onClick={() => setActiveTab('restock')}
               >
@@ -2104,6 +2112,7 @@ export default function AdminModal({
             )}
             {activeTab === 'coupons' && <CouponsTab />}
             {activeTab === 'restock' && <RestockTab products={[...openDrawings, ...closedDrawings]} />}
+            {activeTab === 'announcements' && <AnnouncementsTab />}
 
             {/* =========================================================================
                 TAB 2: CUSTOMERS ACCOUNTS MANAGEMENT

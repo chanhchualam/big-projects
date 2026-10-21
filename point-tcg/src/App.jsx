@@ -14,6 +14,15 @@ import CheckoutModal from './components/CheckoutModal';
 import CustomerOrdersPage from './components/CustomerOrdersPage';
 import FloatingMessenger from './components/FloatingMessenger';
 import Footer from './components/Footer';
+import NotificationBell from './components/NotificationBell';
+import AnnouncementBar from './components/AnnouncementBar';
+import {
+  buildNotifications,
+  trackWishlistChanges,
+  getReadAt,
+  markAllRead,
+  isAnnouncementLive
+} from './utils/notifications';
 import {
   openDrawings as initialOpenDrawings,
   closedDrawings as initialClosedDrawings,
@@ -26,7 +35,6 @@ import { buildSessionUser, signOutUser, purgeLegacyLocalData } from './utils/aut
 import {
   fetchProductsFromDb,
   fetchOrdersFromDb,
-  fetchOrdersForUser,
   saveOrderToDb,
   updateOrderStatusInDb,
   deleteOrderFromDb,
@@ -38,7 +46,9 @@ import {
   saveWishlistToDb,
   fetchUserProfile,
   fetchReviewsFromDb,
-  saveRestockRequest
+  saveRestockRequest,
+  subscribeOrdersForUser,
+  fetchAnnouncementsFromDb
 } from './services/firestoreService';
 import { ensureSignedIn } from './utils/auth';
 
@@ -188,20 +198,34 @@ export default function App() {
 
   useEffect(() => {
     if (!authReady) return;
-    let isMounted = true;
-    (async () => {
-      let list = [];
-      if (isAdmin) {
-        list = (await fetchOrdersFromDb()) || [];
-      } else if (authUid) {
-        list = (await fetchOrdersForUser(authUid)) || [];
+    // Khách: theo dõi trực tiếp đơn của mình để thấy ngay khi shop đổi trạng thái
+    if (!isAdmin) {
+      if (!authUid) {
+        setOrders([]);
+        return;
       }
-      if (isMounted) setOrders(list);
-    })();
+      return subscribeOrdersForUser(authUid, setOrders);
+    }
+    let isMounted = true;
+    fetchOrdersFromDb().then((list) => {
+      if (isMounted) setOrders(list || []);
+    });
     return () => {
       isMounted = false;
     };
   }, [authReady, authUid, isAdmin]);
+
+  // Thông báo của shop (thanh trên đầu trang + chuông thông báo)
+  const [announcements, setAnnouncements] = useState([]);
+  useEffect(() => {
+    fetchAnnouncementsFromDb().then(setAnnouncements);
+  }, []);
+  const liveAnnouncements = useMemo(
+    () => announcements
+      .filter((a) => isAnnouncementLive(a))
+      .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')),
+    [announcements]
+  );
 
   useEffect(() => {
     const handleNewOrder = (e) => {
@@ -258,6 +282,7 @@ export default function App() {
   const [ordersInitialTab, setOrdersInitialTab] = useState('orders');
 
   // Live load & sync from Firebase Firestore on startup
+  const [productsLoaded, setProductsLoaded] = useState(false);
   useEffect(() => {
     let isMounted = true;
     (async () => {
@@ -270,6 +295,7 @@ export default function App() {
           const cloudClosed = cloudProducts.filter(p => p.status === 'closed');
           if (cloudOpen.length > 0) setOpenDrawings(cloudOpen);
           if (cloudClosed.length > 0) setClosedDrawings(cloudClosed);
+          setProductsLoaded(true);
         }
       } catch (err) {
         console.warn('Firebase initial sync notice:', err);
@@ -868,6 +894,48 @@ export default function App() {
     return allProductsCombined.filter((p) => savedIds.includes(p.id));
   }, [allProductsCombined, savedIds]);
 
+  // -------------------------------------------------------------
+  // THÔNG BÁO TRONG WEB (chuông 🔔)
+  // -------------------------------------------------------------
+  // Chỉ so sánh sản phẩm yêu thích sau khi đã tải giá/tồn kho thật từ Firestore
+  const [wishlistEvents, setWishlistEvents] = useState([]);
+  useEffect(() => {
+    if (!productsLoaded) return;
+    setWishlistEvents(trackWishlistChanges(allProductsCombined.filter((p) => savedIds.includes(p.id))));
+  }, [productsLoaded, allProductsCombined, savedIds]);
+
+  const viewerId = user?.id || authUid || 'guest';
+  const [notifReadAt, setNotifReadAt] = useState(0);
+  useEffect(() => {
+    setNotifReadAt(getReadAt(viewerId));
+  }, [viewerId]);
+
+  const notifications = useMemo(
+    () => buildNotifications({
+      orders: isAdmin ? [] : orders,
+      wishlistEvents,
+      announcements: liveAnnouncements
+    }),
+    [orders, isAdmin, wishlistEvents, liveAnnouncements]
+  );
+
+  const handleMarkNotificationsRead = () => {
+    markAllRead(viewerId);
+    setNotifReadAt(getReadAt(viewerId));
+  };
+
+  const handleOpenNotification = (n) => {
+    if (n.action?.type === 'orders') {
+      handleOpenOrdersPage('orders');
+    } else if (n.action?.type === 'product') {
+      const product = allProductsCombined.find((p) => String(p.id) === n.action.productId);
+      if (product) handleOpenProductDetail(product);
+    } else if (n.action?.type === 'coupon') {
+      navigator.clipboard?.writeText(n.action.code);
+      alert(`Đã sao chép mã giảm giá ${n.action.code}. Dán vào ô voucher khi thanh toán nhé!`);
+    }
+  };
+
   const productTypes = useMemo(() => {
     return [...new Set(allProductsCombined.map(getProductCategory))].sort();
   }, [allProductsCombined]);
@@ -1064,8 +1132,18 @@ export default function App() {
 
   return (
     <div className="app-container">
+      <AnnouncementBar announcements={liveAnnouncements} />
+
       {/* 1. Header Bar (#0053e2, Sticky) */}
       <Header
+        notificationBell={
+          <NotificationBell
+            notifications={notifications}
+            readAt={notifReadAt}
+            onMarkAllRead={handleMarkNotificationsRead}
+            onOpenItem={handleOpenNotification}
+          />
+        }
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         savedCount={savedIds.length}

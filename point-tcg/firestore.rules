@@ -134,6 +134,12 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
+    // ---------------- ANNOUNCEMENTS (thanh thông báo của shop) ----------------
+    match /announcements/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ---------------- SETTINGS (QR ngân hàng, thông tin shop) ----------------
     match /settings/{key} {
       allow read: if true;
