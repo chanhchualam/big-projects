@@ -3,8 +3,8 @@
 // Lưu ý: firebaseConfig của web app là thông tin công khai. Dữ liệu được bảo vệ bởi
 // Firebase Authentication + Firestore Security Rules (firestore.rules), không phải bởi apiKey.
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyDCBxzdbKBbmnujiIdON9aGNchUMmB0-LY",
@@ -19,5 +19,12 @@ export const firebaseConfig = {
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+
+// Chỉ dùng khi kiểm thử: build với VITE_USE_EMULATORS=true để chạy trên Firebase Emulator trong máy,
+// không đụng tới dữ liệu thật. Bản deploy bình thường không bật biến này.
+if (import.meta.env?.VITE_USE_EMULATORS === 'true') {
+  connectFirestoreEmulator(db, '127.0.0.1', 8181);
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+}
 
 export default db;
