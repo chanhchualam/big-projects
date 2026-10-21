@@ -37,14 +37,8 @@ service cloud.firestore {
     // ---------------- PRODUCTS ----------------
     match /products/{productId} {
       allow read: if true;
-      allow create, delete: if isAdmin();
-      // Khách chỉ được GIẢM tồn kho (khi đặt hàng), không được sửa giá/thông tin khác
-      allow update: if isAdmin()
-        || (signedIn()
-            && onlyChanges(['stock'])
-            && request.resource.data.stock is int
-            && request.resource.data.stock >= 0
-            && request.resource.data.stock < resource.data.stock);
+      // Chỉ admin sửa sản phẩm, kể cả tồn kho (trừ khi xác nhận đơn)
+      allow create, update, delete: if isAdmin();
     }
 
     // ---------------- ORDERS ----------------
@@ -55,7 +49,8 @@ service cloud.firestore {
       allow create: if isAdmin()
         || (signedIn()
             && request.resource.data.uid == request.auth.uid
-            && request.resource.data.status in newOrderStatuses());
+            && request.resource.data.status in newOrderStatuses()
+            && request.resource.data.get('stockDeducted', false) == false);
 
       // Khách: chỉ đổi trạng thái đơn của chính mình sang "Đã huỷ" hoặc "Khách báo đã chuyển khoản"
       allow update: if isAdmin()
