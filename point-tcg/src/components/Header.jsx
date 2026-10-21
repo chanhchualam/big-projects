@@ -29,7 +29,8 @@ export default function Header({
   pendingOrdersCount,
   products = [],
   onSelectProduct,
-  onLogoClick
+  onLogoClick,
+  notificationBell = null
 }) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -314,6 +315,8 @@ export default function Header({
               <span>My Items</span>
             </div>
           </button>
+
+          {notificationBell}
 
           {/* Order History button */}
           <button

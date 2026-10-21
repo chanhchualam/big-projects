@@ -8,7 +8,10 @@ import {
   fetchRestockRequestsFromDb,
   deleteRestockRequestFromDb,
   fetchSettingsFromDb,
-  saveSettingsToDb
+  saveSettingsToDb,
+  fetchAnnouncementsFromDb,
+  saveAnnouncementToDb,
+  deleteAnnouncementFromDb
 } from '../services/firestoreService';
 import { CARRIERS } from '../utils/orderStatus';
 
@@ -586,6 +589,167 @@ export function TrackingEditor({ order, onSave }) {
       >
         {state === 'saving' ? 'Đang lưu...' : state === 'saved' ? '✓ Đã lưu' : 'Lưu'}
       </button>
+    </div>
+  );
+}
+
+// =============================================================
+// 5. THÔNG BÁO CỦA SHOP (thanh trên đầu trang + chuông thông báo của khách)
+// =============================================================
+const EMPTY_ANNOUNCEMENT = { id: '', text: '', type: 'promo', couponCode: '', link: '', linkText: '', endsAt: '', active: true };
+const ANNOUNCEMENT_TYPES = [
+  { value: 'promo', label: '🎉 Khuyến mãi' },
+  { value: 'info', label: 'ℹ️ Tin tức / Hàng mới' },
+  { value: 'warning', label: '⚠️ Lưu ý (nghỉ lễ, chậm giao...)' }
+];
+
+export function AnnouncementsTab() {
+  const [items, setItems] = useState(null);
+  const [form, setForm] = useState(EMPTY_ANNOUNCEMENT);
+  const [msg, setMsg] = useState('');
+
+  const load = () => fetchAnnouncementsFromDb().then((list) =>
+    setItems([...list].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))));
+  useEffect(() => {
+    load();
+  }, []);
+
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const text = form.text.trim();
+    if (!text) {
+      setMsg('Vui lòng nhập nội dung thông báo.');
+      return;
+    }
+    const now = new Date().toISOString();
+    const existing = items?.find((a) => a.id === form.id);
+    const id = await saveAnnouncementToDb({
+      ...(form.id && { id: form.id }),
+      text: text.slice(0, 200),
+      type: form.type,
+      couponCode: form.couponCode.trim().toUpperCase(),
+      link: form.link.trim(),
+      linkText: form.linkText.trim(),
+      endsAt: form.endsAt || '',
+      active: !!form.active,
+      createdAt: existing?.createdAt || now,
+      updatedAt: now
+    });
+    setMsg(id ? 'Đã lưu thông báo. Khách sẽ thấy khi tải lại trang.' : 'Không lưu được (không có quyền hoặc lỗi kết nối).');
+    if (id) {
+      setForm(EMPTY_ANNOUNCEMENT);
+      load();
+    }
+  };
+
+  const toggleActive = async (a) => {
+    await saveAnnouncementToDb({ id: a.id, active: a.active === false, updatedAt: new Date().toISOString() });
+    load();
+  };
+
+  const handleDelete = async (a) => {
+    if (!window.confirm('Xoá thông báo này?')) return;
+    if (await deleteAnnouncementFromDb(a.id)) load();
+  };
+
+  const statusOf = (a) => {
+    if (a.active === false) return ['Tắt', 'xadmin-pill-gray'];
+    if (a.endsAt && new Date(`${a.endsAt}T23:59:59`) < new Date()) return ['Hết hạn', 'xadmin-pill-red'];
+    return ['Đang hiện', 'xadmin-pill-green'];
+  };
+
+  return (
+    <div className="xadmin-panel">
+      <section className="xadmin-card">
+        <h3>{form.id ? 'Sửa thông báo' : 'Tạo thông báo mới'}</h3>
+        <form className="xadmin-form-grid" onSubmit={handleSave}>
+          <label style={{ gridColumn: '1 / -1' }}>Nội dung (tối đa 200 ký tự)
+            <input
+              value={form.text}
+              onChange={set('text')}
+              maxLength={200}
+              placeholder="VD: 🔥 Giảm 10% toàn bộ Booster Box đến hết Chủ nhật!"
+              required
+            />
+          </label>
+          <label>Loại
+            <select value={form.type} onChange={set('type')}>
+              {ANNOUNCEMENT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+          </label>
+          <label>Mã giảm giá kèm theo (tuỳ chọn)
+            <input value={form.couponCode} onChange={set('couponCode')} placeholder="VD: POINTTCG" />
+          </label>
+          <label>Đường dẫn (tuỳ chọn)
+            <input value={form.link} onChange={set('link')} placeholder="#product-open-1 hoặc https://..." />
+          </label>
+          <label>Chữ trên đường dẫn
+            <input value={form.linkText} onChange={set('linkText')} placeholder="Xem ngay" />
+          </label>
+          <label>Hiện đến hết ngày (để trống = không hết hạn)
+            <input type="date" value={form.endsAt} onChange={set('endsAt')} />
+          </label>
+          <div className="xadmin-checks">
+            <label><input type="checkbox" checked={form.active} onChange={set('active')} /> Đang bật</label>
+          </div>
+          {form.text.trim() && (
+            <div style={{ gridColumn: '1 / -1' }}>
+              <div className="xadmin-muted" style={{ marginBottom: 4 }}>Xem trước:</div>
+              <div className={`announce-bar announce-${form.type}`} style={{ position: 'static', borderRadius: 8 }}>
+                <div className="announce-inner">
+                  <span className="announce-text">{form.text}</span>
+                  {form.couponCode && <span className="announce-coupon">Mã: {form.couponCode.toUpperCase()}</span>}
+                  {form.link && <span className="announce-link">{form.linkText || 'Xem ngay'} →</span>}
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="xadmin-form-actions">
+            <button type="submit" className="xadmin-btn">{form.id ? 'Lưu thay đổi' : 'Đăng thông báo'}</button>
+            {form.id && (
+              <button type="button" className="xadmin-btn-small" onClick={() => { setForm(EMPTY_ANNOUNCEMENT); setMsg(''); }}>
+                Huỷ
+              </button>
+            )}
+            {msg && <span className="xadmin-muted">{msg}</span>}
+          </div>
+        </form>
+      </section>
+
+      <section className="xadmin-card">
+        <h3>Các thông báo ({items?.length || 0})</h3>
+        {items === null ? (
+          <p className="xadmin-muted">Đang tải...</p>
+        ) : items.length === 0 ? (
+          <p className="xadmin-muted">Chưa có thông báo nào.</p>
+        ) : (
+          <div className="xadmin-table-scroll">
+            <table className="xadmin-table">
+              <thead><tr><th>Nội dung</th><th>Mã</th><th>Hết hạn</th><th>Trạng thái</th><th></th></tr></thead>
+              <tbody>
+                {items.map((a) => {
+                  const [label, cls] = statusOf(a);
+                  return (
+                    <tr key={a.id}>
+                      <td>{a.text}</td>
+                      <td>{a.couponCode || '—'}</td>
+                      <td>{a.endsAt ? new Date(a.endsAt).toLocaleDateString('vi-VN') : '—'}</td>
+                      <td><span className={cls}>{label}</span></td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        <button type="button" className="xadmin-btn-small" onClick={() => { setForm({ ...EMPTY_ANNOUNCEMENT, ...a }); setMsg(''); }}>Sửa</button>
+                        <button type="button" className="xadmin-btn-small" onClick={() => toggleActive(a)}>{a.active === false ? 'Bật' : 'Tắt'}</button>
+                        <button type="button" className="xadmin-btn-small danger" onClick={() => handleDelete(a)}>Xoá</button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

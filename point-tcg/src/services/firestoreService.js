@@ -19,7 +19,8 @@ import {
   increment,
   writeBatch,
   arrayUnion,
-  runTransaction
+  runTransaction,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -112,6 +113,16 @@ export async function fetchOrdersForUser(uid) {
     console.warn('Firestore fetchOrdersForUser error:', err.message);
   }
   return null;
+}
+
+// Theo dõi trực tiếp đơn của một người dùng: admin đổi trạng thái là khách thấy ngay (trả về hàm huỷ theo dõi)
+export function subscribeOrdersForUser(uid, onChange) {
+  if (!uid) return () => {};
+  return onSnapshot(
+    query(collection(db, 'orders'), where('uid', '==', uid)),
+    (snap) => onChange(snapToList(snap)),
+    (err) => console.warn('Firestore subscribeOrdersForUser error:', err.message)
+  );
 }
 
 export async function saveOrderToDb(order) {
@@ -259,6 +270,7 @@ export async function updateOrderTrackingInDb(orderId, { carrier, trackingCode }
     await updateDoc(doc(db, 'orders', orderId), {
       carrier: (carrier || '').trim(),
       trackingCode: (trackingCode || '').trim(),
+      trackingAt: new Date().toISOString(),
       updatedAt: new Date().toLocaleString('vi-VN')
     });
     return true;
@@ -421,6 +433,41 @@ export async function deleteRestockRequestFromDb(id) {
     return true;
   } catch (err) {
     console.error('Firestore deleteRestockRequest error:', err);
+    return false;
+  }
+}
+
+// -------------------------------------------------------------
+// 10. BẢNG ANNOUNCEMENTS (THÔNG BÁO CỦA SHOP, ĐỌC CÔNG KHAI)
+// -------------------------------------------------------------
+export async function fetchAnnouncementsFromDb() {
+  try {
+    const snap = await getDocs(collection(db, 'announcements'));
+    return snapToList(snap);
+  } catch (err) {
+    console.warn('Firestore fetchAnnouncements error:', err.message);
+    return [];
+  }
+}
+
+export async function saveAnnouncementToDb(announcement) {
+  try {
+    const { id, ...data } = announcement;
+    const ref = id ? doc(db, 'announcements', id) : doc(collection(db, 'announcements'));
+    await setDoc(ref, data, { merge: true });
+    return ref.id;
+  } catch (err) {
+    console.error('Firestore saveAnnouncement error:', err);
+    return null;
+  }
+}
+
+export async function deleteAnnouncementFromDb(id) {
+  try {
+    await deleteDoc(doc(db, 'announcements', id));
+    return true;
+  } catch (err) {
+    console.error('Firestore deleteAnnouncement error:', err);
     return false;
   }
 }
