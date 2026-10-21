@@ -619,6 +619,9 @@ export default function App() {
         return !prod || typeof prod.stock !== 'number' || prod.stock > 0;
       }));
     }
+
+    // Báo cho CheckoutModal là đơn đã lưu, để chuyển sang bước QR / thành công
+    return true;
   };
 
   // Returns true when Firestore accepted the change (rules limit what customers may set)
