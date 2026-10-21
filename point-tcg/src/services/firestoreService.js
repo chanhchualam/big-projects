@@ -17,7 +17,9 @@ import {
   query,
   where,
   increment,
-  writeBatch
+  writeBatch,
+  arrayUnion,
+  runTransaction
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -123,10 +125,16 @@ export async function saveOrderToDb(order) {
   }
 }
 
+// Mỗi lần đổi trạng thái được ghi thêm một mốc vào statusHistory để khách xem tiến trình đơn
+export function makeStatusEntry(status) {
+  return { status, at: new Date().toISOString() };
+}
+
 export async function updateOrderStatusInDb(orderId, newStatus) {
   try {
     await updateDoc(doc(db, 'orders', orderId), {
       status: newStatus,
+      statusHistory: arrayUnion(makeStatusEntry(newStatus)),
       updatedAt: new Date().toLocaleString('vi-VN')
     });
     return true;
@@ -239,6 +247,180 @@ export async function saveSettingsToDb(key, data) {
     return true;
   } catch (err) {
     console.error(`Firestore saveSettings (${key}) error:`, err);
+    return false;
+  }
+}
+
+// -------------------------------------------------------------
+// 5. MÃ VẬN ĐƠN (CHỈ ADMIN)
+// -------------------------------------------------------------
+export async function updateOrderTrackingInDb(orderId, { carrier, trackingCode }) {
+  try {
+    await updateDoc(doc(db, 'orders', orderId), {
+      carrier: (carrier || '').trim(),
+      trackingCode: (trackingCode || '').trim(),
+      updatedAt: new Date().toLocaleString('vi-VN')
+    });
+    return true;
+  } catch (err) {
+    console.error('Firestore updateOrderTracking error:', err);
+    return false;
+  }
+}
+
+// -------------------------------------------------------------
+// 6. DANH SÁCH YÊU THÍCH (users/{uid}.wishlist)
+// -------------------------------------------------------------
+export async function saveWishlistToDb(uid, productIds) {
+  try {
+    if (!uid) return false;
+    await updateDoc(doc(db, 'users', uid), { wishlist: productIds });
+    return true;
+  } catch (err) {
+    console.warn('Firestore saveWishlist error:', err.message);
+    return false;
+  }
+}
+
+// -------------------------------------------------------------
+// 7. BẢNG COUPONS (MÃ GIẢM GIÁ, id = mã viết hoa)
+// -------------------------------------------------------------
+// Khách chỉ đọc được đúng mã mình nhập; admin xem được toàn bộ danh sách
+export async function fetchCoupon(code) {
+  try {
+    const id = (code || '').trim().toUpperCase();
+    if (!id) return null;
+    const snap = await getDoc(doc(db, 'coupons', id));
+    return snap.exists() ? { ...snap.data(), code: snap.id } : null;
+  } catch (err) {
+    console.warn('Firestore fetchCoupon error:', err.message);
+    return null;
+  }
+}
+
+export async function fetchCouponsFromDb() {
+  try {
+    const snap = await getDocs(collection(db, 'coupons'));
+    const list = [];
+    snap.forEach((d) => list.push({ ...d.data(), code: d.id }));
+    return list;
+  } catch (err) {
+    console.warn('Firestore fetchCoupons error:', err.message);
+    return null;
+  }
+}
+
+export async function saveCouponToDb(coupon) {
+  try {
+    const { code, ...data } = coupon;
+    await setDoc(doc(db, 'coupons', code.trim().toUpperCase()), data, { merge: true });
+    return true;
+  } catch (err) {
+    console.error('Firestore saveCoupon error:', err);
+    return false;
+  }
+}
+
+export async function deleteCouponFromDb(code) {
+  try {
+    await deleteDoc(doc(db, 'coupons', code));
+    return true;
+  } catch (err) {
+    console.error('Firestore deleteCoupon error:', err);
+    return false;
+  }
+}
+
+// Tăng lượt dùng của mã khi đơn được tạo; trả false nếu mã đã hết lượt
+export async function redeemCoupon(code) {
+  try {
+    return await runTransaction(db, async (tx) => {
+      const ref = doc(db, 'coupons', code);
+      const snap = await tx.get(ref);
+      if (!snap.exists()) return false;
+      const c = snap.data();
+      if (c.maxUses > 0 && (c.usedCount || 0) >= c.maxUses) return false;
+      tx.update(ref, { usedCount: (c.usedCount || 0) + 1 });
+      return true;
+    });
+  } catch (err) {
+    console.warn('Firestore redeemCoupon error:', err.message);
+    return false;
+  }
+}
+
+// -------------------------------------------------------------
+// 8. BẢNG REVIEWS (ĐÁNH GIÁ SẢN PHẨM, id = productId_uid)
+// -------------------------------------------------------------
+export async function fetchReviewsFromDb() {
+  try {
+    const snap = await getDocs(collection(db, 'reviews'));
+    return snapToList(snap);
+  } catch (err) {
+    console.warn('Firestore fetchReviews error:', err.message);
+    return [];
+  }
+}
+
+export async function saveReviewToDb(review) {
+  try {
+    const id = `${review.productId}_${review.uid}`;
+    await setDoc(doc(db, 'reviews', id), review);
+    return { ...review, id };
+  } catch (err) {
+    console.error('Firestore saveReview error:', err);
+    return null;
+  }
+}
+
+export async function deleteReviewFromDb(reviewId) {
+  try {
+    await deleteDoc(doc(db, 'reviews', reviewId));
+    return true;
+  } catch (err) {
+    console.error('Firestore deleteReview error:', err);
+    return false;
+  }
+}
+
+// -------------------------------------------------------------
+// 9. BẢNG RESTOCK_REQUESTS (BÁO KHI CÓ HÀNG LẠI)
+// -------------------------------------------------------------
+export async function saveRestockRequest({ productId, productTitle, email, uid }) {
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    // id cố định theo sản phẩm + email để một người không đăng ký trùng
+    const id = `${productId}_${cleanEmail}`.replace(/[/]/g, '_');
+    await setDoc(doc(db, 'restock_requests', id), {
+      productId: String(productId),
+      productTitle,
+      email: cleanEmail,
+      uid,
+      createdAt: new Date().toISOString()
+    });
+    return true;
+  } catch (err) {
+    console.error('Firestore saveRestockRequest error:', err);
+    return false;
+  }
+}
+
+export async function fetchRestockRequestsFromDb() {
+  try {
+    const snap = await getDocs(collection(db, 'restock_requests'));
+    return snapToList(snap);
+  } catch (err) {
+    console.warn('Firestore fetchRestockRequests error:', err.message);
+    return null;
+  }
+}
+
+export async function deleteRestockRequestFromDb(id) {
+  try {
+    await deleteDoc(doc(db, 'restock_requests', id));
+    return true;
+  } catch (err) {
+    console.error('Firestore deleteRestockRequest error:', err);
     return false;
   }
 }

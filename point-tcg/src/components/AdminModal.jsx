@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createCardSvg, PRESET_CARD_STYLES, allProducts, getProductCatalogImage, embedImageInStoreFrame } from '../products';
 import { saveNewOrder, changePassword } from '../utils/auth';
 import { checkOrderPricing } from '../utils/orderCheck';
+import { StatsTab, CouponsTab, RestockTab, TrackingEditor } from './AdminExtraTabs';
 import { auth } from '../firebase';
 import {
   getQrConfig,
@@ -13,6 +14,7 @@ import {
   generateQrUrl
 } from '../utils/qrConfig';
 import {
+  fetchCouponsFromDb,
   fetchProductsFromDb,
   fetchOrdersFromDb,
   fetchUsersFromDb,
@@ -30,6 +32,7 @@ export default function AdminModal({
   closedDrawings = [],
   orders: propOrders = null,
   onUpdateOrderStatus: propUpdateStatus = null,
+  onUpdateOrderTracking = null,
   onDeleteOrder: propDeleteOrder = null,
   onAddProduct,
   onUpdateProduct,
@@ -49,6 +52,12 @@ export default function AdminModal({
   const [orderSearch, setOrderSearch] = useState('');
   const [selectedSlipOrder, setSelectedSlipOrder] = useState(null); // For Shopee packing slip preview
   const [newOrderAlert, setNewOrderAlert] = useState(null);
+
+  // Danh sách mã giảm giá để đối chiếu phần giảm giá trong đơn
+  const [couponList, setCouponList] = useState(null);
+  useEffect(() => {
+    if (isOpen && activeTab === 'orders') fetchCouponsFromDb().then(setCouponList);
+  }, [isOpen, activeTab]);
 
   // File Upload State & References
   const fileInputRef = useRef(null);
@@ -346,6 +355,14 @@ export default function AdminModal({
   };
 
   const handleNextStep = (order) => {
+    // Xác nhận đơn chờ thanh toán: hỏi lại nếu giá trong đơn không khớp
+    if (order.status?.includes('Chờ')) {
+      const { warnings } = checkOrderPricing(order, [...openDrawings, ...closedDrawings], couponList);
+      if (warnings.length > 0
+        && !window.confirm(`Đơn #${order.id} có giá không khớp:\n- ${warnings.join('\n- ')}\n\nBạn đã kiểm tra số tiền thực nhận và vẫn muốn xác nhận?`)) {
+        return;
+      }
+    }
     if (order.status?.includes('Chờ thanh toán QR')) {
       handleUpdateStatus(order.id, 'Đang chuẩn bị hàng');
     } else if (order.status?.includes('Chờ') || order.status?.includes('Đã xác nhận') || order.status?.includes('Đã thanh toán')) {
@@ -1673,6 +1690,30 @@ export default function AdminModal({
 
               <button
                 type="button"
+                className={`admin-tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
+                onClick={() => setActiveTab('stats')}
+              >
+                📊 Thống Kê & Xuất Đơn
+              </button>
+
+              <button
+                type="button"
+                className={`admin-tab-btn ${activeTab === 'coupons' ? 'active' : ''}`}
+                onClick={() => setActiveTab('coupons')}
+              >
+                🎟️ Mã Giảm Giá
+              </button>
+
+              <button
+                type="button"
+                className={`admin-tab-btn ${activeTab === 'restock' ? 'active' : ''}`}
+                onClick={() => setActiveTab('restock')}
+              >
+                🔔 Báo Có Hàng
+              </button>
+
+              <button
+                type="button"
                 className={`admin-tab-btn ${activeTab === 'customers' ? 'active' : ''}`}
                 onClick={() => setActiveTab('customers')}
               >
@@ -1851,7 +1892,7 @@ export default function AdminModal({
                       const isShipping = order.status === 'Đang giao hàng';
                       const isCompleted = order.status === 'Giao thành công';
                       const isCancelled = order.status === 'Đã huỷ';
-                      const pricing = checkOrderPricing(order, [...openDrawings, ...closedDrawings]);
+                      const pricing = checkOrderPricing(order, [...openDrawings, ...closedDrawings], couponList);
 
                       return (
                         <div key={order.id} className={`shopper-order-card ${isQrWaiting ? 'card-qr-waiting' : isPending ? 'card-pending-new' : ''}`}>
@@ -1932,6 +1973,8 @@ export default function AdminModal({
                               </div>
                             </div>
                           )}
+
+                          <TrackingEditor key={`${order.id}-${order.trackingCode || ''}`} order={order} onSave={onUpdateOrderTracking} />
 
                           {/* Items Checklist for Packing */}
                           <div className="shopper-items-checklist">
@@ -2047,6 +2090,12 @@ export default function AdminModal({
                 )}
               </div>
             )}
+
+            {activeTab === 'stats' && (
+              <StatsTab orders={orders} products={[...openDrawings, ...closedDrawings]} />
+            )}
+            {activeTab === 'coupons' && <CouponsTab />}
+            {activeTab === 'restock' && <RestockTab products={[...openDrawings, ...closedDrawings]} />}
 
             {/* =========================================================================
                 TAB 2: CUSTOMERS ACCOUNTS MANAGEMENT

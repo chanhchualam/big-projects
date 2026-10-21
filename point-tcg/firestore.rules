@@ -53,10 +53,13 @@ service cloud.firestore {
             && request.resource.data.get('stockDeducted', false) == false);
 
       // Khách: chỉ đổi trạng thái đơn của chính mình sang "Đã huỷ" hoặc "Khách báo đã chuyển khoản"
+      // (kèm thêm đúng một mốc vào statusHistory)
       allow update: if isAdmin()
         || (signedIn()
             && resource.data.uid == request.auth.uid
-            && onlyChanges(['status', 'updatedAt'])
+            && onlyChanges(['status', 'updatedAt', 'statusHistory'])
+            && request.resource.data.get('statusHistory', []).size()
+                 <= resource.data.get('statusHistory', []).size() + 1
             && (
               (resource.data.status in customerCancellableStatuses()
                 && request.resource.data.status == 'Đã huỷ')
@@ -77,8 +80,55 @@ service cloud.firestore {
       allow update: if isAdmin()
         || (signedInWithAccount()
             && request.auth.uid == uid
-            && onlyChanges(['name', 'phone', 'address', 'updatedAt']));
+            && onlyChanges(['name', 'phone', 'address', 'updatedAt', 'wishlist'])
+            && request.resource.data.get('wishlist', []) is list
+            && request.resource.data.get('wishlist', []).size() <= 200);
       allow delete: if isAdmin();
+    }
+
+    // ---------------- COUPONS (mã giảm giá, id = mã) ----------------
+    match /coupons/{code} {
+      // Khách chỉ tra được đúng mã mình nhập, không liệt kê được danh sách mã
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, delete: if isAdmin();
+      // Khách đặt hàng: tăng lượt dùng đúng 1, không vượt giới hạn
+      allow update: if isAdmin()
+        || (signedIn()
+            && onlyChanges(['usedCount'])
+            && request.resource.data.usedCount == resource.data.get('usedCount', 0) + 1
+            && (resource.data.get('maxUses', 0) == 0
+                || request.resource.data.usedCount <= resource.data.maxUses));
+    }
+
+    // ---------------- REVIEWS (id = productId_uid) ----------------
+    // Chỉ khách có đơn "Giao thành công" chứa sản phẩm đó mới được đánh giá
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create, update: if signedInWithAccount()
+        && request.resource.data.uid == request.auth.uid
+        && reviewId == request.resource.data.productId + '_' + request.auth.uid
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.comment is string
+        && request.resource.data.comment.size() <= 1000
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.uid == request.auth.uid
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.status == 'Giao thành công'
+        && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.productIds.hasAny([request.resource.data.productId]);
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.uid == request.auth.uid);
+    }
+
+    // ---------------- RESTOCK REQUESTS (báo khi có hàng lại) ----------------
+    match /restock_requests/{id} {
+      // update: đăng ký lại cùng sản phẩm + email thì ghi đè document cũ
+      allow create, update: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && exists(/databases/$(database)/documents/products/$(request.resource.data.productId));
+      allow read, delete: if isAdmin();
     }
 
     // ---------------- SETTINGS (QR ngân hàng, thông tin shop) ----------------

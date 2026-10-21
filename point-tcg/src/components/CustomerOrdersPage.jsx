@@ -2,6 +2,7 @@
 // Trang Tài Khoản & Lịch Sử Đơn Hàng Dành Cho Khách Hàng (Customer Orders & Account Portal)
 import React, { useState, useMemo, useEffect } from 'react';
 import { getProductCatalogImage } from '../products';
+import { OrderTimeline, TrackingInfo, ProfileEditor, ReviewsPanel } from './AccountPanels';
 
 // Must match customerCancellableStatuses() in firestore.rules
 const CUSTOMER_CANCELLABLE_STATUSES = [
@@ -21,6 +22,10 @@ function formatVndPrice(usdPrice) {
 
 export default function CustomerOrdersPage({
   currentUser,
+  initialTab = 'orders',
+  onUpdateCurrentUser,
+  reviews = [],
+  onReviewSaved,
   orders = [],
   onUpdateOrderStatus,
   onAddToCart,
@@ -29,7 +34,10 @@ export default function CustomerOrdersPage({
   onOpenProductDetail
 }) {
   // Navigation sidebar tab: 'orders' | 'profile' | 'addresses' | 'reviews'
-  const [activeMenuTab, setActiveMenuTab] = useState('orders');
+  const [activeMenuTab, setActiveMenuTab] = useState(initialTab || 'orders');
+  useEffect(() => {
+    setActiveMenuTab(initialTab || 'orders');
+  }, [initialTab]);
 
   // Order status filter tabs:
   // 'pending_confirm' (Chờ xác nhận) | 'pending_pickup' (Chờ lấy hàng) | 'shipping' (Đang giao hàng) | 'delivered' (Đã giao) | 'returned' (Trả hàng) | 'cancelled' (Đã huỷ)
@@ -464,6 +472,9 @@ export default function CustomerOrdersPage({
                             </div>
                           </div>
 
+                          <OrderTimeline order={order} />
+                          <TrackingInfo order={order} />
+
                           {/* Items List */}
                           <div className="cop-card-items-list">
                             {(order.items || []).map((item, idx) => {
@@ -586,41 +597,19 @@ export default function CustomerOrdersPage({
                   </div>
                 </div>
 
-                <div className="cop-profile-form">
-                  <div className="cop-form-group">
-                    <label>Họ và tên</label>
-                    <input type="text" readOnly value={displayName} className="cop-input-readonly" />
+                {currentUser ? (
+                  <ProfileEditor
+                    key={currentUser.id}
+                    currentUser={currentUser}
+                    onUpdateCurrentUser={onUpdateCurrentUser}
+                  />
+                ) : (
+                  <div className="cop-profile-actions">
+                    <button type="button" className="cop-btn-edit-profile" onClick={() => onOpenSignIn?.('login')}>
+                      Đăng nhập để sửa thông tin
+                    </button>
                   </div>
-                  <div className="cop-form-group">
-                    <label>Email liên hệ</label>
-                    <input type="email" readOnly value={displayEmail} className="cop-input-readonly" />
-                  </div>
-                  <div className="cop-form-group">
-                    <label>Số điện thoại</label>
-                    <input type="tel" readOnly value={displayPhone} className="cop-input-readonly" />
-                  </div>
-                  <div className="cop-form-group">
-                    <label>Địa chỉ nhận hàng mặc định</label>
-                    <input type="text" readOnly value={displayAddress} className="cop-input-readonly" />
-                  </div>
-                </div>
-
-                <div className="cop-profile-actions">
-                  <button
-                    type="button"
-                    className="cop-btn-edit-profile"
-                    onClick={() => alert('Thông tin tài khoản được đồng bộ an toàn với đơn hàng của bạn.')}
-                  >
-                    Chỉnh sửa thông tin
-                  </button>
-                  <button
-                    type="button"
-                    className="cop-btn-switch-tab"
-                    onClick={() => setActiveMenuTab('orders')}
-                  >
-                    Xem lịch sử đơn hàng
-                  </button>
-                </div>
+                )}
               </div>
             </div>
           )}
@@ -639,7 +628,7 @@ export default function CustomerOrdersPage({
                   <button
                     type="button"
                     className="cop-btn-small"
-                    onClick={() => alert('Địa chỉ giao hàng này đang được đặt làm mặc định khi đặt hàng.')}
+                    onClick={() => setActiveMenuTab('profile')}
                   >
                     Thay đổi
                   </button>
@@ -655,22 +644,13 @@ export default function CustomerOrdersPage({
             <div className="cop-reviews-section">
               <h1 className="cop-section-title">Đánh giá đơn hàng</h1>
               <div className="cop-reviews-card">
-                <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                  <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>⭐</div>
-                  <h3 style={{ fontSize: '1.1rem', color: '#1e293b', fontWeight: 700 }}>
-                    Đánh giá sản phẩm đã mua
-                  </h3>
-                  <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '460px', margin: '8px auto 20px' }}>
-                    Sau khi nhận được thẻ bài Pokémon TCG chính hãng niêm phong, bạn có thể gửi phản hồi và đánh giá 5 sao cho đơn hàng tại đây.
-                  </p>
-                  <button
-                    type="button"
-                    className="cop-btn-shop-now"
-                    onClick={() => setActiveMenuTab('orders')}
-                  >
-                    Xem đơn hàng để đánh giá
-                  </button>
-                </div>
+                <ReviewsPanel
+                  currentUser={currentUser}
+                  orders={userOrders}
+                  reviews={reviews}
+                  onReviewSaved={onReviewSaved}
+                  onGoToOrders={() => setActiveMenuTab('orders')}
+                />
               </div>
             </div>
           )}
@@ -697,6 +677,8 @@ export default function CustomerOrdersPage({
                 <span>Trạng thái hiện tại:</span>
                 <strong style={{ color: '#2563eb' }}>{viewingOrderDetail.status}</strong>
               </div>
+              <OrderTimeline order={viewingOrderDetail} />
+              <TrackingInfo order={viewingOrderDetail} />
 
               <div className="cop-detail-section">
                 <h4>Thông tin người nhận:</h4>

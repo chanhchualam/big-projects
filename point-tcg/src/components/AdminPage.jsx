@@ -10,6 +10,7 @@ export default function AdminPage({
   closedDrawings = [],
   orders = [],
   onUpdateOrderStatus,
+  onUpdateOrderTracking,
   onDeleteOrder,
   onAddProduct,
   onUpdateProduct,
@@ -312,6 +313,7 @@ export default function AdminPage({
           closedDrawings={closedDrawings}
           orders={orders}
           onUpdateOrderStatus={onUpdateOrderStatus}
+          onUpdateOrderTracking={onUpdateOrderTracking}
           onDeleteOrder={onDeleteOrder}
           onAddProduct={onAddProduct}
           onUpdateProduct={onUpdateProduct}

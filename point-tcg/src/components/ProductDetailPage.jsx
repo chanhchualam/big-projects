@@ -1,5 +1,10 @@
 // src/components/ProductDetailPage.jsx
 import React, { useState, useEffect, useMemo } from 'react';
+import RestockNotify from './RestockNotify';
+
+function stars(n) {
+  return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+}
 
 // Price helpers matching Vietnamese e-commerce stores
 export function toVnd(price) {
@@ -35,7 +40,9 @@ export default function ProductDetailPage({
   isSaved,
   onToggleSave,
   user,
-  onOpenAdminEdit
+  onOpenAdminEdit,
+  reviews = [],
+  onRequestRestock
 }) {
   const [qty, setQty] = useState(1);
   const [activeImgIndex, setActiveImgIndex] = useState(0);
@@ -350,6 +357,13 @@ export default function ProductDetailPage({
               </div>
             </div>
 
+            {isOutOfStock && onRequestRestock && (
+              <div className="pdp-restock-box">
+                <p>Sản phẩm tạm hết hàng. Để lại email, shop sẽ báo ngay khi có hàng lại.</p>
+                <RestockNotify product={product} defaultEmail={user?.email} onRequestRestock={onRequestRestock} />
+              </div>
+            )}
+
             {/* Large Primary Red CTA: MUA NGAY */}
             <button
               type="button"
@@ -426,7 +440,7 @@ export default function ProductDetailPage({
               className={`pdp-tab-nav-btn ${activeTab === 'reviews' ? 'active' : ''}`}
               onClick={() => setActiveTab('reviews')}
             >
-              ĐÁNH GIÁ SẢN PHẨM ({product.reviewsCount || 48})
+              ĐÁNH GIÁ SẢN PHẨM ({reviews.length})
             </button>
           </div>
 
@@ -470,49 +484,39 @@ export default function ProductDetailPage({
               </div>
             ) : (
               <div className="pdp-reviews-body">
-                <div className="pdp-reviews-summary">
-                  <div className="pdp-score-big">4.9</div>
-                  <div className="pdp-score-stars">⭐⭐⭐⭐⭐</div>
-                  <div className="pdp-score-total">Dựa trên {product.reviewsCount || 48} đánh giá từ người mua đã xác thực</div>
-                </div>
-
-                <div className="pdp-reviews-list">
-                  <div className="pdp-review-card">
-                    <div className="pdp-reviewer-header">
-                      <strong>Nguyễn Hoàng Minh</strong>
-                      <span className="verified-badge">✓ Đã mua hàng tại Point TCG</span>
-                      <span className="review-date">2 ngày trước</span>
+                {reviews.length === 0 ? (
+                  <div className="pdp-reviews-summary">
+                    <div className="pdp-score-total">
+                      Chưa có đánh giá nào. Khách đã nhận hàng có thể đánh giá trong mục "Tài khoản › Đánh giá đơn hàng".
                     </div>
-                    <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                    <p className="review-text">
-                      Hộp nguyên seal nét căng không một vết trầy. Đóng gói 3 lớp bóng khí siêu dày, shop giao hoả tốc rất ưng ý. Pull được em thẻ Chase cực đỉnh!
-                    </p>
                   </div>
-
-                  <div className="pdp-review-card">
-                    <div className="pdp-reviewer-header">
-                      <strong>Trần Đức Huy</strong>
-                      <span className="verified-badge">✓ Đã mua hàng tại Point TCG</span>
-                      <span className="review-date">1 tuần trước</span>
+                ) : (
+                  <>
+                    <div className="pdp-reviews-summary">
+                      <div className="pdp-score-big">{(product.rating || 0).toFixed(1)}</div>
+                      <div className="pdp-score-stars" style={{ color: '#f59e0b' }}>{stars(Math.round(product.rating || 0))}</div>
+                      <div className="pdp-score-total">Dựa trên {reviews.length} đánh giá từ người mua đã xác thực</div>
                     </div>
-                    <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                    <p className="review-text">
-                      Chuẩn hàng chính hãng, giá cạnh tranh hơn nhiều so với các shop khác. Hỗ trợ nhiệt tình qua Zalo 24/7. Sẽ tiếp tục ủng hộ Point TCG!
-                    </p>
-                  </div>
 
-                  <div className="pdp-review-card">
-                    <div className="pdp-reviewer-header">
-                      <strong>Lê Quang Vũ</strong>
-                      <span className="verified-badge">✓ Đã mua hàng tại Point TCG</span>
-                      <span className="review-date">2 tuần trước</span>
+                    <div className="pdp-reviews-list">
+                      {[...reviews]
+                        .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+                        .map((r) => (
+                          <div key={r.id} className="pdp-review-card">
+                            <div className="pdp-reviewer-header">
+                              <strong>{r.name || 'Khách hàng'}</strong>
+                              <span className="verified-badge">✓ Đã mua hàng tại Point TCG</span>
+                              <span className="review-date">
+                                {r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi-VN') : ''}
+                              </span>
+                            </div>
+                            <div className="review-stars" style={{ color: '#f59e0b' }}>{stars(r.rating)}</div>
+                            {r.comment && <p className="review-text">{r.comment}</p>}
+                          </div>
+                        ))}
                     </div>
-                    <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                    <p className="review-text">
-                      Uy tín số 1! Mua lần thứ 3 ở shop rồi vẫn cực kỳ hài lòng với chất lượng dịch vụ và độ mới của seal.
-                    </p>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
             )}
           </div>

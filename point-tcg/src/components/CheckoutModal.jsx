@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { saveNewOrder, ensureSignedIn, getAuthErrorMessage } from '../utils/auth';
 import { getProductCatalogImage } from '../products';
 import { getQrConfig, loadQrConfig, generateQrUrl } from '../utils/qrConfig';
+import { fetchCoupon, redeemCoupon } from '../services/firestoreService';
+import { getCouponError } from '../utils/orderCheck';
 
 // Khách chỉ được báo đã chuyển khoản; admin kiểm tra sao kê rồi mới chuyển sang "Đã thanh toán"
 const CUSTOMER_REPORTED_PAID_STATUS = 'Khách báo đã chuyển khoản (Chờ xác nhận)';
@@ -60,7 +62,8 @@ export default function CheckoutModal({
 
   // Discount code
   const [couponCode, setCouponCode] = useState('');
-  const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState(null); // { code, percent, freeShip, ... } từ Firestore
+  const appliedDiscount = appliedCoupon?.percent || 0;
   const [couponMessage, setCouponMessage] = useState('');
 
   // Reset modal state when opening
@@ -71,14 +74,16 @@ export default function CheckoutModal({
       setCheckoutStep('form');
       setCompletedOrder(null);
       setCouponMessage('');
+      setAppliedCoupon(null);
       setSecondsLeft(900);
       setCopiedField(null);
       setUseFallbackQr(false);
+      // Điền sẵn thông tin đã lưu trong tài khoản
       setShippingInfo({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
+        name: user?.name || '',
+        email: user?.email || '',
+        phone: user?.phone || '',
+        address: user?.address || '',
         note: ''
       });
     }
@@ -125,7 +130,9 @@ export default function CheckoutModal({
   // Shipping Fee Calculation
   const freeShippingThreshold = 75;
   const isFreeStandard = cartTotal >= freeShippingThreshold;
-  const shippingFee = shippingMethod === 'standard' ? (isFreeStandard ? 0 : 8.5) : 15.0;
+  const shippingFee = shippingMethod === 'standard'
+    ? (isFreeStandard || appliedCoupon?.freeShip ? 0 : 8.5)
+    : 15.0;
 
   // Total Calculation
   const discountAmount = appliedDiscount > 0 ? (cartTotal * (appliedDiscount / 100)) : 0;
@@ -162,20 +169,24 @@ export default function CheckoutModal({
     }
   };
 
-  // Apply Coupon
-  const handleApplyCoupon = (e) => {
+  // Apply Coupon — mã do admin tạo trong trang quản trị (collection 'coupons')
+  const handleApplyCoupon = async (e) => {
     e.preventDefault();
     const code = couponCode.trim().toUpperCase();
-    if (code === 'POINTTCG' || code === 'POKEMON10') {
-      setAppliedDiscount(10);
-      setCouponMessage('🎉 Áp dụng mã POINTTCG thành công! Giảm 10% tổng đơn hàng.');
-    } else if (code === 'FREESHIP') {
-      setShippingMethod('standard');
-      setAppliedDiscount(5);
-      setCouponMessage('🎉 Áp dụng mã FREESHIP thành công! Giảm thêm 5%.');
-    } else {
-      setCouponMessage('⚠️ Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+    if (!code) return;
+    setCouponMessage('⏳ Đang kiểm tra mã...');
+    const coupon = await fetchCoupon(code);
+    const error = getCouponError(coupon, cartTotal);
+    if (error) {
+      setAppliedCoupon(null);
+      setCouponMessage(`⚠️ ${error}`);
+      return;
     }
+    setAppliedCoupon(coupon);
+    const parts = [];
+    if (coupon.percent > 0) parts.push(`giảm ${coupon.percent}% tạm tính`);
+    if (coupon.freeShip) parts.push('miễn phí ship tiêu chuẩn');
+    setCouponMessage(`🎉 Áp dụng mã ${coupon.code} thành công: ${parts.join(' + ')}.`);
   };
 
   // Submit Order Handler
@@ -201,7 +212,26 @@ export default function CheckoutModal({
         return;
       }
 
-      const generatedOrderId = `PTCG-${Date.now().toString().slice(-6)}`;
+      // Giữ lượt dùng mã giảm giá trước khi tạo đơn
+      if (appliedCoupon) {
+        const couponError = getCouponError(appliedCoupon, cartTotal);
+        if (couponError) {
+          setAppliedCoupon(null);
+          setCouponMessage(`⚠️ ${couponError}`);
+          setCheckoutStep('form');
+          return;
+        }
+        const redeemed = await redeemCoupon(appliedCoupon.code);
+        if (!redeemed) {
+          setAppliedCoupon(null);
+          setCouponMessage('⚠️ Mã giảm giá vừa hết lượt sử dụng. Vui lòng đặt lại đơn.');
+          setCheckoutStep('form');
+          return;
+        }
+      }
+
+      // 8 chữ số (6 số cuối thời gian + 2 số ngẫu nhiên) để hạn chế trùng mã đơn
+      const generatedOrderId = `PTCG-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`;
       const orderPayload = {
         id: generatedOrderId,
         uid,
@@ -225,6 +255,7 @@ export default function CheckoutModal({
         subtotal: cartTotal,
         shippingFee,
         discountAmount,
+        couponCode: appliedCoupon?.code || '',
         total: finalTotal,
         amountVnd,
         status: paymentMethod === 'cod' ? 'Chờ xác nhận (Đơn mới)' : 'Chờ thanh toán QR (Đơn mới)',

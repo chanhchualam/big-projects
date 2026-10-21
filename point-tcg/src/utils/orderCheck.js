@@ -4,13 +4,23 @@
 // Quy tắc phí ship / mã giảm giá phải khớp với CheckoutModal.
 const VND_RATE = 25400;
 const FREE_SHIPPING_THRESHOLD = 75;
-const MAX_DISCOUNT_PERCENT = 10;
+const LEGACY_MAX_DISCOUNT_PERCENT = 10; // đơn cũ trước khi có bảng coupons
 const TOLERANCE = 0.01;
 
 const money = (n) => `$${(Number(n) || 0).toFixed(2)}`;
 const differs = (a, b) => Math.abs((Number(a) || 0) - (Number(b) || 0)) > TOLERANCE;
 
-export function checkOrderPricing(order, products = []) {
+// Lý do mã giảm giá không dùng được (null nếu hợp lệ)
+export function getCouponError(coupon, subtotal) {
+  if (!coupon) return 'Mã giảm giá không tồn tại.';
+  if (coupon.active === false) return 'Mã giảm giá đã bị tắt.';
+  if (coupon.expiresAt && new Date(`${coupon.expiresAt}T23:59:59`) < new Date()) return 'Mã giảm giá đã hết hạn.';
+  if (coupon.maxUses > 0 && (coupon.usedCount || 0) >= coupon.maxUses) return 'Mã giảm giá đã hết lượt sử dụng.';
+  if (coupon.minOrder > 0 && subtotal < coupon.minOrder) return `Mã chỉ áp dụng cho đơn từ ${money(coupon.minOrder)}.`;
+  return null;
+}
+
+export function checkOrderPricing(order, products = [], coupons = null) {
   const warnings = [];
   const byId = new Map(products.map((p) => [String(p.id), p]));
 
@@ -37,20 +47,41 @@ export function checkOrderPricing(order, products = []) {
     warnings.push(`Tạm tính trong đơn ${money(order.subtotal)}, tính lại theo giá hiện tại ${money(expectedSubtotal)}.`);
   }
 
-  // 2. Phí ship
+  // 2. Mã giảm giá: đơn mới có trường couponCode ('' = không dùng mã)
+  let maxPercent = 0;
+  let freeShip = false;
+  if (order.couponCode === undefined) {
+    maxPercent = LEGACY_MAX_DISCOUNT_PERCENT;
+  } else if (order.couponCode) {
+    const coupon = Array.isArray(coupons) ? coupons.find((c) => c.code === order.couponCode) : null;
+    if (coupon) {
+      maxPercent = Number(coupon.percent) || 0;
+      freeShip = !!coupon.freeShip;
+    } else if (Array.isArray(coupons)) {
+      warnings.push(`Mã giảm giá "${order.couponCode}" không còn tồn tại.`);
+    } else {
+      // Chưa tải được danh sách mã → không đối chiếu phần giảm giá
+      maxPercent = 100;
+      freeShip = true;
+    }
+  }
+
+  // 3. Phí ship
   const isExpress = (order.shippingMethod || '').includes('Hoả tốc');
-  const expectedShipping = isExpress ? 15 : (expectedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 8.5);
+  const expectedShipping = isExpress ? 15 : (expectedSubtotal >= FREE_SHIPPING_THRESHOLD || freeShip ? 0 : 8.5);
   if (differs(order.shippingFee, expectedShipping)) {
     warnings.push(`Phí ship trong đơn ${money(order.shippingFee)}, đúng ra là ${money(expectedShipping)}.`);
   }
 
-  // 3. Giảm giá tối đa 10% tạm tính
-  const maxDiscount = expectedSubtotal * MAX_DISCOUNT_PERCENT / 100;
+  // 4. Giảm giá không vượt mức của mã
+  const maxDiscount = expectedSubtotal * maxPercent / 100;
   if ((Number(order.discountAmount) || 0) > maxDiscount + TOLERANCE) {
-    warnings.push(`Giảm giá ${money(order.discountAmount)} vượt mức tối đa ${MAX_DISCOUNT_PERCENT}% (${money(maxDiscount)}).`);
+    warnings.push(order.couponCode
+      ? `Giảm giá ${money(order.discountAmount)} vượt mức của mã ${order.couponCode} (${maxPercent}% = ${money(maxDiscount)}).`
+      : `Giảm giá ${money(order.discountAmount)} nhưng đơn không dùng mã giảm giá hợp lệ.`);
   }
 
-  // 4. Tổng tiền phải khớp: tạm tính − giảm giá + ship, và số VNĐ trên mã QR
+  // 5. Tổng tiền phải khớp: tạm tính − giảm giá + ship, và số VNĐ trên mã QR
   const discount = Math.min(Number(order.discountAmount) || 0, maxDiscount);
   const expectedTotal = Math.max(0, expectedSubtotal - discount + expectedShipping);
   if (differs(order.total, expectedTotal)) {
