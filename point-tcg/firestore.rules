@@ -50,7 +50,10 @@ service cloud.firestore {
         || (signedIn()
             && request.resource.data.uid == request.auth.uid
             && request.resource.data.status in newOrderStatuses()
-            && request.resource.data.get('stockDeducted', false) == false);
+            && request.resource.data.get('stockDeducted', false) == false
+            // Các trường chỉ Cloud Functions được ghi (giá server tính, thanh toán SePay)
+            && !request.resource.data.keys().hasAny(['priceVerified', 'priceIssues', 'serverTotal',
+                 'serverAmountVnd', 'paidAmount', 'paymentRef', 'paymentNote']));
 
       // Khách: chỉ đổi trạng thái đơn của chính mình sang "Đã huỷ" hoặc "Khách báo đã chuyển khoản"
       // (kèm thêm đúng một mốc vào statusHistory)
