@@ -9268,3 +9268,11 @@
     grid-template-columns: 1fr;
   }
 }
+
+.cde-note {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.85rem;
+}

@@ -4,6 +4,7 @@
 //   'timer'  — đếm ngược tới endsAt:            "Drawing ends in 02:14:33"
 //   'fixed'  — hiện mốc cố định, không đếm giờ:  "Kết thúc lúc 20:00, 25/10/2026"
 //   'custom' — chữ tự do do admin nhập
+//   'none'   — không hẹn giờ, không hiện dòng thời gian
 
 export const DEFAULT_LABELS = {
   timer: 'Drawing ends in',
@@ -32,6 +33,7 @@ export function getCountdownMode(product) {
 // legacyEnd: mốc cũ (sản phẩm tạo trước khi có endsAt) — tính từ lúc khách mở web
 export function getDrawingText(product, now = Date.now(), legacyEnd = null) {
   const mode = getCountdownMode(product);
+  if (mode === 'none') return '';
   if (mode === 'custom' && product.customCountdownText?.trim()) {
     return product.customCountdownText.trim();
   }
