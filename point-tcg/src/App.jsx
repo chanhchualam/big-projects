@@ -699,7 +699,23 @@ export default function App() {
 
   const handleUpdateProduct = (updatedProduct, section) => {
     const prodToSave = { ...updatedProduct, status: section };
-    if (section === 'open') {
+    // Đổi khu vực Open ↔ Closed: bỏ khỏi danh sách cũ, thêm vào đầu danh sách mới
+    const movedFrom = section === 'open'
+      ? closedDrawings.some(p => p.id === updatedProduct.id)
+      : openDrawings.some(p => p.id === updatedProduct.id);
+    if (movedFrom) {
+      if (section === 'open') {
+        setClosedDrawings(prev => prev.filter(p => p.id !== updatedProduct.id));
+        setOpenDrawings(prev => [updatedProduct, ...prev]);
+        setTargetTimestamps(prev => ({
+          ...prev,
+          [updatedProduct.id]: Date.now() + (updatedProduct.secondsRemaining || 7200) * 1000
+        }));
+      } else {
+        setOpenDrawings(prev => prev.filter(p => p.id !== updatedProduct.id));
+        setClosedDrawings(prev => [updatedProduct, ...prev]);
+      }
+    } else if (section === 'open') {
       setOpenDrawings(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
       setTargetTimestamps(prev => ({
         ...prev,

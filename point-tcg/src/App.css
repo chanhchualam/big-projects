@@ -9169,3 +9169,70 @@
     font-size: 0.8rem;
   }
 }
+
+/* Tab Sản phẩm (gộp Open + Closed Drawings) */
+.admin-product-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-section-pill {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.admin-section-pill.open {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.admin-section-pill.closed {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.admin-section-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.admin-section-choice button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-section-choice button strong {
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.admin-section-choice button span {
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.admin-section-choice button.active {
+  border-color: #0053e2;
+  background: #eff6ff;
+}
+
+@media (max-width: 640px) {
+  .admin-section-choice {
+    grid-template-columns: 1fr;
+  }
+}
