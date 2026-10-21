@@ -16,6 +16,7 @@ import {
   EmailAuthProvider
 } from 'firebase/auth';
 import { auth } from '../firebase';
+import { usdToVnd, VND_RATE } from './currency';
 import { getProductCatalogImage } from '../products';
 import {
   saveUserToDb,
@@ -232,7 +233,8 @@ export function saveNewOrder(orderData) {
     ...orderData,
     id: orderData.id || `PTCG-${Date.now().toString().slice(-6)}`,
     items: sanitizedItems,
-    amountVnd: orderData.amountVnd || Math.round((orderData.total || 0) * 25400),
+    amountVnd: orderData.amountVnd || usdToVnd(orderData.total),
+    vndRate: orderData.vndRate || VND_RATE,
     status: orderData.status || 'Chờ thanh toán QR (Đơn mới)',
     // Tồn kho chỉ bị trừ khi admin xác nhận đơn; đơn cũ không có trường này đã trừ lúc đặt
     stockDeducted: false,

@@ -4,6 +4,7 @@ import { getProductCatalogImage } from '../products';
 import { getQrConfig, loadQrConfig, generateQrUrl } from '../utils/qrConfig';
 import { fetchCoupon, redeemCoupon } from '../services/firestoreService';
 import { getCouponError } from '../utils/orderCheck';
+import { usdToVnd, VND_RATE } from '../utils/currency';
 
 // Khách chỉ được báo đã chuyển khoản; admin kiểm tra sao kê rồi mới chuyển sang "Đã thanh toán"
 const CUSTOMER_REPORTED_PAID_STATUS = 'Khách báo đã chuyển khoản (Chờ xác nhận)';
@@ -137,7 +138,7 @@ export default function CheckoutModal({
   // Total Calculation
   const discountAmount = appliedDiscount > 0 ? (cartTotal * (appliedDiscount / 100)) : 0;
   const finalTotal = Math.max(0, cartTotal - discountAmount + shippingFee);
-  const amountVnd = Math.round(finalTotal * 25400);
+  const amountVnd = usdToVnd(finalTotal);
 
   // Formatting helpers
   const formatVndText = (num) => {
@@ -258,6 +259,7 @@ export default function CheckoutModal({
         couponCode: appliedCoupon?.code || '',
         total: finalTotal,
         amountVnd,
+        vndRate: VND_RATE,
         status: paymentMethod === 'cod' ? 'Chờ xác nhận (Đơn mới)' : 'Chờ thanh toán QR (Đơn mới)',
         createdAt: new Date().toLocaleString('vi-VN')
       };

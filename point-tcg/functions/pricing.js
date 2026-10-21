@@ -1,7 +1,8 @@
 // functions/pricing.js
 // Tính lại giá đơn phía server từ giá sản phẩm + mã giảm giá trong Firestore.
 // Quy tắc phải khớp với CheckoutModal.jsx và src/utils/orderCheck.js.
-export const VND_RATE = 25400;
+// Phải khớp với src/utils/currency.js
+export const VND_RATE = 26500;
 const FREE_SHIPPING_THRESHOLD = 75;
 const EXPRESS_FEE = 15;
 const STANDARD_FEE = 8.5;
@@ -46,7 +47,7 @@ export function computeOrderPrice(order, productsById, coupon) {
   const shippingFee = isExpress ? EXPRESS_FEE : (subtotal >= FREE_SHIPPING_THRESHOLD || freeShip ? 0 : STANDARD_FEE);
   const discount = subtotal * percent / 100;
   const total = round2(Math.max(0, subtotal - discount + shippingFee));
-  const amountVnd = Math.round(total * VND_RATE);
+  const amountVnd = Math.round((total * VND_RATE) / 1000) * 1000;
 
   if (Math.abs((Number(order.total) || 0) - total) > TOLERANCE) {
     issues.push(`Tổng tiền trong đơn ${order.total}, server tính ra ${total}`);

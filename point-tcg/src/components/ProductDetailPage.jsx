@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import RestockNotify from './RestockNotify';
 import { getProductImages } from '../utils/productImages';
 import { isStoreFramed } from '../products';
+import { usdToVnd } from '../utils/currency';
 
 function stars(n) {
   return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
@@ -16,8 +17,8 @@ export function toVnd(price) {
   if (price >= 1000) {
     return price;
   }
-  // Convert standard USD price to VND (approx 25,000 VND / USD, rounded to 10k)
-  return Math.round((price * 25000) / 10000) * 10000;
+  // Quy đổi USD → VNĐ theo tỷ giá chung (src/utils/currency.js)
+  return usdToVnd(price);
 }
 
 export function formatVnd(price) {
