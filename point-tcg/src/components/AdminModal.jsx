@@ -53,6 +53,10 @@ export default function AdminModal({
   const [selectedSlipOrder, setSelectedSlipOrder] = useState(null); // For Shopee packing slip preview
   const [newOrderAlert, setNewOrderAlert] = useState(null);
 
+  // Tab "Sản phẩm": gộp Open + Closed Drawings, lọc bằng ô chọn
+  const [productSectionFilter, setProductSectionFilter] = useState('all'); // 'all' | 'open' | 'closed'
+  const sectionOf = (product) => (closedDrawings.some((p) => p.id === product.id) ? 'closed' : 'open');
+
   // Danh sách mã giảm giá để đối chiếu phần giảm giá trong đơn
   const [couponList, setCouponList] = useState(null);
   useEffect(() => {
@@ -601,7 +605,7 @@ export default function AdminModal({
     setFormData({
       id: `custom-${Date.now()}`,
       title: '',
-      section: activeTab === 'closed' ? 'closed' : 'open',
+      section: productSectionFilter === 'closed' ? 'closed' : 'open',
       price: '',
       wasPrice: '',
       stock: 20,
@@ -672,7 +676,7 @@ export default function AdminModal({
   useEffect(() => {
     if (initialProductToEdit) {
       const section = initialProductToEdit.status || 'open';
-      setActiveTab(section === 'closed' ? 'closed' : 'open');
+      setActiveTab('products');
       startEdit(initialProductToEdit, section);
     }
   }, [initialProductToEdit]);
@@ -713,7 +717,7 @@ export default function AdminModal({
       customCountdownText: quickTimerData.mode === 'custom' ? quickTimerData.customText.trim() : '',
       secondsRemaining: totalSec > 0 ? totalSec : 7200
     };
-    onUpdateProduct(updated, activeTab);
+    onUpdateProduct(updated, sectionOf(quickTimerProduct));
     setUploadToast(`Đã cập nhật thời gian đếm ngược cho "${quickTimerProduct.title}" thành công!`);
     setQuickTimerProduct(null);
     setTimeout(() => setUploadToast(''), 3500);
@@ -984,7 +988,10 @@ export default function AdminModal({
     reader.readAsDataURL(file);
   };
 
-  const currentProductList = activeTab === 'closed' ? closedDrawings : openDrawings;
+  const currentProductList = [
+    ...(productSectionFilter !== 'closed' ? openDrawings : []),
+    ...(productSectionFilter !== 'open' ? closedDrawings : [])
+  ];
 
   const modalInner = (
     <div className={isFullPage ? "admin-fullpage-card" : "admin-modal-card admin-modal-wide"} onClick={(e) => e.stopPropagation()}>
@@ -1034,15 +1041,6 @@ export default function AdminModal({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {(activeTab === 'open' || activeTab === 'closed') && !editingProduct && !isCreatingNew && (
-              <button
-                type="button"
-                className="btn-admin-add"
-                onClick={startAddNew}
-              >
-                + Thêm Sản Phẩm Mới
-              </button>
-            )}
             {isFullPage ? (
               <button
                 type="button"
@@ -1086,6 +1084,28 @@ export default function AdminModal({
               {/* Form columns */}
               <div className="admin-form-col">
                 <div className="form-group">
+                  <span className="form-label">Loại sản phẩm <span style={{ color: '#ef4444' }}>*</span></span>
+                  <div className="admin-section-choice" role="radiogroup" aria-label="Loại sản phẩm">
+                    {[
+                      ['open', '⚡ Open Drawing', 'Đang mở raffle, có đồng hồ đếm ngược'],
+                      ['closed', '📦 Closed Drawing', 'Đã đóng raffle, hiện trong băng chuyền']
+                    ].map(([value, title, sub]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        role="radio"
+                        aria-checked={formData.section === value}
+                        className={formData.section === value ? 'active' : ''}
+                        onClick={() => setFormData({ ...formData, section: value })}
+                      >
+                        <strong>{title}</strong>
+                        <span>{sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="form-group">
                   <label className="form-label">Tên sản phẩm Pokémon <span style={{ color: '#ef4444' }}>*</span></label>
                   <input
                     type="text"
@@ -1098,17 +1118,6 @@ export default function AdminModal({
                 </div>
 
                 <div className="form-row-2">
-                  <div className="form-group">
-                    <label className="form-label">Khu vực hiển thị <span style={{ color: '#ef4444' }}>*</span></label>
-                    <select
-                      className="form-input"
-                      value={formData.section}
-                      onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    >
-                      <option value="open">⚡ Open Drawings (Đang mở raffle)</option>
-                      <option value="closed">📦 Closed Drawings (Băng chuyền đã đóng)</option>
-                    </select>
-                  </div>
 
                   <div className="form-group">
                     <label className="form-label">Huy hiệu góc thẻ (Badge)</label>
@@ -1730,18 +1739,10 @@ export default function AdminModal({
 
               <button
                 type="button"
-                className={`admin-tab-btn ${activeTab === 'open' ? 'active' : ''}`}
-                onClick={() => setActiveTab('open')}
+                className={`admin-tab-btn ${activeTab === 'products' ? 'active' : ''}`}
+                onClick={() => setActiveTab('products')}
               >
-                ⚡ Open Drawings ({openDrawings.length})
-              </button>
-
-              <button
-                type="button"
-                className={`admin-tab-btn ${activeTab === 'closed' ? 'active' : ''}`}
-                onClick={() => setActiveTab('closed')}
-              >
-                📦 Closed Drawings ({closedDrawings.length})
+                🃏 Sản Phẩm ({openDrawings.length + closedDrawings.length})
               </button>
 
               <button
@@ -2208,17 +2209,40 @@ export default function AdminModal({
             {/* =========================================================================
                 TAB 3: PRODUCT CATALOG (OPEN DRAWINGS & CLOSED DRAWINGS)
                ========================================================================= */}
-            {(activeTab === 'open' || activeTab === 'closed') && (
+            {activeTab === 'products' && (
               <div className="admin-table-container">
+                <div className="admin-product-filter-row">
+                  <div className="xadmin-segment" role="group" aria-label="Lọc theo loại sản phẩm">
+                    {[
+                      ['all', `Tất cả (${openDrawings.length + closedDrawings.length})`],
+                      ['open', `⚡ Open Drawings (${openDrawings.length})`],
+                      ['closed', `📦 Closed Drawings (${closedDrawings.length})`]
+                    ].map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        className={productSectionFilter === value ? 'active' : ''}
+                        onClick={() => setProductSectionFilter(value)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <button type="button" className="btn-admin-add" onClick={startAddNew}>
+                    + Thêm Sản Phẩm Mới
+                  </button>
+                </div>
                 {currentProductList.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
                     Chưa có sản phẩm nào trong mục này. Bấm <strong>+ Thêm Sản Phẩm Mới</strong> để tạo!
                   </div>
                 ) : (
                   <div className="admin-product-cards-list">
-                    {currentProductList.map((product) => (
+                    {currentProductList.map((product) => {
+                      const section = sectionOf(product);
+                      return (
                       <div key={product.id} className="admin-item-row">
-                        <img src={product.image} alt={product.title} className="admin-item-thumb" />
+                        <img src={getProductImage(product) || product.image} alt={product.title} className="admin-item-thumb" />
 
                         <div className="admin-item-info">
                           <div className="admin-item-title">{product.title}</div>
@@ -2230,8 +2254,8 @@ export default function AdminModal({
                               </span>
                             )}
                             {product.badge && <span className="admin-pill-badge">{product.badge}</span>}
-                            <span style={{ color: '#64748b' }}>
-                              {product.status === 'open' ? '🟢 Đang mở raffle' : '🔴 Đã kết thúc'}
+                            <span className={section === 'open' ? 'admin-section-pill open' : 'admin-section-pill closed'}>
+                              {section === 'open' ? '⚡ Open Drawing' : '📦 Closed Drawing'}
                             </span>
                             <span className={`admin-stock-badge ${Number(product.stock ?? 20) <= 0 ? 'out' : Number(product.stock ?? 20) <= 5 ? 'low' : 'ok'}`}>
                               📦 Kho: <strong>{typeof product.stock === 'number' ? product.stock : 20}</strong>
@@ -2253,7 +2277,7 @@ export default function AdminModal({
                             <button
                               type="button"
                               className="btn-stock-quick"
-                              onClick={() => handleQuickAdjustStock(product, -1, activeTab)}
+                              onClick={() => handleQuickAdjustStock(product, -1, section)}
                               disabled={(product.stock ?? 20) <= 0}
                               title="Giảm 1 sp"
                             >
@@ -2263,7 +2287,7 @@ export default function AdminModal({
                             <button
                               type="button"
                               className="btn-stock-quick"
-                              onClick={() => handleQuickAdjustStock(product, 1, activeTab)}
+                              onClick={() => handleQuickAdjustStock(product, 1, section)}
                               title="Tăng 1 sp"
                             >
                               +1
@@ -2271,7 +2295,7 @@ export default function AdminModal({
                             <button
                               type="button"
                               className="btn-stock-quick btn-stock-plus10"
-                              onClick={() => handleQuickAdjustStock(product, 10, activeTab)}
+                              onClick={() => handleQuickAdjustStock(product, 10, section)}
                               title="Thêm 10 sp"
                             >
                               +10
@@ -2294,7 +2318,7 @@ export default function AdminModal({
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                  handleQuickUpload(product, activeTab, file);
+                                  handleQuickUpload(product, section, file);
                                 }
                                 e.target.value = '';
                               }}
@@ -2303,7 +2327,7 @@ export default function AdminModal({
                           <button
                             type="button"
                             className="btn-action-edit"
-                            onClick={() => startEdit(product, activeTab)}
+                            onClick={() => startEdit(product, section)}
                             title="Chỉnh sửa sản phẩm"
                           >
                             ✏️ Sửa
@@ -2313,7 +2337,7 @@ export default function AdminModal({
                             className="btn-action-delete"
                             onClick={() => {
                               if (confirm(`Bạn có chắc muốn xoá sản phẩm "${product.title}"?`)) {
-                                onDeleteProduct(product.id, activeTab);
+                                onDeleteProduct(product.id, section);
                               }
                             }}
                             title="Xoá sản phẩm"
@@ -2322,7 +2346,8 @@ export default function AdminModal({
                           </button>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
