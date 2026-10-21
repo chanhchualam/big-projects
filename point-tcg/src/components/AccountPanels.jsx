@@ -236,7 +236,8 @@ function StarPicker({ value, onChange }) {
   );
 }
 
-function ReviewForm({ item, order, existing, currentUser, onSaved }) {
+// hideHead: dùng trong trang chi tiết sản phẩm (đã có tên/ảnh sản phẩm ở trên)
+export function ReviewForm({ item, order, existing, currentUser, onSaved, hideHead = false }) {
   const [rating, setRating] = useState(existing?.rating || 5);
   const [comment, setComment] = useState(existing?.comment || '');
   const [state, setState] = useState(existing ? 'saved' : 'idle'); // idle | saving | saved | error | editing
@@ -267,13 +268,15 @@ function ReviewForm({ item, order, existing, currentUser, onSaved }) {
 
   return (
     <div className="review-item-card">
-      <div className="review-item-head">
-        {img && <img src={img} alt="" className="review-item-thumb" />}
-        <div>
-          <div className="review-item-title">{item.title}</div>
-          <div className="review-item-sub">Đơn #{order.id}</div>
+      {!hideHead && (
+        <div className="review-item-head">
+          {img && <img src={img} alt="" className="review-item-thumb" />}
+          <div>
+            <div className="review-item-title">{item.title}</div>
+            <div className="review-item-sub">Đơn #{order.id}</div>
+          </div>
         </div>
-      </div>
+      )}
 
       {state === 'saved' ? (
         <div className="review-saved">

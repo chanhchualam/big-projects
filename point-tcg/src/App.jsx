@@ -1178,6 +1178,12 @@ export default function App() {
           product={withReviewStats(selectedProduct)}
           reviews={reviews.filter((r) => r.productId === String(selectedProduct.id))}
           user={user}
+          orders={orders}
+          onReviewSaved={handleReviewSaved}
+          onOpenSignIn={(mode) => {
+            setSignInMode(mode || 'login');
+            setIsSignInOpen(true);
+          }}
           onRequestRestock={handleRequestRestock}
           allProducts={allStoreProducts}
           onBackToStore={handleBackToStore}
