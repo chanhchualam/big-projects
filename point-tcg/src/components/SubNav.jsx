@@ -19,14 +19,14 @@ export default function SubNav({ onCategorySelect, activeCategory }) {
             className={`sub-chip ${activeCategory === 'open' ? 'highlight' : ''}`}
             onClick={() => onCategorySelect && onCategorySelect('open')}
           >
-            ⚡ Open Drawings
+            Open Drawings
           </button>
           <button
             type="button"
             className={`sub-chip ${activeCategory === 'closed' ? 'highlight' : ''}`}
             onClick={() => onCategorySelect && onCategorySelect('closed')}
           >
-            📦 Closed Drawings Archive
+            Closed Drawings Archive
           </button>
         </div>
       </div>

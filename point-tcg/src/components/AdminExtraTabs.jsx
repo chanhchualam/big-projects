@@ -228,7 +228,7 @@ export function StatsTab({ orders = [], products = [] }) {
           onClick={() => exportOrdersCsv(ordersInRange, `don-hang-point-tcg-${range}-${dayKey(new Date())}.csv`)}
           disabled={ordersInRange.length === 0}
         >
-          ⬇️ Xuất {ordersInRange.length} đơn ra Excel (CSV)
+          Xuất {ordersInRange.length} đơn ra Excel (CSV)
         </button>
       </div>
 
@@ -308,7 +308,7 @@ export function StatsTab({ orders = [], products = [] }) {
 
       <section className="xadmin-card">
         <div className="xadmin-card-head">
-          <h3>⚠️ Sắp hết hàng ({lowStock.length})</h3>
+          <h3>Sắp hết hàng ({lowStock.length})</h3>
           <label className="xadmin-inline-field">
             Cảnh báo khi tồn kho ≤
             <input
@@ -539,7 +539,7 @@ export function RestockTab({ products = [] }) {
             </div>
             <div className="xadmin-email-list">{emails.join(', ')}</div>
             <div className="xadmin-form-actions">
-              <a className="xadmin-btn" href={mailto}>✉️ Soạn email báo có hàng</a>
+              <a className="xadmin-btn" href={mailto}>Soạn email báo có hàng</a>
               <button type="button" className="xadmin-btn-small" onClick={() => navigator.clipboard?.writeText(emails.join(', '))}>
                 Sao chép email
               </button>
@@ -566,7 +566,7 @@ export function TrackingEditor({ order, onSave }) {
 
   return (
     <div className="tracking-editor">
-      <span className="tracking-editor-label">🚚 Vận đơn:</span>
+      <span className="tracking-editor-label">Vận đơn:</span>
       <select value={carrier} onChange={(e) => setCarrier(e.target.value)} aria-label="Đơn vị vận chuyển">
         {CARRIERS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
       </select>
@@ -598,9 +598,9 @@ export function TrackingEditor({ order, onSave }) {
 // =============================================================
 const EMPTY_ANNOUNCEMENT = { id: '', text: '', type: 'promo', couponCode: '', link: '', linkText: '', endsAt: '', active: true };
 const ANNOUNCEMENT_TYPES = [
-  { value: 'promo', label: '🎉 Khuyến mãi' },
-  { value: 'info', label: 'ℹ️ Tin tức / Hàng mới' },
-  { value: 'warning', label: '⚠️ Lưu ý (nghỉ lễ, chậm giao...)' }
+  { value: 'promo', label: 'Khuyến mãi' },
+  { value: 'info', label: 'Tin tức / Hàng mới' },
+  { value: 'warning', label: 'Lưu ý (nghỉ lễ, chậm giao...)' }
 ];
 
 export function AnnouncementsTab() {
@@ -670,7 +670,7 @@ export function AnnouncementsTab() {
               value={form.text}
               onChange={set('text')}
               maxLength={200}
-              placeholder="VD: 🔥 Giảm 10% toàn bộ Booster Box đến hết Chủ nhật!"
+              placeholder="VD: Giảm 10% toàn bộ Booster Box đến hết Chủ nhật!"
               required
             />
           </label>

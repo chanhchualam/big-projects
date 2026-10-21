@@ -107,7 +107,7 @@ export default function SignInModal({
     try {
       const res = await sendPasswordReset(loginEmail);
       if (res.success) {
-        setLoginInfo(`📧 Nếu ${loginEmail.trim()} đã đăng ký, bạn sẽ nhận được email đặt lại mật khẩu trong vài phút (kiểm tra cả mục Spam).`);
+        setLoginInfo(`Nếu ${loginEmail.trim()} đã đăng ký, bạn sẽ nhận được email đặt lại mật khẩu trong vài phút (kiểm tra cả mục Spam).`);
       } else {
         setLoginError(res.error);
       }
@@ -152,7 +152,7 @@ export default function SignInModal({
       });
 
       if (regResult.success) {
-        setRegSuccess('🎉 Đăng ký tài khoản thành công! Đang tự động lưu lên Firebase và đăng nhập...');
+        setRegSuccess('Đăng ký tài khoản thành công! Đang tự động lưu lên Firebase và đăng nhập...');
         setTimeout(() => {
           onSignInSuccess(regResult.user);
           onClose();
@@ -190,7 +190,7 @@ export default function SignInModal({
               setLoginError('');
             }}
           >
-            🔑 Đăng Nhập
+            Đăng Nhập
           </button>
           <button
             type="button"
@@ -200,7 +200,7 @@ export default function SignInModal({
               setRegError('');
             }}
           >
-            📝 Đăng Ký
+            Đăng Ký
           </button>
         </div>
 
@@ -223,7 +223,7 @@ export default function SignInModal({
 
             {loginError && (
               <div className="admin-error-box">
-                ⚠️ {loginError}
+                {loginError}
               </div>
             )}
 
@@ -282,7 +282,7 @@ export default function SignInModal({
                 disabled={isSubmitting}
                 style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'wait' : 'pointer' }}
               >
-                {isSubmitting ? '⏳ Đang kiểm tra đăng nhập...' : 'Đăng Nhập Ngay'}
+                {isSubmitting ? 'Đang kiểm tra đăng nhập...' : 'Đăng Nhập Ngay'}
               </button>
 
 
@@ -320,7 +320,7 @@ export default function SignInModal({
 
             {regError && (
               <div className="admin-error-box">
-                ⚠️ {regError}
+                {regError}
               </div>
             )}
 
@@ -428,7 +428,7 @@ export default function SignInModal({
                 disabled={isSubmitting}
                 style={{ backgroundColor: '#059669', color: '#ffffff', opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'wait' : 'pointer' }}
               >
-                {isSubmitting ? '⏳ Đang lưu tài khoản lên Firebase...' : 'Hoàn Tất Đăng Ký Tài Khoản'}
+                {isSubmitting ? 'Đang lưu tài khoản lên Firebase...' : 'Hoàn Tất Đăng Ký Tài Khoản'}
               </button>
 
               <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.82rem', color: '#64748b' }}>

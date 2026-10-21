@@ -175,19 +175,19 @@ export default function CheckoutModal({
     e.preventDefault();
     const code = couponCode.trim().toUpperCase();
     if (!code) return;
-    setCouponMessage('⏳ Đang kiểm tra mã...');
+    setCouponMessage('Đang kiểm tra mã...');
     const coupon = await fetchCoupon(code);
     const error = getCouponError(coupon, cartTotal);
     if (error) {
       setAppliedCoupon(null);
-      setCouponMessage(`⚠️ ${error}`);
+      setCouponMessage(`${error}`);
       return;
     }
     setAppliedCoupon(coupon);
     const parts = [];
     if (coupon.percent > 0) parts.push(`giảm ${coupon.percent}% tạm tính`);
     if (coupon.freeShip) parts.push('miễn phí ship tiêu chuẩn');
-    setCouponMessage(`🎉 Áp dụng mã ${coupon.code} thành công: ${parts.join(' + ')}.`);
+    setCouponMessage(`Áp dụng mã ${coupon.code} thành công: ${parts.join(' + ')}.`);
   };
 
   // Submit Order Handler
@@ -218,14 +218,14 @@ export default function CheckoutModal({
         const couponError = getCouponError(appliedCoupon, cartTotal);
         if (couponError) {
           setAppliedCoupon(null);
-          setCouponMessage(`⚠️ ${couponError}`);
+          setCouponMessage(`${couponError}`);
           setCheckoutStep('form');
           return;
         }
         const redeemed = await redeemCoupon(appliedCoupon.code);
         if (!redeemed) {
           setAppliedCoupon(null);
-          setCouponMessage('⚠️ Mã giảm giá vừa hết lượt sử dụng. Vui lòng đặt lại đơn.');
+          setCouponMessage('Mã giảm giá vừa hết lượt sử dụng. Vui lòng đặt lại đơn.');
           setCheckoutStep('form');
           return;
         }
@@ -411,19 +411,19 @@ export default function CheckoutModal({
 
               {secondsLeft === 0 ? (
                 <div className="qr-expired-alert">
-                  <span>⚠️ Mã QR đã hết hạn! Vui lòng gia hạn thêm thời gian để tiếp tục.</span>
+                  <span>Mã QR đã hết hạn! Vui lòng gia hạn thêm thời gian để tiếp tục.</span>
                   <button
                     type="button"
                     className="btn-renew-timer"
                     onClick={() => setSecondsLeft(900)}
                   >
-                    🔄 Gia hạn thêm 15 phút
+                    Gia hạn thêm 15 phút
                   </button>
                 </div>
               ) : (
                 <div className="qr-timer-instruction">
                   {secondsLeft <= 180 ? (
-                    <strong style={{ color: '#ef4444' }}>⚡ Sắp hết thời gian giữ hàng! Vui lòng chuyển khoản nhanh chóng.</strong>
+                    <strong style={{ color: '#ef4444' }}>Sắp hết thời gian giữ hàng! Vui lòng chuyển khoản nhanh chóng.</strong>
                   ) : (
                     <span>Hệ thống tự động kích hoạt đơn hàng ngay khi nhận được chuyển khoản.</span>
                   )}
@@ -582,7 +582,7 @@ export default function CheckoutModal({
                 </div>
 
                 <div className="syntax-warning-note">
-                  ⚠️ <strong>Quan trọng:</strong> Vui lòng giữ nguyên nội dung chuyển khoản <code>{(qrConfig.notePrefix || 'PTCG')} {activeOrder.id}</code> để nhân viên Point TCG lập tức nhận biết và chuẩn bị hàng cho bạn.
+                  <strong>Quan trọng:</strong> Vui lòng giữ nguyên nội dung chuyển khoản <code>{(qrConfig.notePrefix || 'PTCG')} {activeOrder.id}</code> để nhân viên Point TCG lập tức nhận biết và chuẩn bị hàng cho bạn.
                 </div>
 
                 {/* Primary CTA Buttons */}
@@ -592,7 +592,7 @@ export default function CheckoutModal({
                     className="btn-confirm-transfer-paid"
                     onClick={handleConfirmTransfer}
                   >
-                    <span>✅ Tôi Đã Chuyển Khoản Thành Công</span>
+                    <span>Tôi Đã Chuyển Khoản Thành Công</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M5 12h14" />
                       <path d="M12 5l7 7-7 7" />
@@ -608,7 +608,7 @@ export default function CheckoutModal({
                         if (onOpenOrderHistory) onOpenOrderHistory();
                       }}
                     >
-                      📦 Xem Đơn Trong Lịch Sử
+                      Xem Đơn Trong Lịch Sử
                     </button>
                     <button
                       type="button"
@@ -694,7 +694,7 @@ export default function CheckoutModal({
                 className="btn-continue-shopping"
                 onClick={onClose}
               >
-                🛍️ Tiếp Tục Mua Sắm
+                Tiếp Tục Mua Sắm
               </button>
               {onOpenOrderHistory && (
                 <button
@@ -705,7 +705,7 @@ export default function CheckoutModal({
                     onOpenOrderHistory();
                   }}
                 >
-                  📦 Xem Lịch Sử Đơn Hàng
+                  Xem Lịch Sử Đơn Hàng
                 </button>
               )}
             </div>
@@ -864,14 +864,14 @@ export default function CheckoutModal({
                       className={`pay-tab-btn ${paymentMethod === 'qr' ? 'active' : ''}`}
                       onClick={() => setPaymentMethod('qr')}
                     >
-                      📱 Chuyển Khoản / VietQR
+                      Chuyển Khoản / VietQR
                     </button>
                     <button
                       type="button"
                       className={`pay-tab-btn ${paymentMethod === 'cod' ? 'active' : ''}`}
                       onClick={() => setPaymentMethod('cod')}
                     >
-                      💵 Thanh Toán Tiền Mặt Khi Nhận Hàng (COD)
+                      Thanh Toán Tiền Mặt Khi Nhận Hàng (COD)
                     </button>
                   </div>
 
@@ -879,7 +879,6 @@ export default function CheckoutModal({
                   {paymentMethod === 'qr' && (
                     <div className="payment-details-box qr-box">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
-                        <span>⚡</span>
                         <span>Quét mã VietQR chuyển khoản (Có đồng hồ đếm ngược 15:00)</span>
                       </div>
                       <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
@@ -979,7 +978,7 @@ export default function CheckoutModal({
                       onClick={onClose}
                       title="Chọn thêm sản phẩm khác từ cửa hàng"
                     >
-                      <span>🛍️ + Chọn thêm sản phẩm khác</span>
+                      <span>+ Chọn thêm sản phẩm khác</span>
                     </button>
                   </div>
 
@@ -1042,7 +1041,7 @@ export default function CheckoutModal({
                   </div>
 
                   <button type="submit" className="btn-confirm-checkout">
-                    <span>🔒 Đặt Hàng & Thanh Toán Ngay</span>
+                    <span>Đặt Hàng & Thanh Toán Ngay</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M5 12h14" />
                       <path d="M12 5l7 7-7 7" />
@@ -1050,7 +1049,7 @@ export default function CheckoutModal({
                   </button>
 
                   <div className="checkout-guarantee-note">
-                    🛡️ Cam kết 100% hàng chính hãng niêm phong factory sealed • Đơn hàng đồng bộ tức thì sang Admin Shopper
+                    Cam kết 100% hàng chính hãng niêm phong factory sealed • Đơn hàng đồng bộ tức thì sang Admin Shopper
                   </div>
                 </div>
               </div>

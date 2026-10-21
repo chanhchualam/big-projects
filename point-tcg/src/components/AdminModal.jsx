@@ -313,7 +313,7 @@ export default function AdminModal({
         const priceInfo = newOrder.amountVnd
           ? `${newOrder.amountVnd.toLocaleString('vi-VN')} đ`
           : `$${newOrder.total?.toFixed(2)}`;
-        setNewOrderAlert(`🔔 ĐƠN HÀNG MỚI! Khách ${newOrder.customerName} vừa đặt đơn #${newOrder.id} (${priceInfo})`);
+        setNewOrderAlert(`ĐƠN HÀNG MỚI! Khách ${newOrder.customerName} vừa đặt đơn #${newOrder.id} (${priceInfo})`);
         setTimeout(() => setNewOrderAlert(null), 8000);
       }
     };
@@ -460,7 +460,7 @@ export default function AdminModal({
     const saved = saveNewOrder(testPayload);
     if (saved) {
       setLocalOrders(prev => [saved, ...prev.filter(o => o.id !== saved.id)]);
-      setNewOrderAlert(`🔔 ĐÃ TẠO ĐƠN TEST! Khách hàng ${saved.customerName} đặt đơn #${saved.id} (${(saved.amountVnd || 0).toLocaleString('vi-VN')} đ)`);
+      setNewOrderAlert(`ĐÃ TẠO ĐƠN TEST! Khách hàng ${saved.customerName} đặt đơn #${saved.id} (${(saved.amountVnd || 0).toLocaleString('vi-VN')} đ)`);
       setTimeout(() => setNewOrderAlert(null), 5000);
     }
   };
@@ -979,7 +979,7 @@ export default function AdminModal({
 
     if (res.success) {
       setPasswordForm({ current: '', next: '', confirm: '' });
-      setAccountSuccessMsg('✅ Đã đổi mật khẩu quản trị thành công!');
+      setAccountSuccessMsg('Đã đổi mật khẩu quản trị thành công!');
       setTimeout(() => setAccountSuccessMsg(''), 4000);
     } else {
       setAccountErrorMsg(res.error);
@@ -1001,7 +1001,7 @@ export default function AdminModal({
     }
     const saved = await saveQrConfig(qrSettings);
     if (saved) {
-      setQrSaveToast('🎉 Đã lưu cài đặt mã QR & thông tin ngân hàng thành công! Khách mua hàng sẽ thấy mã QR mới này.');
+      setQrSaveToast('Đã lưu cài đặt mã QR & thông tin ngân hàng thành công! Khách mua hàng sẽ thấy mã QR mới này.');
       setTimeout(() => setQrSaveToast(''), 4500);
     } else {
       alert('Không thể lưu cài đặt QR lên Firestore (không có quyền hoặc ảnh QR quá lớn).');
@@ -1016,7 +1016,7 @@ export default function AdminModal({
         return;
       }
       setQrSettings(def);
-      setQrSaveToast('🔄 Đã khôi phục mã QR về mặc định.');
+      setQrSaveToast('Đã khôi phục mã QR về mặc định.');
       setTimeout(() => setQrSaveToast(''), 3000);
     }
   };
@@ -1068,7 +1068,7 @@ export default function AdminModal({
         {/* Live Upload Toast Alert */}
         {uploadToast && (
           <div className="admin-upload-toast">
-            <span>✅ {uploadToast}</span>
+            <span>{uploadToast}</span>
             <button
               type="button"
               className="btn-toast-dismiss"
@@ -1100,7 +1100,7 @@ export default function AdminModal({
                 onClick={onNavigateToStore || (() => window.open('./#', '_blank'))}
                 title="Mở tab khách hàng để xem cửa hàng"
               >
-                🌐 Xem Shop ↗
+                Xem Shop ↗
               </button>
             ) : (
               <button
@@ -1119,7 +1119,7 @@ export default function AdminModal({
         {(isCreatingNew || editingProduct) ? (
           <div className="admin-form-container">
             <div className="admin-form-header">
-              <h3>{isCreatingNew ? '✨ Thêm Sản Phẩm Mới Vào Cửa Hàng' : `✏️ Chỉnh Sửa Sản Phẩm: ${formData.title}`}</h3>
+              <h3>{isCreatingNew ? 'Thêm Sản Phẩm Mới Vào Cửa Hàng' : `Chỉnh Sửa Sản Phẩm: ${formData.title}`}</h3>
               <button
                 type="button"
                 className="btn-admin-back"
@@ -1139,8 +1139,8 @@ export default function AdminModal({
                   <span className="form-label">Loại sản phẩm <span style={{ color: '#ef4444' }}>*</span></span>
                   <div className="admin-section-choice" role="radiogroup" aria-label="Loại sản phẩm">
                     {[
-                      ['open', '⚡ Open Drawing', 'Đang mở raffle, có đồng hồ đếm ngược'],
-                      ['closed', '📦 Closed Drawing', 'Đã đóng raffle, hiện trong băng chuyền']
+                      ['open', 'Open Drawing', 'Đang mở raffle, có đồng hồ đếm ngược'],
+                      ['closed', 'Closed Drawing', 'Đã đóng raffle, hiện trong băng chuyền']
                     ].map(([value, title, sub]) => (
                       <button
                         key={value}
@@ -1259,7 +1259,6 @@ export default function AdminModal({
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <label className="form-label" style={{ margin: 0, fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', fontSize: '0.95rem' }}>
-                      <span style={{ fontSize: '1.2rem' }}>📝</span>
                       <span>Mô Tả Sản Phẩm (Hiển thị tại tab "MÔ TẢ SẢN PHẨM")</span>
                     </label>
                     <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600, background: '#e2e8f0', padding: '3px 8px', borderRadius: '12px' }}>
@@ -1292,7 +1291,7 @@ export default function AdminModal({
 
                   {/* Preset Quick Fill Templates */}
                   <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.78rem', color: '#334155', fontWeight: 700 }}>💡 Mẫu gợi ý nhanh:</span>
+                    <span style={{ fontSize: '0.78rem', color: '#334155', fontWeight: 700 }}>Mẫu gợi ý nhanh:</span>
                     <button
                       type="button"
                       className="preset-text-chip"
@@ -1301,7 +1300,7 @@ export default function AdminModal({
                         description: `${prev.title || 'Sản phẩm'} là bộ sưu tập cao cấp chính hãng từ The Pokémon Company, được nhập khẩu nguyên seal 100% với tem niêm phong tiêu chuẩn quốc tế.\n\nSản phẩm được bảo quản cẩn thận trong phòng nhiệt độ và độ ẩm chuẩn collectors, đảm bảo góc cạnh hộp và lớp seal hoàn hảo không tì vết.`
                       }))}
                     >
-                      📦 Mẫu Booster Box Nguyên Seal
+                      Mẫu Booster Box Nguyên Seal
                     </button>
                     <button
                       type="button"
@@ -1311,7 +1310,7 @@ export default function AdminModal({
                         description: `${prev.title || 'Sản phẩm'} - Phiên bản giới hạn dành riêng cho nhà sưu tập thẻ bài Pokémon TCG chuyên nghiệp.\n\n• Tình trạng: Mới 100% Factory Sealed nguyên seal màng co chính hãng.\n• Xuất xứ: The Pokémon Company International (USA / Japan).\n• Cam kết: Hoàn tiền 111% nếu phát hiện hàng giả mạo hoặc khui bóc seal trước khi nhận.`
                       }))}
                     >
-                      💎 Mẫu Cam Kết Chính Hãng & Seal
+                      Mẫu Cam Kết Chính Hãng & Seal
                     </button>
                     <button
                       type="button"
@@ -1321,7 +1320,7 @@ export default function AdminModal({
                         description: `${prev.title || 'Sản phẩm'} - Thẻ bài đơn (Single Card) tình trạng Near Mint (NM), được bọc sleeve bảo vệ và để trong toploader cứng cáp.\n\nCam kết thẻ bài chính hãng 100%, bảo quản không cong vênh, góc cạnh sắc nét.`
                       }))}
                     >
-                      🃏 Mẫu Thẻ Bài Lẻ (Single Card)
+                      Mẫu Thẻ Bài Lẻ (Single Card)
                     </button>
                   </div>
                 </div>
@@ -1331,7 +1330,6 @@ export default function AdminModal({
                 <div className="admin-countdown-setting-card">
                   <div className="countdown-card-header">
                     <div className="countdown-card-title">
-                      <span style={{ fontSize: '1.25rem' }}>⏱️</span>
                       <div>
                         <strong>Tuỳ Chỉnh Thời Gian & Dòng Chữ "Drawing ends in"</strong>
                         <p className="countdown-card-sub">
@@ -1365,7 +1363,7 @@ export default function AdminModal({
                     <span>Hình ảnh sản phẩm <span style={{ color: '#ef4444' }}>*</span></span>
                     {formData.imageType === 'upload' && formData.uploadedFileName && (
                       <span className="admin-file-meta-tag">
-                        📁 {formData.uploadedFileName} {formData.uploadedFileSize ? `(${formData.uploadedFileSize})` : ''}
+                        {formData.uploadedFileName} {formData.uploadedFileSize ? `(${formData.uploadedFileSize})` : ''}
                       </span>
                     )}
                   </label>
@@ -1375,21 +1373,21 @@ export default function AdminModal({
                       className={`admin-tab-chip ${formData.imageType === 'upload' ? 'active' : ''}`}
                       onClick={() => setFormData({ ...formData, imageType: 'upload' })}
                     >
-                      📁 Tải ảnh từ máy tính (Khuyên dùng)
+                      Tải ảnh từ máy tính (Khuyên dùng)
                     </button>
                     <button
                       type="button"
                       className={`admin-tab-chip ${formData.imageType === 'url' ? 'active' : ''}`}
                       onClick={() => setFormData({ ...formData, imageType: 'url' })}
                     >
-                      🔗 Link ảnh Online
+                      Link ảnh Online
                     </button>
                     <button
                       type="button"
                       className={`admin-tab-chip ${formData.imageType === 'preset' ? 'active' : ''}`}
                       onClick={() => setFormData({ ...formData, imageType: 'preset' })}
                     >
-                      🎨 Mẫu Pokémon có sẵn
+                      Mẫu Pokémon có sẵn
                     </button>
                   </div>
 
@@ -1413,7 +1411,6 @@ export default function AdminModal({
 
                         {!formData.rawUploadedImage ? (
                           <div className="dropzone-empty-state">
-                            <div className="dropzone-icon">☁️</div>
                             <div className="dropzone-primary-text">
                               Kéo thả file ảnh vào đây hoặc <span>bấm để chọn từ máy tính</span>
                             </div>
@@ -1428,7 +1425,7 @@ export default function AdminModal({
                                 fileInputRef.current?.click();
                               }}
                             >
-                              📂 Chọn File Ảnh Từ Máy
+                              Chọn File Ảnh Từ Máy
                             </button>
                           </div>
                         ) : (
@@ -1450,7 +1447,7 @@ export default function AdminModal({
                                     fileInputRef.current?.click();
                                   }}
                                 >
-                                  🔄 Đổi file khác
+                                  Đổi file khác
                                 </button>
                                 <button
                                   type="button"
@@ -1460,7 +1457,7 @@ export default function AdminModal({
                                     handleClearUploadedImage();
                                   }}
                                 >
-                                  🗑️ Xoá ảnh
+                                  Xoá ảnh
                                 </button>
                               </div>
                             </div>
@@ -1478,7 +1475,7 @@ export default function AdminModal({
                           />
                           <div className="admin-frame-toggle-text">
                             <div className="admin-frame-toggle-title">
-                              🖼️ Đóng khung đỏ trưng bày chuẩn Shop Point TCG (Khuyên dùng)
+                              Đóng khung đỏ trưng bày chuẩn Shop Point TCG (Khuyên dùng)
                             </div>
                             <div className="admin-frame-toggle-desc">
                               Tự động bọc ảnh trong khung viền đỏ #d32f2f, tiêu đề <strong>CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</strong>, tag giảm giá và logo chứng nhận TCG chuẩn POINT TCG.
@@ -1514,7 +1511,7 @@ export default function AdminModal({
                           />
                           <div className="admin-frame-toggle-text">
                             <div className="admin-frame-toggle-title">
-                              🖼️ Đóng khung đỏ trưng bày cho link ảnh này
+                              Đóng khung đỏ trưng bày cho link ảnh này
                             </div>
                           </div>
                         </label>
@@ -1539,11 +1536,11 @@ export default function AdminModal({
                 <div className="admin-gallery-box">
                   <div className="admin-gallery-head">
                     <div>
-                      <strong>🖼️ Ảnh phụ ({(formData.gallery || []).length}/{MAX_GALLERY_IMAGES})</strong>
+                      <strong>Ảnh phụ ({(formData.gallery || []).length}/{MAX_GALLERY_IMAGES})</strong>
                       <p>Khách sẽ thấy ảnh chính + các ảnh phụ tự đổi lần lượt, có thể vuốt hoặc bấm mũi tên để xem.</p>
                     </div>
                     <label className={`xadmin-btn ${galleryBusy || (formData.gallery || []).length >= MAX_GALLERY_IMAGES ? 'disabled' : ''}`}>
-                      {galleryBusy ? '⏳ Đang nén ảnh...' : '+ Thêm ảnh phụ'}
+                      {galleryBusy ? 'Đang nén ảnh...' : '+ Thêm ảnh phụ'}
                       <input
                         type="file"
                         accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
@@ -1600,7 +1597,7 @@ export default function AdminModal({
 
                 <div className="admin-form-actions">
                   <button type="submit" className="btn-admin-save">
-                    {isCreatingNew ? '➕ Đăng Sản Phẩm Mới' : '💾 Lưu Cập Nhật'}
+                    {isCreatingNew ? 'Đăng Sản Phẩm Mới' : 'Lưu Cập Nhật'}
                   </button>
                   <button
                     type="button"
@@ -1618,7 +1615,7 @@ export default function AdminModal({
               {/* Preview Col */}
               <div className="admin-preview-col">
                 <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
-                  👁️ Xem trước Card:
+                  Xem trước Card:
                 </div>
                 <div className="product-card" style={{ maxWidth: '280px', margin: '0 auto' }}>
                   <div className="card-image-box">
@@ -1676,7 +1673,7 @@ export default function AdminModal({
                 className={`admin-tab-btn ${activeTab === 'orders' ? 'active shopper-tab' : ''}`}
                 onClick={() => setActiveTab('orders')}
               >
-                🛍️ Đơn Hàng Shopper ({orders.length})
+                Đơn Hàng Shopper ({orders.length})
                 {pendingCount > 0 && <span className="admin-badge-count-red">{pendingCount} mới</span>}
               </button>
 
@@ -1685,7 +1682,7 @@ export default function AdminModal({
                 className={`admin-tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
                 onClick={() => setActiveTab('stats')}
               >
-                📊 Thống Kê & Xuất Đơn
+                Thống Kê & Xuất Đơn
               </button>
 
               <button
@@ -1693,7 +1690,7 @@ export default function AdminModal({
                 className={`admin-tab-btn ${activeTab === 'coupons' ? 'active' : ''}`}
                 onClick={() => setActiveTab('coupons')}
               >
-                🎟️ Mã Giảm Giá
+                Mã Giảm Giá
               </button>
 
               <button
@@ -1701,7 +1698,7 @@ export default function AdminModal({
                 className={`admin-tab-btn ${activeTab === 'announcements' ? 'active' : ''}`}
                 onClick={() => setActiveTab('announcements')}
               >
-                📢 Thông Báo Shop
+                Thông Báo Shop
               </button>
 
               <button
@@ -1709,7 +1706,7 @@ export default function AdminModal({
                 className={`admin-tab-btn ${activeTab === 'restock' ? 'active' : ''}`}
                 onClick={() => setActiveTab('restock')}
               >
-                🔔 Báo Có Hàng
+                Báo Có Hàng
               </button>
 
               <button
@@ -1717,7 +1714,7 @@ export default function AdminModal({
                 className={`admin-tab-btn ${activeTab === 'customers' ? 'active' : ''}`}
                 onClick={() => setActiveTab('customers')}
               >
-                👥 Khách Hàng ({customers.length})
+                Khách Hàng ({customers.length})
               </button>
 
               <button
@@ -1725,7 +1722,7 @@ export default function AdminModal({
                 className={`admin-tab-btn ${activeTab === 'products' ? 'active' : ''}`}
                 onClick={() => setActiveTab('products')}
               >
-                🃏 Sản Phẩm ({openDrawings.length + closedDrawings.length})
+                Sản Phẩm ({openDrawings.length + closedDrawings.length})
               </button>
 
               <button
@@ -1733,7 +1730,7 @@ export default function AdminModal({
                 className={`admin-tab-btn ${activeTab === 'account' ? 'active' : ''}`}
                 onClick={() => setActiveTab('account')}
               >
-                👤 Tài Khoản Admin
+                Tài Khoản Admin
               </button>
 
               <button
@@ -1745,7 +1742,7 @@ export default function AdminModal({
                   setIsCreatingNew(false);
                 }}
               >
-                💳 Cài Đặt Mã QR & Ngân Hàng
+                Cài Đặt Mã QR & Ngân Hàng
               </button>
 
               <button
@@ -1766,7 +1763,7 @@ export default function AdminModal({
                   }
                 }}
               >
-                🔥 Firebase Database
+                Firebase Database
               </button>
 
               <button
@@ -1778,7 +1775,7 @@ export default function AdminModal({
                   }
                 }}
               >
-                🔄 Khôi phục sản phẩm mẫu
+                Khôi phục sản phẩm mẫu
               </button>
             </div>
 
@@ -1794,23 +1791,23 @@ export default function AdminModal({
                     <div className="metric-val">{orders.length}</div>
                   </div>
                   <div className="metric-box highlight-pending" style={{ borderColor: '#eab308' }}>
-                    <div className="metric-label">🟡 Chờ Quét QR</div>
+                    <div className="metric-label">Chờ Quét QR</div>
                     <div className="metric-val">{qrWaitingCount}</div>
                   </div>
                   <div className="metric-box highlight-pending">
-                    <div className="metric-label">🟢 Chờ Xác Nhận / Chuẩn Bị</div>
+                    <div className="metric-label">Chờ Xác Nhận / Chuẩn Bị</div>
                     <div className="metric-val">{pendingCount}</div>
                   </div>
                   <div className="metric-box">
-                    <div className="metric-label">🟠 Đang Chuẩn Bị Hàng</div>
+                    <div className="metric-label">Đang Chuẩn Bị Hàng</div>
                     <div className="metric-val">{preparingCount}</div>
                   </div>
                   <div className="metric-box">
-                    <div className="metric-label">🔵 Đang Giao Hàng</div>
+                    <div className="metric-label">Đang Giao Hàng</div>
                     <div className="metric-val">{shippingCount}</div>
                   </div>
                   <div className="metric-box highlight-revenue">
-                    <div className="metric-label">💰 Doanh Thu Thực Nhận</div>
+                    <div className="metric-label">Doanh Thu Thực Nhận</div>
                     <div className="metric-val">${totalRevenue.toFixed(2)}</div>
                   </div>
                 </div>
@@ -1820,7 +1817,7 @@ export default function AdminModal({
                   <div className="status-filter-pills">
                     {[
                       { key: 'all', label: `Tất cả (${orders.length})` },
-                      { key: 'Chờ thanh toán QR', label: `🟡 Chờ quét QR (${qrWaitingCount})` },
+                      { key: 'Chờ thanh toán QR', label: `Chờ quét QR (${qrWaitingCount})` },
                       { key: 'Chờ xác nhận', label: `Chờ chuẩn bị (${pendingCount})` },
                       { key: 'Đang chuẩn bị hàng', label: `Đang chuẩn bị (${preparingCount})` },
                       { key: 'Đang giao hàng', label: `Đang giao (${shippingCount})` },
@@ -1845,7 +1842,7 @@ export default function AdminModal({
                       onClick={handleCreateTestOrder}
                       title="Giả lập một đơn hàng mới thanh toán bằng mã QR để test tức thì"
                     >
-                      ⚡ + Tạo Đơn Mới (QR Test)
+                      + Tạo Đơn Mới (QR Test)
                     </button>
                     <button
                       type="button"
@@ -1853,14 +1850,14 @@ export default function AdminModal({
                       onClick={handleRestoreSampleOrders}
                       title="Khôi phục danh sách các đơn hàng mẫu ban đầu"
                     >
-                      🔄 Khôi Phục Đơn Mẫu
+                      Khôi Phục Đơn Mẫu
                     </button>
 
                     <div className="order-search-box">
                       <input
                         type="text"
                         className="form-input search-orders-input"
-                        placeholder="🔍 Tìm mã đơn (#PTCG...), tên khách, SĐT..."
+                        placeholder="Tìm mã đơn (#PTCG...), tên khách, SĐT..."
                         value={orderSearch}
                         onChange={(e) => setOrderSearch(e.target.value)}
                       />
@@ -1871,7 +1868,6 @@ export default function AdminModal({
                 {/* Orders List for Fulfillment */}
                 {filteredOrders.length === 0 ? (
                   <div className="empty-orders-view">
-                    <div style={{ fontSize: '2.5rem' }}>📭</div>
                     <h4>Không tìm thấy đơn hàng nào phù hợp</h4>
                     <p>Khi khách hàng đặt mua qua Giỏ hàng, đơn hàng sẽ ngay lập tức xuất hiện tại đây để bạn chuẩn bị đóng gói!</p>
                   </div>
@@ -1905,7 +1901,7 @@ export default function AdminModal({
                                 onClick={() => setSelectedSlipOrder(order)}
                                 title="In phiếu đóng gói / Vận đơn Shopee"
                               >
-                                🖨️ In Phiếu Đóng Gói
+                                In Phiếu Đóng Gói
                               </button>
                               <button
                                 type="button"
@@ -1913,7 +1909,7 @@ export default function AdminModal({
                                 onClick={() => handleDeleteOrderClick(order.id)}
                                 title="Xoá đơn hàng này"
                               >
-                                🗑️
+                                
                               </button>
                             </div>
                           </div>
@@ -1921,14 +1917,14 @@ export default function AdminModal({
                           {/* Customer & Shipping Summary */}
                           <div className="shopper-customer-grid">
                             <div className="shopper-cust-col">
-                              <div className="cust-row-title">👤 Thông tin khách hàng:</div>
+                              <div className="cust-row-title">Thông tin khách hàng:</div>
                               <div>Họ tên: <strong>{order.customerName}</strong></div>
                               <div>Điện thoại: <strong>{order.customerPhone || 'Chưa cập nhật'}</strong></div>
                               <div>Email: <span>{order.customerEmail}</span></div>
                             </div>
 
                             <div className="shopper-cust-col">
-                              <div className="cust-row-title">📍 Địa chỉ nhận hàng:</div>
+                              <div className="cust-row-title">Địa chỉ nhận hàng:</div>
                               <div className="address-highlight-text">{order.shippingAddress}</div>
                               {order.orderNotes && (
                                 <div className="note-bubble">
@@ -1938,7 +1934,7 @@ export default function AdminModal({
                             </div>
 
                             <div className="shopper-cust-col">
-                              <div className="cust-row-title">💳 Thanh toán & Vận chuyển:</div>
+                              <div className="cust-row-title">Thanh toán & Vận chuyển:</div>
                               <div>Hình thức: <strong>{order.paymentMethod}</strong></div>
                               {order.amountVnd && (
                                 <div>Quy đổi VNĐ: <strong style={{ color: '#0053e2' }}>{order.amountVnd.toLocaleString('vi-VN')} đ</strong></div>
@@ -1956,14 +1952,14 @@ export default function AdminModal({
                             <div className="xadmin-pill-green" style={{ margin: '8px 0' }}>✓ Server đã kiểm tra giá: khớp</div>
                           )}
                           {order.paymentNote && (
-                            <div className="xadmin-pill-amber" style={{ margin: '8px 0', whiteSpace: 'normal' }}>💳 {order.paymentNote}</div>
+                            <div className="xadmin-pill-amber" style={{ margin: '8px 0', whiteSpace: 'normal' }}>{order.paymentNote}</div>
                           )}
 
                           {/* Cảnh báo giá: giá trong đơn do khách gửi lên, có thể đã bị sửa */}
                           {pricing.warnings.length > 0 && (
                             <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', padding: '10px 14px', borderRadius: '8px', fontSize: '0.84rem', margin: '10px 0' }}>
                               <div style={{ fontWeight: 800, marginBottom: '4px' }}>
-                                ⚠️ Giá trong đơn không khớp — kiểm tra số tiền thực nhận trước khi xác nhận
+                                Giá trong đơn không khớp — kiểm tra số tiền thực nhận trước khi xác nhận
                               </div>
                               <ul style={{ margin: '0 0 6px 18px', padding: 0 }}>
                                 {pricing.warnings.map((w, i) => <li key={i}>{w}</li>)}
@@ -1979,7 +1975,7 @@ export default function AdminModal({
                           {/* Items Checklist for Packing */}
                           <div className="shopper-items-checklist">
                             <div className="checklist-heading">
-                              <span>📦 Danh sách hàng cần nhặt vào hộp đóng gói ({order.items?.length || 0} món):</span>
+                              <span>Danh sách hàng cần nhặt vào hộp đóng gói ({order.items?.length || 0} món):</span>
                             </div>
                             <div className="checklist-items-table">
                               {order.items?.map((item, idx) => (
@@ -2019,9 +2015,9 @@ export default function AdminModal({
                                   handleUpdateStatus(order.id, next);
                                 }}
                               >
-                                <option value="Chờ thanh toán QR (Đơn mới)">🟡 Chờ thanh toán QR (Đơn mới)</option>
-                                <option value="Khách báo đã chuyển khoản (Chờ xác nhận)">🟠 Khách báo đã chuyển khoản (kiểm tra sao kê)</option>
-                                <option value="Đã thanh toán (Chờ chuẩn bị hàng)">🟢 Đã thanh toán (Chờ chuẩn bị hàng)</option>
+                                <option value="Chờ thanh toán QR (Đơn mới)">Chờ thanh toán QR (Đơn mới)</option>
+                                <option value="Khách báo đã chuyển khoản (Chờ xác nhận)">Khách báo đã chuyển khoản (kiểm tra sao kê)</option>
+                                <option value="Đã thanh toán (Chờ chuẩn bị hàng)">Đã thanh toán (Chờ chuẩn bị hàng)</option>
                                 <option value="Chờ xác nhận (Đơn mới)">Chờ xác nhận (Đơn mới)</option>
                                 <option value="Đang chuẩn bị hàng">Đang chuẩn bị hàng</option>
                                 <option value="Đang giao hàng">Đang giao hàng</option>
@@ -2038,7 +2034,7 @@ export default function AdminModal({
                                   onClick={() => handleUpdateStatus(order.id, 'Đang chuẩn bị hàng')}
                                   title="Xác nhận tài khoản đã nhận tiền chuyển khoản và bắt đầu chuẩn bị hàng"
                                 >
-                                  ✅ Xác Nhận Đã Nhận Tiền QR (Duyệt Đơn)
+                                  Xác Nhận Đã Nhận Tiền QR (Duyệt Đơn)
                                 </button>
                               )}
 
@@ -2048,7 +2044,7 @@ export default function AdminModal({
                                   className="btn-flow-action btn-flow-prepare"
                                   onClick={() => handleNextStep(order)}
                                 >
-                                  📦 Bắt Đầu Chuẩn Bị Hàng
+                                  Bắt Đầu Chuẩn Bị Hàng
                                 </button>
                               )}
 
@@ -2058,7 +2054,7 @@ export default function AdminModal({
                                   className="btn-flow-action btn-flow-ship"
                                   onClick={() => handleNextStep(order)}
                                 >
-                                  🚚 Đã Đóng Gói - Giao Vận Chuyển
+                                  Đã Đóng Gói - Giao Vận Chuyển
                                 </button>
                               )}
 
@@ -2068,7 +2064,7 @@ export default function AdminModal({
                                   className="btn-flow-action btn-flow-complete"
                                   onClick={() => handleNextStep(order)}
                                 >
-                                  ✅ Xác Nhận Đã Giao Thành Công
+                                  Xác Nhận Đã Giao Thành Công
                                 </button>
                               )}
 
@@ -2117,7 +2113,7 @@ export default function AdminModal({
                     type="text"
                     className="form-input"
                     style={{ width: '280px' }}
-                    placeholder="🔍 Tìm khách hàng theo tên, email..."
+                    placeholder="Tìm khách hàng theo tên, email..."
                     value={customerSearch}
                     onChange={(e) => setCustomerSearch(e.target.value)}
                   />
@@ -2177,7 +2173,7 @@ export default function AdminModal({
                                   onClick={() => handleDeleteCustomerClick(cust.id, cust.name)}
                                   title="Xoá tài khoản khách hàng này"
                                 >
-                                  🗑️ Xoá
+                                  Xoá
                                 </button>
                               </td>
                             </tr>
@@ -2198,8 +2194,8 @@ export default function AdminModal({
                   <div className="xadmin-segment" role="group" aria-label="Lọc theo loại sản phẩm">
                     {[
                       ['all', `Tất cả (${openDrawings.length + closedDrawings.length})`],
-                      ['open', `⚡ Open Drawings (${openDrawings.length})`],
-                      ['closed', `📦 Closed Drawings (${closedDrawings.length})`]
+                      ['open', `Open Drawings (${openDrawings.length})`],
+                      ['closed', `Closed Drawings (${closedDrawings.length})`]
                     ].map(([value, label]) => (
                       <button
                         key={value}
@@ -2238,10 +2234,10 @@ export default function AdminModal({
                             )}
                             {product.badge && <span className="admin-pill-badge">{product.badge}</span>}
                             <span className={section === 'open' ? 'admin-section-pill open' : 'admin-section-pill closed'}>
-                              {section === 'open' ? '⚡ Open Drawing' : '📦 Closed Drawing'}
+                              {section === 'open' ? 'Open Drawing' : 'Closed Drawing'}
                             </span>
                             <span className={`admin-stock-badge ${Number(product.stock ?? 20) <= 0 ? 'out' : Number(product.stock ?? 20) <= 5 ? 'low' : 'ok'}`}>
-                              📦 Kho: <strong>{typeof product.stock === 'number' ? product.stock : 20}</strong>
+                              Kho: <strong>{typeof product.stock === 'number' ? product.stock : 20}</strong>
                               {Number(product.stock ?? 20) <= 0 && (
                                 <span style={{ marginLeft: '4px', fontStyle: 'italic', color: '#b91c1c' }}>
                                   (Hết hàng — Đang ẩn khỏi khách)
@@ -2249,7 +2245,7 @@ export default function AdminModal({
                               )}
                             </span>
                             <span style={{ color: '#d97706', fontWeight: 700, background: '#fffbeb', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fde68a', fontSize: '0.74rem' }}>
-                              ⏱️ {getDrawingText(product, Date.now(), Date.now() + (product.secondsRemaining || 7200) * 1000) || 'Không hẹn giờ'}
+                              {getDrawingText(product, Date.now(), Date.now() + (product.secondsRemaining || 7200) * 1000) || 'Không hẹn giờ'}
                             </span>
                           </div>
                         </div>
@@ -2290,10 +2286,10 @@ export default function AdminModal({
                             onClick={() => handleOpenQuickTimer(product)}
                             title="Tuỳ chỉnh thời gian đếm ngược (Drawing ends in)"
                           >
-                            ⏱️ Đổi giờ
+                            Đổi giờ
                           </button>
                           <label className="btn-action-upload-img" title="Tải ảnh mới từ máy tính cho sản phẩm này">
-                            📷 Up ảnh
+                            Up ảnh
                             <input
                               type="file"
                               accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
@@ -2313,7 +2309,7 @@ export default function AdminModal({
                             onClick={() => startEdit(product, section)}
                             title="Chỉnh sửa sản phẩm"
                           >
-                            ✏️ Sửa
+                            Sửa
                           </button>
                           <button
                             type="button"
@@ -2325,7 +2321,7 @@ export default function AdminModal({
                             }}
                             title="Xoá sản phẩm"
                           >
-                            🗑️ Xoá
+                            Xoá
                           </button>
                         </div>
                       </div>
@@ -2342,7 +2338,6 @@ export default function AdminModal({
             {activeTab === 'account' && (
               <div className="admin-account-panel">
                 <div className="admin-account-header">
-                  <div style={{ fontSize: '2rem' }}>🛡️</div>
                   <div>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
                       Thiết Lập Tài Khoản Quản Trị Viên (Admin)
@@ -2360,7 +2355,6 @@ export default function AdminModal({
                 )}
                 {accountErrorMsg && (
                   <div className="admin-login-error-alert" role="alert">
-                    <span>⚠️</span>
                     <span>{accountErrorMsg}</span>
                   </div>
                 )}
@@ -2408,7 +2402,7 @@ export default function AdminModal({
 
                   <div className="admin-account-actions">
                     <button type="submit" className="btn-admin-save-account" disabled={isChangingPassword}>
-                      {isChangingPassword ? '⏳ Đang đổi mật khẩu...' : '🔐 Đổi Mật Khẩu'}
+                      {isChangingPassword ? 'Đang đổi mật khẩu...' : 'Đổi Mật Khẩu'}
                     </button>
                   </div>
                 </form>
@@ -2421,7 +2415,6 @@ export default function AdminModal({
             {activeTab === 'qr_settings' && (
               <div className="admin-account-panel">
                 <div className="admin-account-header">
-                  <div style={{ fontSize: '2.2rem' }}>💳</div>
                   <div>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
                       Thiết Lập Mã QR Thanh Toán & Tài Khoản Ngân Hàng
@@ -2460,7 +2453,7 @@ export default function AdminModal({
                           }}
                           onClick={() => setQrSettings({ ...qrSettings, mode: 'vietqr' })}
                         >
-                          ⚡ VietQR Tự Động (Khuyên Dùng)
+                          VietQR Tự Động (Khuyên Dùng)
                         </button>
                         <button
                           type="button"
@@ -2477,7 +2470,7 @@ export default function AdminModal({
                           }}
                           onClick={() => setQrSettings({ ...qrSettings, mode: 'custom_image' })}
                         >
-                          🖼️ Tải Ảnh QR Riêng Của Bạn
+                          Tải Ảnh QR Riêng Của Bạn
                         </button>
                       </div>
                     </div>
@@ -2580,7 +2573,6 @@ export default function AdminModal({
                               style={{ display: 'none' }}
                               onChange={handleQrImageUpload}
                             />
-                            <div style={{ fontSize: '2rem', marginBottom: '6px' }}>📷</div>
                             <strong style={{ color: '#0053e2', fontSize: '0.9rem' }}>
                               Bấm vào đây để chọn ảnh mã QR từ máy tính
                             </strong>
@@ -2640,7 +2632,7 @@ export default function AdminModal({
 
                     <div className="admin-account-actions" style={{ marginTop: '20px' }}>
                       <button type="submit" className="btn-admin-save-account" style={{ padding: '12px 24px', fontSize: '0.95rem' }}>
-                        💾 Lưu Cài Đặt Mã QR Mới
+                        Lưu Cài Đặt Mã QR Mới
                       </button>
                       <button
                         type="button"
@@ -2655,7 +2647,6 @@ export default function AdminModal({
                   {/* RIGHT: LIVE PREVIEW OF HOW CUSTOMERS WILL SEE IT */}
                   <div style={{ background: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '14px', padding: '18px', textAlign: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontWeight: 800, color: '#0f172a', fontSize: '0.92rem', marginBottom: '12px' }}>
-                      <span>👁️</span>
                       <span>Xem Trước Mã QR Khách Sẽ Quét</span>
                     </div>
 
@@ -2676,11 +2667,11 @@ export default function AdminModal({
                     </div>
 
                     <div style={{ marginTop: '14px', textAlign: 'left', background: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.82rem', lineHeight: 1.6 }}>
-                      <div>🏦 <strong>Ngân hàng:</strong> {qrSettings.bankName || 'MB Bank'}</div>
-                      <div>🔢 <strong>STK:</strong> <code style={{ color: '#0053e2', fontWeight: 700 }}>{qrSettings.accountNumber || '888866889999'}</code></div>
-                      <div>👤 <strong>Chủ TK:</strong> {qrSettings.accountName || 'POINT TCG STORE'}</div>
-                      <div>💵 <strong>Số tiền mẫu:</strong> 500.000₫</div>
-                      <div>📝 <strong>Cú pháp mẫu:</strong> <code>{qrSettings.notePrefix || 'PTCG'} PTCG-123456</code></div>
+                      <div><strong>Ngân hàng:</strong> {qrSettings.bankName || 'MB Bank'}</div>
+                      <div><strong>STK:</strong> <code style={{ color: '#0053e2', fontWeight: 700 }}>{qrSettings.accountNumber || '888866889999'}</code></div>
+                      <div><strong>Chủ TK:</strong> {qrSettings.accountName || 'POINT TCG STORE'}</div>
+                      <div><strong>Số tiền mẫu:</strong> 500.000₫</div>
+                      <div><strong>Cú pháp mẫu:</strong> <code>{qrSettings.notePrefix || 'PTCG'} PTCG-123456</code></div>
                     </div>
 
                     <div style={{ marginTop: '10px', fontSize: '0.78rem', color: '#16a34a', fontWeight: 600 }}>
@@ -2709,7 +2700,6 @@ export default function AdminModal({
                   gap: '16px'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ fontSize: '2.5rem' }}>🔥</div>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#9a3412', margin: 0 }}>
@@ -2778,7 +2768,6 @@ export default function AdminModal({
                     border: `1.5px solid ${firebaseToast.type === 'error' ? '#fecaca' : firebaseToast.type === 'info' ? '#bfdbfe' : '#a7f3d0'}`
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>{firebaseToast.type === 'error' ? '❌' : firebaseToast.type === 'info' ? '⏳' : '✅'}</span>
                       <span>{firebaseToast.message}</span>
                     </div>
                     <button
@@ -2824,7 +2813,6 @@ export default function AdminModal({
                       opacity: firebaseSyncing ? 0.7 : 1
                     }}
                   >
-                    <span>{firebaseSyncing ? '⏳' : '🚀'}</span>
                     <span>Đẩy Dữ Liệu Hiện Tại Lên Firebase</span>
                   </button>
 
@@ -2848,7 +2836,6 @@ export default function AdminModal({
                       gap: '8px'
                     }}
                   >
-                    <span>⬇️</span>
                     <span>Nạp Dữ Liệu Từ Firebase Về Máy</span>
                   </button>
 
@@ -2870,7 +2857,6 @@ export default function AdminModal({
                       gap: '6px'
                     }}
                   >
-                    <span>🔄</span>
                     <span>Làm Mới</span>
                   </button>
                 </div>
@@ -2899,7 +2885,6 @@ export default function AdminModal({
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '1.8rem' }}>📦</span>
                       <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>
                         collection
                       </span>
@@ -2931,7 +2916,6 @@ export default function AdminModal({
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '1.8rem' }}>🛍️</span>
                       <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>
                         collection
                       </span>
@@ -2963,7 +2947,6 @@ export default function AdminModal({
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '1.8rem' }}>👥</span>
                       <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>
                         collection
                       </span>
@@ -2995,7 +2978,6 @@ export default function AdminModal({
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '1.8rem' }}>⚙️</span>
                       <span style={{ background: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800 }}>
                         collection
                       </span>
@@ -3043,7 +3025,7 @@ export default function AdminModal({
                         boxShadow: firebaseActiveSubTab === 'overview' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none'
                       }}
                     >
-                      📊 Tổng Quan Cấu Trúc
+                      Tổng Quan Cấu Trúc
                     </button>
 
                     <button
@@ -3063,7 +3045,7 @@ export default function AdminModal({
                         cursor: 'pointer'
                       }}
                     >
-                      📦 products ({openDrawings.length + closedDrawings.length})
+                      products ({openDrawings.length + closedDrawings.length})
                     </button>
 
                     <button
@@ -3083,7 +3065,7 @@ export default function AdminModal({
                         cursor: 'pointer'
                       }}
                     >
-                      🛍️ orders ({orders.length})
+                      orders ({orders.length})
                     </button>
 
                     <button
@@ -3103,7 +3085,7 @@ export default function AdminModal({
                         cursor: 'pointer'
                       }}
                     >
-                      👥 users ({customers.length + 1})
+                      users ({customers.length + 1})
                     </button>
 
                     <button
@@ -3123,7 +3105,7 @@ export default function AdminModal({
                         cursor: 'pointer'
                       }}
                     >
-                      ⚙️ settings (2 docs)
+                      settings (2 docs)
                     </button>
                   </div>
 
@@ -3131,7 +3113,6 @@ export default function AdminModal({
                   <div style={{ padding: '20px' }}>
                     {loadingFirebaseTable ? (
                       <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
-                        <div style={{ fontSize: '2rem', marginBottom: '8px' }}>⏳</div>
                         <div>Đang tải dữ liệu từ Firebase Cloud Firestore...</div>
                       </div>
                     ) : firebaseActiveSubTab === 'overview' ? (
@@ -3142,7 +3123,7 @@ export default function AdminModal({
                         </h4>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
                           <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                            <div style={{ fontWeight: 800, color: '#ea580c' }}>📁 collection: products</div>
+                            <div style={{ fontWeight: 800, color: '#ea580c' }}>collection: products</div>
                             <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
                               Lưu trữ toàn bộ danh sách sản phẩm thẻ bài Pokémon, giá bán USD/VND, số lượng tồn kho, trạng thái Open/Closed, đếm ngược thời gian và hình ảnh.
                             </div>
@@ -3152,7 +3133,7 @@ export default function AdminModal({
                           </div>
 
                           <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                            <div style={{ fontWeight: 800, color: '#ea580c' }}>📁 collection: orders</div>
+                            <div style={{ fontWeight: 800, color: '#ea580c' }}>collection: orders</div>
                             <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
                               Lưu trữ chi tiết các đơn đặt hàng của khách: họ tên, email, số điện thoại, địa chỉ nhận hàng, phương thức thanh toán VietQR / COD, danh sách sản phẩm và trạng thái đơn.
                             </div>
@@ -3162,7 +3143,7 @@ export default function AdminModal({
                           </div>
 
                           <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                            <div style={{ fontWeight: 800, color: '#ea580c' }}>📁 collection: users</div>
+                            <div style={{ fontWeight: 800, color: '#ea580c' }}>collection: users</div>
                             <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
                               Lưu trữ hồ sơ tài khoản khách hàng và tài khoản quản trị viên hệ thống (phân quyền role <code>admin</code> và <code>customer</code>).
                             </div>
@@ -3172,7 +3153,7 @@ export default function AdminModal({
                           </div>
 
                           <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                            <div style={{ fontWeight: 800, color: '#ea580c' }}>📁 collection: settings</div>
+                            <div style={{ fontWeight: 800, color: '#ea580c' }}>collection: settings</div>
                             <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>
                               Lưu trữ cài đặt hệ thống: thông tin ngân hàng tạo mã VietQR động (MBBank, STK, Tên chủ thẻ) và thông tin cửa hàng Point TCG.
                             </div>
@@ -3213,7 +3194,7 @@ export default function AdminModal({
                               gap: '4px'
                             }}
                           >
-                            📋 Sao chép JSON
+                            Sao chép JSON
                           </button>
                         </div>
 
@@ -3369,7 +3350,7 @@ export default function AdminModal({
                   className="btn-print-trigger"
                   onClick={() => window.print()}
                 >
-                  🖨️ In Phiếu Đóng Gói (Print)
+                  In Phiếu Đóng Gói (Print)
                 </button>
                 <button
                   type="button"
@@ -3384,7 +3365,7 @@ export default function AdminModal({
               <div className="printable-slip-card" id="printable-slip">
                 <div className="slip-brand-row">
                   <div>
-                    <h3 className="slip-brand-name">⚡ POINT TCG LOGISTICS</h3>
+                    <h3 className="slip-brand-name">POINT TCG LOGISTICS</h3>
                     <p style={{ fontSize: '0.78rem', color: '#64748b' }}>Dịch Vụ Vận Chuyển Hàng Sưu Tầm Niêm Phong An Toàn</p>
                   </div>
                   <div className="slip-barcode-box">
@@ -3465,7 +3446,7 @@ export default function AdminModal({
                   </div>
 
                   <div className="slip-instruction">
-                    <div>⚠️ <strong>CHỈ DẪN VẬN CHUYỂN:</strong> ĐỒNG KIỂM NIÊM PHONG • KHÔNG ĐƯỢC LÀM RÁCH SEAL • TRẢ HÀNG NẾU HỘP BỊ MÓP MÉO</div>
+                    <div><strong>CHỈ DẪN VẬN CHUYỂN:</strong> ĐỒNG KIỂM NIÊM PHONG • KHÔNG ĐƯỢC LÀM RÁCH SEAL • TRẢ HÀNG NẾU HỘP BỊ MÓP MÉO</div>
                   </div>
                 </div>
 
@@ -3490,7 +3471,6 @@ export default function AdminModal({
             <div className="quick-timer-modal" onClick={(e) => e.stopPropagation()}>
               <div className="quick-timer-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '1.4rem' }}>⏱️</span>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
                       Tuỳ Chỉnh "Drawing ends in"
@@ -3518,7 +3498,7 @@ export default function AdminModal({
                     className="btn-admin-save"
                     onClick={handleSaveQuickTimer}
                   >
-                    💾 Cập Nhật Thời Gian
+                    Cập Nhật Thời Gian
                   </button>
                   <button
                     type="button"

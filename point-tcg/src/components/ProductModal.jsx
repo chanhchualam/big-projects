@@ -135,13 +135,13 @@ export default function ProductModal({
               <div className="modal-spec-row">
                 <span className="modal-spec-label">Tồn Kho Hiện Tại</span>
                 <span className="modal-spec-value" style={{ fontWeight: 700, color: isOutOfStock ? '#ef4444' : stock <= 5 ? '#f59e0b' : '#059669' }}>
-                  {isOutOfStock ? '🔴 Hết Hàng' : stock <= 5 ? `⚡ Chỉ còn ${stock} sản phẩm!` : `📦 Còn ${stock} sản phẩm`}
+                  {isOutOfStock ? 'Hết Hàng' : stock <= 5 ? `Chỉ còn ${stock} sản phẩm!` : `Còn ${stock} sản phẩm`}
                 </span>
               </div>
               <div className="modal-spec-row">
                 <span className="modal-spec-label">Drawing Status</span>
                 <span className="modal-spec-value" style={{ color: status === 'open' ? '#16a34a' : '#64748b' }}>
-                  {status === 'open' ? '🟢 Open for Requests' : '🔴 Closed'}
+                  {status === 'open' ? 'Open for Requests' : 'Closed'}
                 </span>
               </div>
               {drawingDetails?.totalEntries && (
@@ -236,7 +236,7 @@ export default function ProductModal({
                   style={{ flex: 1, padding: '14px', fontSize: '0.98rem' }}
                   disabled
                 >
-                  🔴 Sản Phẩm Này Đã Hết Hàng
+                  Sản Phẩm Này Đã Hết Hàng
                 </button>
               ) : (
                 <>
@@ -253,7 +253,7 @@ export default function ProductModal({
                       onClose();
                     }}
                   >
-                    ⚡ Mua Ngay (x{qty}) & Quét QR
+                    Mua Ngay (x{qty}) & Quét QR
                   </button>
 
                   <button
@@ -265,7 +265,7 @@ export default function ProductModal({
                       onClose();
                     }}
                   >
-                    🛒 Thêm Vào Giỏ (x{qty})
+                    Thêm Vào Giỏ (x{qty})
                   </button>
                 </>
               )}

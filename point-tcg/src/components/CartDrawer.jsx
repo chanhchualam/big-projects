@@ -62,7 +62,7 @@ export default function CartDrawer({
         <div style={{ padding: '12px 20px', background: '#f0fdf4', borderBottom: '1px solid #dcfce7' }}>
           <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#166534', marginBottom: '6px' }}>
             {freeShippingMet
-              ? '🎉 You qualify for FREE Insured Courier Shipping!'
+              ? 'You qualify for FREE Insured Courier Shipping!'
               : `Add $${(freeShippingThreshold - cartTotal).toFixed(2)} more for FREE Insured Shipping`}
           </div>
           <div style={{ height: '6px', background: '#dcfce7', borderRadius: '99px', overflow: 'hidden' }}>
@@ -81,7 +81,6 @@ export default function CartDrawer({
         <div className="drawer-body">
           {cartItems.length === 0 ? (
             <div className="drawer-empty">
-              <div className="drawer-empty-icon">🛒</div>
               <h3>Your cart is empty</h3>
               <p>Explore our open & closed Pokémon TCG drawings and add your favorite collectibles.</p>
             </div>

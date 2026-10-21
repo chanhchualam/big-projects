@@ -218,7 +218,7 @@ export default function CustomerOrdersPage({
                   {displayName}
                 </span>
                 <span className="cop-user-role-badge">
-                  {currentUser?.role === 'admin' ? '🛡️ Quản trị viên' : '🌟 Thành viên thân thiết'}
+                  {currentUser?.role === 'admin' ? 'Quản trị viên' : 'Thành viên thân thiết'}
                 </span>
               </div>
               <div className="cop-avatar-circle" aria-label="Avatar">
@@ -234,7 +234,6 @@ export default function CustomerOrdersPage({
               className={`cop-menu-item ${activeMenuTab === 'profile' ? 'active' : ''}`}
               onClick={() => setActiveMenuTab('profile')}
             >
-              <span className="cop-menu-icon">👤</span>
               <span className="cop-menu-text">Thông tin tài khoản</span>
               <span className="cop-menu-arrow">›</span>
             </button>
@@ -244,7 +243,6 @@ export default function CustomerOrdersPage({
               className={`cop-menu-item ${activeMenuTab === 'orders' ? 'active' : ''}`}
               onClick={() => setActiveMenuTab('orders')}
             >
-              <span className="cop-menu-icon">📑</span>
               <span className="cop-menu-text">Lịch sử đơn hàng</span>
               <span className="cop-menu-arrow">›</span>
             </button>
@@ -254,7 +252,6 @@ export default function CustomerOrdersPage({
               className={`cop-menu-item ${activeMenuTab === 'addresses' ? 'active' : ''}`}
               onClick={() => setActiveMenuTab('addresses')}
             >
-              <span className="cop-menu-icon">📍</span>
               <span className="cop-menu-text">Địa chỉ đã lưu</span>
               <span className="cop-menu-arrow">›</span>
             </button>
@@ -264,14 +261,12 @@ export default function CustomerOrdersPage({
               className={`cop-menu-item ${activeMenuTab === 'reviews' ? 'active' : ''}`}
               onClick={() => setActiveMenuTab('reviews')}
             >
-              <span className="cop-menu-icon">💬</span>
               <span className="cop-menu-text">Đánh giá đơn hàng</span>
               <span className="cop-menu-arrow">›</span>
             </button>
 
             {/* Email Liên hệ */}
             <div className="cop-info-item">
-              <span className="cop-info-icon">✉️</span>
               <div className="cop-info-content">
                 <span className="cop-info-label">Email liên hệ</span>
                 <span className="cop-info-value" title="banhmigamestore@gmail.com">
@@ -282,7 +277,6 @@ export default function CustomerOrdersPage({
 
             {/* Website */}
             <div className="cop-info-item">
-              <span className="cop-info-icon">🌐</span>
               <div className="cop-info-content">
                 <span className="cop-info-label">Website</span>
                 <a
@@ -320,7 +314,6 @@ export default function CustomerOrdersPage({
 
               {/* Search Bar: Tìm theo mã đơn hàng hoặc tên sản phẩm */}
               <div className="cop-search-bar">
-                <span className="cop-search-icon">🔍</span>
                 <input
                   type="text"
                   className="cop-search-input"
@@ -494,9 +487,7 @@ export default function CustomerOrdersPage({
                                           e.target.style.display = 'none';
                                         }}
                                       />
-                                    ) : (
-                                      <div className="cop-item-placeholder">⚡</div>
-                                    )}
+                                    ) : null}
                                   </div>
 
                                   <div className="cop-item-info">

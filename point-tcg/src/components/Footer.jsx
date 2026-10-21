@@ -26,7 +26,7 @@ export default function Footer({ onOpenAdminLogin, onOpenOrderHistory }) {
               if (onOpenOrderHistory) onOpenOrderHistory();
             }}
           >
-            📦 Track Orders
+            Track Orders
           </a>
           <a href="#about" className="footer-link" onClick={(e) => { e.preventDefault(); alert('About Point TCG: The premier limited-stock drawing destination for authentic sealed Pokémon trading cards.'); }}>
             About Point TCG
@@ -44,10 +44,10 @@ export default function Footer({ onOpenAdminLogin, onOpenOrderHistory }) {
 
         {/* Collector reassurance badges */}
         <div className="footer-badges-row">
-          <span className="footer-badge-pill">🛡️ PSA & Beckett Compatible Slabs</span>
-          <span className="footer-badge-pill">🔒 Verified Factory Heat Shrink</span>
-          <span className="footer-badge-pill">⚡ Tamper-Evident Packaging</span>
-          <span className="footer-badge-pill">📦 Tracked & Insured Delivery</span>
+          <span className="footer-badge-pill">PSA & Beckett Compatible Slabs</span>
+          <span className="footer-badge-pill">Verified Factory Heat Shrink</span>
+          <span className="footer-badge-pill">Tamper-Evident Packaging</span>
+          <span className="footer-badge-pill">Tracked & Insured Delivery</span>
         </div>
       </div>
 

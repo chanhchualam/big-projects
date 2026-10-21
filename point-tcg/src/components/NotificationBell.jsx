@@ -1,5 +1,5 @@
 // src/components/NotificationBell.jsx
-// Nút 🔔 trên thanh đầu trang: danh sách thông báo về đơn hàng, sản phẩm yêu thích và tin của shop
+// Nút trên thanh đầu trang: danh sách thông báo về đơn hàng, sản phẩm yêu thích và tin của shop
 import React, { useState, useEffect, useRef } from 'react';
 import { timeAgo } from '../utils/notifications';
 
@@ -72,7 +72,6 @@ export default function NotificationBell({ notifications = [], readAt = 0, onMar
                         onOpenItem?.(n);
                       }}
                     >
-                      <span className="notif-icon" aria-hidden="true">{n.icon}</span>
                       <span className="notif-body">
                         <span className="notif-title">{n.title}</span>
                         <span className="notif-time">{timeAgo(n.at)}</span>

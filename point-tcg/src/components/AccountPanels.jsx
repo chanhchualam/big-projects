@@ -51,7 +51,7 @@ export function TrackingInfo({ order }) {
 
   return (
     <div className="tracking-box">
-      <span>🚚 {order.carrier || 'Vận chuyển'}:</span>
+      <span>{order.carrier || 'Vận chuyển'}:</span>
       <strong className="tracking-code">{order.trackingCode}</strong>
       <button
         type="button"
@@ -143,7 +143,7 @@ export function ProfileEditor({ currentUser, onUpdateCurrentUser }) {
   );
 
   const msg = (m) =>
-    m && <div className={m.ok ? 'acc-msg-ok' : 'acc-msg-err'}>{m.ok ? '✅' : '⚠️'} {m.text}</div>;
+    m && <div className={m.ok ? 'acc-msg-ok' : 'acc-msg-err'}>{m.text}</div>;
 
   return (
     <>
@@ -293,7 +293,7 @@ function ReviewForm({ item, order, existing, currentUser, onSaved }) {
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
-          {state === 'error' && <div className="acc-msg-err">⚠️ Không gửi được đánh giá. Vui lòng thử lại.</div>}
+          {state === 'error' && <div className="acc-msg-err">Không gửi được đánh giá. Vui lòng thử lại.</div>}
           <button type="submit" className="cop-btn-edit-profile" disabled={state === 'saving'}>
             {state === 'saving' ? 'Đang gửi...' : 'Gửi đánh giá'}
           </button>
@@ -328,7 +328,6 @@ export function ReviewsPanel({ currentUser, orders, reviews, onReviewSaved, onGo
   if (reviewable.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-        <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>⭐</div>
         <h3 style={{ fontSize: '1.1rem', color: '#1e293b', fontWeight: 700 }}>Chưa có sản phẩm để đánh giá</h3>
         <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '460px', margin: '8px auto 20px' }}>
           Khi đơn hàng chuyển sang "Giao thành công", sản phẩm trong đơn sẽ xuất hiện ở đây để bạn chấm sao và nhận xét.
