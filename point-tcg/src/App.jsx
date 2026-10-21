@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import Header, { normalizeSearchText } from './components/Header';
 import SubNav from './components/SubNav';
 import ProductCard from './components/ProductCard';
@@ -8,10 +8,11 @@ import CartDrawer from './components/CartDrawer';
 import SavedModal from './components/SavedModal';
 import ProductDetailPage from './components/ProductDetailPage';
 import SignInModal from './components/SignInModal';
-import AdminModal from './components/AdminModal';
-import AdminPage from './components/AdminPage';
-import CheckoutModal from './components/CheckoutModal';
-import CustomerOrdersPage from './components/CustomerOrdersPage';
+// Trang quản trị chỉ tải khi vào #admin — khách mua hàng không phải tải phần code này
+const AdminPage = lazy(() => import('./components/AdminPage'));
+// Tải khi cần: form thanh toán (khi bấm mua) và trang đơn hàng / tài khoản
+const CheckoutModal = lazy(() => import('./components/CheckoutModal'));
+const CustomerOrdersPage = lazy(() => import('./components/CustomerOrdersPage'));
 import FloatingMessenger from './components/FloatingMessenger';
 import Footer from './components/Footer';
 import NotificationBell from './components/NotificationBell';
@@ -40,6 +41,7 @@ import {
   updateOrderStatusInDb,
   deleteOrderFromDb,
   saveProductToDb,
+  saveProductMediaToDb,
   deleteProductFromDb,
   applyOrderStock,
   makeStatusEntry,
@@ -153,7 +155,6 @@ export default function App() {
   const [isSavedOpen, setIsSavedOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [signInMode, setSignInMode] = useState('login'); // 'login' | 'register' | 'admin'
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [adminProductToEdit, setAdminProductToEdit] = useState(null);
 
@@ -672,7 +673,8 @@ export default function App() {
   // -------------------------------------------------------------
   // ADMIN OPERATIONS: ADD, EDIT, DELETE, RESET
   // -------------------------------------------------------------
-  const handleAddProduct = (newProduct, section) => {
+  // media: ảnh gốc + ảnh phụ (product_media/{id}); newProduct chỉ chứa ảnh thu nhỏ
+  const handleAddProduct = (newProduct, section, media) => {
     const prodToSave = { ...newProduct, status: section };
     if (section === 'open') {
       setOpenDrawings(prev => [newProduct, ...prev]);
@@ -683,10 +685,11 @@ export default function App() {
     } else {
       setClosedDrawings(prev => [newProduct, ...prev]);
     }
+    if (media) saveProductMediaToDb(newProduct.id, media);
     saveProductToDb(prodToSave);
   };
 
-  const handleUpdateProduct = (updatedProduct, section) => {
+  const handleUpdateProduct = (updatedProduct, section, media) => {
     const prodToSave = { ...updatedProduct, status: section };
     // Đổi khu vực Open Closed: bỏ khỏi danh sách cũ, thêm vào đầu danh sách mới
     const movedFrom = section === 'open'
@@ -715,6 +718,7 @@ export default function App() {
     }
     // Live-sync currently viewed product on the detail page
     setSelectedProduct(prev => (prev && prev.id === updatedProduct.id ? updatedProduct : prev));
+    if (media) saveProductMediaToDb(updatedProduct.id, media);
     saveProductToDb(prodToSave);
   };
 
@@ -1059,36 +1063,38 @@ export default function App() {
   // -------------------------------------------------------------
   if (currentRoute === 'admin') {
     return (
-      <AdminPage
-        currentUser={user}
-        authReady={authReady}
-        openDrawings={openDrawings}
-        closedDrawings={closedDrawings}
-        orders={orders}
-        onUpdateOrderStatus={handleUpdateOrderStatus}
-        onUpdateOrderTracking={handleUpdateOrderTracking}
-        onDeleteOrder={handleDeleteOrder}
-        onAddProduct={handleAddProduct}
-        onUpdateProduct={handleUpdateProduct}
-        onDeleteProduct={handleDeleteProduct}
-        onResetDefaults={handleResetDefaults}
-        initialProductToEdit={adminProductToEdit}
-        onAdminLoginSuccess={(adminData) => setUser(adminData)}
-        onSignOut={handleSignOut}
-        onNavigateToStore={() => {
-          setAdminProductToEdit(null);
-          try {
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
-          } catch (e) {
-            window.location.hash = '';
-          }
-          if (selectedProduct) {
-            setCurrentRoute('product');
-          } else {
-            setCurrentRoute('store');
-          }
-        }}
-      />
+      <Suspense fallback={<div className="admin-loading-screen">Đang tải trang quản trị...</div>}>
+        <AdminPage
+          currentUser={user}
+          authReady={authReady}
+          openDrawings={openDrawings}
+          closedDrawings={closedDrawings}
+          orders={orders}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onUpdateOrderTracking={handleUpdateOrderTracking}
+          onDeleteOrder={handleDeleteOrder}
+          onAddProduct={handleAddProduct}
+          onUpdateProduct={handleUpdateProduct}
+          onDeleteProduct={handleDeleteProduct}
+          onResetDefaults={handleResetDefaults}
+          initialProductToEdit={adminProductToEdit}
+          onAdminLoginSuccess={(adminData) => setUser(adminData)}
+          onSignOut={handleSignOut}
+          onNavigateToStore={() => {
+            setAdminProductToEdit(null);
+            try {
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            } catch (e) {
+              window.location.hash = '';
+            }
+            if (selectedProduct) {
+              setCurrentRoute('product');
+            } else {
+              setCurrentRoute('store');
+            }
+          }}
+        />
+      </Suspense>
     );
   }
 
@@ -1098,22 +1104,24 @@ export default function App() {
   if (currentRoute === 'orders') {
     return (
       <>
-        <CustomerOrdersPage
-          currentUser={user}
-          initialTab={ordersInitialTab}
-          onUpdateCurrentUser={(updated) => setUser(prev => (prev ? { ...prev, ...updated } : prev))}
-          orders={orders}
-          reviews={reviews}
-          onReviewSaved={handleReviewSaved}
-          onUpdateOrderStatus={handleUpdateOrderStatus}
-          onAddToCart={handleAddToCart}
-          onBackToStore={handleBackToStore}
-          onOpenSignIn={(mode) => {
-            setSignInMode(mode || 'login');
-            setIsSignInOpen(true);
-          }}
-          onOpenProductDetail={handleOpenProductDetail}
-        />
+        <Suspense fallback={null}>
+          <CustomerOrdersPage
+            currentUser={user}
+            initialTab={ordersInitialTab}
+            onUpdateCurrentUser={(updated) => setUser(prev => (prev ? { ...prev, ...updated } : prev))}
+            orders={orders}
+            reviews={reviews}
+            onReviewSaved={handleReviewSaved}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
+            onAddToCart={handleAddToCart}
+            onBackToStore={handleBackToStore}
+            onOpenSignIn={(mode) => {
+              setSignInMode(mode || 'login');
+              setIsSignInOpen(true);
+            }}
+            onOpenProductDetail={handleOpenProductDetail}
+          />
+        </Suspense>
         <SignInModal
           isOpen={isSignInOpen}
           onClose={() => setIsSignInOpen(false)}
@@ -1445,21 +1453,6 @@ export default function App() {
         setIsSignInOpen(true);
       }} />
 
-      {/* Admin Portal Modal */}
-      <AdminModal
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-        openDrawings={openDrawings}
-        closedDrawings={closedDrawings}
-        orders={orders}
-        onUpdateOrderStatus={handleUpdateOrderStatus}
-        onUpdateOrderTracking={handleUpdateOrderTracking}
-        onDeleteOrder={handleDeleteOrder}
-        onAddProduct={handleAddProduct}
-        onUpdateProduct={handleUpdateProduct}
-        onDeleteProduct={handleDeleteProduct}
-        onResetDefaults={handleResetDefaults}
-      />
 
       {/* Modals & Slide-in Drawers */}
       <CartDrawer
@@ -1476,19 +1469,23 @@ export default function App() {
       />
 
       {/* Secure Checkout & Payment Modal */}
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        cartItems={cart}
-        cartTotal={cartTotal}
-        user={user}
-        onUpdateQty={handleUpdateCartQty}
-        onRemoveItem={handleRemoveFromCart}
-        onClearCart={() => setCart([])}
-        onOrderPlaced={handleOrderPlaced}
-        onUpdateOrderStatus={handleUpdateOrderStatus}
-        onOpenOrderHistory={handleOpenOrdersPage}
-      />
+      {isCheckoutOpen && (
+        <Suspense fallback={null}>
+          <CheckoutModal
+            isOpen={isCheckoutOpen}
+            onClose={() => setIsCheckoutOpen(false)}
+            cartItems={cart}
+            cartTotal={cartTotal}
+            user={user}
+            onUpdateQty={handleUpdateCartQty}
+            onRemoveItem={handleRemoveFromCart}
+            onClearCart={() => setCart([])}
+            onOrderPlaced={handleOrderPlaced}
+            onUpdateOrderStatus={handleUpdateOrderStatus}
+            onOpenOrderHistory={handleOpenOrdersPage}
+          />
+        </Suspense>
+      )}
 
       <SavedModal
         isOpen={isSavedOpen}

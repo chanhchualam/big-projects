@@ -6,6 +6,7 @@ import { checkOrderPricing } from '../utils/orderCheck';
 import CountdownEditor from './CountdownEditor';
 import { usdToVnd, formatVndAmount, VND_RATE } from '../utils/currency';
 import {
+  splitProductImages,
   compressImageFile,
   estimateDocBytes,
   formatKb,
@@ -24,6 +25,7 @@ import {
   generateQrUrl
 } from '../utils/qrConfig';
 import {
+  fetchProductMedia,
   fetchCouponsFromDb,
   fetchProductsFromDb,
   fetchOrdersFromDb,
@@ -62,6 +64,10 @@ export default function AdminModal({
   const [orderSearch, setOrderSearch] = useState('');
   const [selectedSlipOrder, setSelectedSlipOrder] = useState(null); // For Shopee packing slip preview
   const [newOrderAlert, setNewOrderAlert] = useState(null);
+
+  // Ảnh gốc của sản phẩm đang sửa (tải từ product_media) và trạng thái đang lưu
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [savingProduct, setSavingProduct] = useState(false);
 
   // Tab "Sản phẩm": gộp Open + Closed Drawings, lọc bằng ô chọn
   const [productSectionFilter, setProductSectionFilter] = useState('all'); // 'all' | 'open' | 'closed'
@@ -675,6 +681,19 @@ export default function AdminModal({
       selectedPresetIdx: 0,
       gallery: Array.isArray(product.gallery) ? product.gallery : []
     });
+
+    // Form đang giữ ảnh thu nhỏ → tải ảnh gốc + ảnh phụ để sửa
+    if (product.hasMedia) {
+      setMediaLoading(true);
+      fetchProductMedia(product.id).then((media) => {
+        if (media?.image) {
+          setFormData((prev) => (prev.id === product.id
+            ? { ...prev, imageUrl: media.image, rawUploadedImage: media.image, gallery: media.gallery || [] }
+            : prev));
+        }
+        setMediaLoading(false);
+      });
+    }
   };
 
   // Auto-open product edit when requested from product detail page
@@ -862,16 +881,16 @@ export default function AdminModal({
   };
 
   const handleQuickUpload = (product, section, file) => {
-    processImageFile(file, (dataUrl, fileName, fileSize) => {
+    processImageFile(file, async (dataUrl, fileName, fileSize) => {
       const framedImage = embedImageInStoreFrame(dataUrl, {
         badgeText: getFrameBadge(product),
         badgeSubText: 'OFF'
       });
-      const updatedProduct = {
-        ...product,
-        image: framedImage
-      };
-      onUpdateProduct(updatedProduct, section);
+      // Giữ nguyên ảnh phụ đang có, chỉ đổi ảnh chính
+      const existing = product.hasMedia ? await fetchProductMedia(product.id) : null;
+      const gallery = existing?.gallery || product.gallery || [];
+      const { productFields, media } = await splitProductImages(framedImage, gallery);
+      onUpdateProduct({ ...product, ...productFields }, section, media);
       setUploadToast(`Đã tải lên và đổi ảnh cho "${product.title}" thành công! (${fileSize})`);
       setTimeout(() => setUploadToast(''), 4000);
     });
@@ -892,8 +911,9 @@ export default function AdminModal({
     return createCardSvg(defaultPreset.emoji, formData.title.trim().toUpperCase() || 'POKÉMON CARD', defaultPreset.gradient);
   };
 
-  const handleProductSubmit = (e) => {
+  const handleProductSubmit = async (e) => {
     e.preventDefault();
+    if (mediaLoading || savingProduct) return;
     if (!formData.title.trim()) {
       alert('Vui lòng nhập tên sản phẩm!');
       return;
@@ -940,22 +960,50 @@ export default function AdminModal({
       }
     };
 
-    productPayload.gallery = formData.gallery || [];
-    const docBytes = estimateDocBytes(productPayload);
-    if (docBytes > PRODUCT_DOC_BUDGET) {
-      alert(`Ảnh của sản phẩm quá nặng (${formatKb(docBytes)}, tối đa khoảng ${formatKb(PRODUCT_DOC_BUDGET)}). Hãy xoá bớt ảnh phụ hoặc dùng ảnh nhỏ hơn.`);
+    // Ảnh gốc + ảnh phụ lưu ở product_media (giới hạn 1MB / document)
+    const gallery = formData.gallery || [];
+    const mediaBytes = estimateDocBytes({ image: finalImage, gallery });
+    if (mediaBytes > PRODUCT_DOC_BUDGET) {
+      alert(`Ảnh của sản phẩm quá nặng (${formatKb(mediaBytes)}, tối đa khoảng ${formatKb(PRODUCT_DOC_BUDGET)}). Hãy xoá bớt ảnh phụ hoặc dùng ảnh nhỏ hơn.`);
       return;
     }
 
+    // Trang chủ chỉ đọc ảnh thu nhỏ
+    setSavingProduct(true);
+    const { productFields, media } = await splitProductImages(finalImage, gallery);
+    setSavingProduct(false);
+    Object.assign(productPayload, productFields);
+
     if (isCreatingNew) {
-      onAddProduct(productPayload, formData.section);
+      onAddProduct(productPayload, formData.section, media);
     } else {
-      onUpdateProduct(productPayload, formData.section);
+      onUpdateProduct(productPayload, formData.section, media);
     }
 
     setEditingProduct(null);
     setIsCreatingNew(false);
   };
+
+  // Một lần mỗi phiên: chuyển sản phẩm cũ (ảnh lớn nằm ngay trong products/{id}) sang ảnh thu nhỏ + product_media
+  const migratedRef = useRef(new Set());
+  useEffect(() => {
+    const pending = [
+      ...openDrawings.map((p) => [p, 'open']),
+      ...closedDrawings.map((p) => [p, 'closed'])
+    ].filter(([p]) => !p.hasMedia
+      && !migratedRef.current.has(p.id)
+      && ((p.image || '').length > 60 * 1024 || (p.gallery || []).length > 0));
+    if (pending.length === 0) return;
+    pending.forEach(([p]) => migratedRef.current.add(p.id));
+    (async () => {
+      for (const [p, section] of pending) {
+        const { productFields, media } = await splitProductImages(p.image, p.gallery || []);
+        onUpdateProduct({ ...p, ...productFields }, section, media);
+      }
+      setUploadToast(`Đã tối ưu ảnh cho ${pending.length} sản phẩm: trang chủ giờ chỉ tải ảnh thu nhỏ.`);
+      setTimeout(() => setUploadToast(''), 5000);
+    })();
+  }, [openDrawings, closedDrawings]);
 
   // -------------------------------------------------------------
   // ADMIN CREDENTIALS HANDLERS
@@ -1597,7 +1645,7 @@ export default function AdminModal({
 
                 <div className="admin-form-actions">
                   <button type="submit" className="btn-admin-save">
-                    {isCreatingNew ? 'Đăng Sản Phẩm Mới' : 'Lưu Cập Nhật'}
+                    {mediaLoading ? 'Đang tải ảnh gốc...' : savingProduct ? 'Đang xử lý ảnh...' : isCreatingNew ? 'Đăng Sản Phẩm Mới' : 'Lưu Cập Nhật'}
                   </button>
                   <button
                     type="button"

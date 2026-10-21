@@ -41,6 +41,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // ---------------- PRODUCT MEDIA (ảnh gốc + ảnh phụ, tải khi mở trang chi tiết) ----------------
+    match /product_media/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ---------------- ORDERS ----------------
     match /orders/{orderId} {
       allow read: if isAdmin()

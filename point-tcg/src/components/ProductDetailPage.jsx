@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import RestockNotify from './RestockNotify';
 import { getProductImages } from '../utils/productImages';
+import { fetchProductMedia } from '../services/firestoreService';
 import { isStoreFramed } from '../products';
 import { usdToVnd } from '../utils/currency';
 import { ReviewForm } from './AccountPanels';
@@ -99,10 +100,23 @@ export default function ProductDetailPage({
   const vndWasPrice = product.wasPrice ? formatVnd(product.wasPrice) : formatVnd(product.price * 1.19);
   const productIdCode = `SP${(product.id || '').replace(/\D/g, '').padStart(6, '0') || '001305'}`;
 
-  // Ảnh thật của sản phẩm: ảnh chính + ảnh phụ admin tải lên
+  // Ảnh gốc + ảnh phụ chỉ tải khi mở trang chi tiết; trong lúc chờ hiện ảnh thu nhỏ
+  const [media, setMedia] = useState(null);
+  useEffect(() => {
+    setMedia(null);
+    if (!product.hasMedia) return;
+    let alive = true;
+    fetchProductMedia(product.id).then((m) => {
+      if (alive) setMedia(m);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [product.id, product.hasMedia, product.image]);
+
   const galleryImages = useMemo(
-    () => getProductImages(product).map((src, i) => ({ id: i, label: `Ảnh ${i + 1}`, src })),
-    [product.image, product.gallery]
+    () => getProductImages(product, media).map((src, i) => ({ id: i, label: `Ảnh ${i + 1}`, src })),
+    [product.image, product.gallery, product.thumbs, media]
   );
 
   // Tự đổi ảnh chính khi có nhiều ảnh; dừng khi rê chuột vào khung ảnh
@@ -208,7 +222,7 @@ export default function ProductDetailPage({
               {/* Main Showcase Showcase Box */}
               <div
                 // Ảnh đã có khung đỏ của shop → không vẽ thêm khung thứ hai
-                className={`pdp-main-image-frame ${isStoreFramed(galleryImages[0]?.src) ? 'pdp-frame-plain' : ''}`}
+                className={`pdp-main-image-frame ${product.framed || isStoreFramed(galleryImages[0]?.src) ? 'pdp-frame-plain' : ''}`}
                 onMouseEnter={() => setGalleryPaused(true)}
                 onMouseLeave={() => setGalleryPaused(false)}
                 onPointerDown={(e) => { swipeStartX.current = e.clientX; }}
