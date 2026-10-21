@@ -87,11 +87,13 @@ export const safeSaveProducts = (key, products) => {
     console.warn(`LocalStorage quota exceeded while saving ${key}, optimizing payload:`, quotaErr);
     try {
       // Create lean payload: if images are large data URLs (> 20KB), don't store raw base64 in list
+      // Bản lưu tạm trong máy: bỏ ảnh lớn và ảnh phụ (luôn tải lại đầy đủ từ Firestore)
       const lean = products.map(p => ({
         ...p,
         image: typeof p.image === 'string' && p.image.startsWith('data:') && p.image.length > 20000
           ? ''
-          : p.image
+          : p.image,
+        gallery: []
       }));
       localStorage.setItem(key, JSON.stringify(lean));
     } catch (retryErr) {
