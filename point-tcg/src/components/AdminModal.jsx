@@ -1909,7 +1909,7 @@ export default function AdminModal({
                                 onClick={() => handleDeleteOrderClick(order.id)}
                                 title="Xoá đơn hàng này"
                               >
-                                
+                                Xoá
                               </button>
                             </div>
                           </div>

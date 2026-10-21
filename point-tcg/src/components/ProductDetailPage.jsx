@@ -4,6 +4,7 @@ import RestockNotify from './RestockNotify';
 import { getProductImages } from '../utils/productImages';
 import { isStoreFramed } from '../products';
 import { usdToVnd } from '../utils/currency';
+import { ReviewForm } from './AccountPanels';
 
 function stars(n) {
   return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
@@ -45,8 +46,23 @@ export default function ProductDetailPage({
   user,
   onOpenAdminEdit,
   reviews = [],
-  onRequestRestock
+  onRequestRestock,
+  orders = [],
+  onReviewSaved,
+  onOpenSignIn
 }) {
+  // Đơn "Giao thành công" của khách có chứa sản phẩm này → được đánh giá (khớp firestore.rules)
+  const reviewOrder = useMemo(() => {
+    if (!user || user.role === 'admin') return null;
+    return orders.find((o) =>
+      o.status === 'Giao thành công'
+      && o.uid === user.id
+      && Array.isArray(o.productIds)
+      && o.productIds.includes(String(product.id))
+    ) || null;
+  }, [orders, user, product.id]);
+  const myReview = user ? reviews.find((r) => r.uid === user.id) : null;
+
   const [qty, setQty] = useState(1);
   const [activeImgIndex, setActiveImgIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('desc'); // 'desc' | 'reviews'
@@ -275,8 +291,11 @@ export default function ProductDetailPage({
                 className="social-btn messenger"
                 onClick={() => window.open(`https://www.messenger.com/t/?link=${encodeURIComponent(window.location.href)}`, '_blank')}
                 title="Gửi Messenger"
+                aria-label="Gửi Messenger"
               >
-                
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.91 1.19 5.44 3.14 7.17V22l2.87-1.58c.8.22 1.66.34 2.99.34 5.64 0 10-4.13 10-9.7S17.64 2 12 2zm1.04 12.94-2.55-2.72-4.98 2.72 5.48-5.82 2.61 2.72 4.92-2.72-5.48 5.82z" />
+                </svg>
               </button>
               <button
                 type="button"
@@ -299,8 +318,12 @@ export default function ProductDetailPage({
                 className="social-btn copylink"
                 onClick={handleCopyLink}
                 title="Sao chép liên kết"
+                aria-label="Sao chép liên kết"
               >
-                
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
               </button>
               {copyNotice && <span className="copy-notice-toast">✓ Đã sao chép liên kết!</span>}
             </div>
@@ -505,11 +528,38 @@ export default function ProductDetailPage({
               </div>
             ) : (
               <div className="pdp-reviews-body">
+                {/* Ô viết đánh giá */}
+                <div className="pdp-write-review">
+                  <h3 className="pdp-write-review-title">{myReview ? 'Đánh giá của bạn' : 'Viết đánh giá'}</h3>
+                  {!user ? (
+                    <div className="pdp-write-review-note">
+                      <span>Đăng nhập để đánh giá sản phẩm bạn đã mua.</span>
+                      <button type="button" className="cop-btn-edit-profile" onClick={() => onOpenSignIn?.('login')}>
+                        Đăng nhập để đánh giá
+                      </button>
+                    </div>
+                  ) : user.role === 'admin' ? (
+                    <div className="pdp-write-review-note">Tài khoản quản trị không viết đánh giá.</div>
+                  ) : reviewOrder ? (
+                    <ReviewForm
+                      key={`${product.id}-${myReview?.id || 'new'}`}
+                      item={product}
+                      order={reviewOrder}
+                      existing={myReview}
+                      currentUser={user}
+                      onSaved={onReviewSaved}
+                      hideHead
+                    />
+                  ) : (
+                    <div className="pdp-write-review-note">
+                      Chỉ khách đã mua và nhận sản phẩm này (đơn ở trạng thái "Giao thành công") mới đánh giá được, để đảm bảo đánh giá là thật.
+                    </div>
+                  )}
+                </div>
+
                 {reviews.length === 0 ? (
                   <div className="pdp-reviews-summary">
-                    <div className="pdp-score-total">
-                      Chưa có đánh giá nào. Khách đã nhận hàng có thể đánh giá trong mục "Tài khoản › Đánh giá đơn hàng".
-                    </div>
+                    <div className="pdp-score-total">Chưa có đánh giá nào cho sản phẩm này.</div>
                   </div>
                 ) : (
                   <>
