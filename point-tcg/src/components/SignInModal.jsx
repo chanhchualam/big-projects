@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   registerUser,
-  authenticateUser
+  authenticateUser,
+  sendPasswordReset
 } from '../utils/auth';
 
 export default function SignInModal({
@@ -17,6 +18,7 @@ export default function SignInModal({
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [loginInfo, setLoginInfo] = useState('');
 
   // Form State - Register
   const [regName, setRegName] = useState('');
@@ -33,6 +35,7 @@ export default function SignInModal({
     if (isOpen) {
       setActiveTab(initialMode === 'register' ? 'register' : 'login');
       setLoginError('');
+      setLoginInfo('');
       setRegError('');
       setRegSuccess('');
       setLoginPassword('');
@@ -66,6 +69,7 @@ export default function SignInModal({
   const handleUserLogin = async (e) => {
     e.preventDefault();
     setLoginError('');
+    setLoginInfo('');
 
     if (!loginEmail.trim() || !loginPassword.trim()) {
       setLoginError('Vui lòng điền đầy đủ email và mật khẩu!');
@@ -89,6 +93,28 @@ export default function SignInModal({
     }
   };
 
+
+  const handleForgotPassword = async () => {
+    setLoginError('');
+    setLoginInfo('');
+
+    if (!loginEmail.trim()) {
+      setLoginError('Vui lòng nhập email ở trên rồi bấm "Quên mật khẩu?"');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await sendPasswordReset(loginEmail);
+      if (res.success) {
+        setLoginInfo(`📧 Nếu ${loginEmail.trim()} đã đăng ký, bạn sẽ nhận được email đặt lại mật khẩu trong vài phút (kiểm tra cả mục Spam).`);
+      } else {
+        setLoginError(res.error);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // -------------------------------------------------------------
   // 2. HANDLER: USER REGISTER
@@ -201,6 +227,12 @@ export default function SignInModal({
               </div>
             )}
 
+            {loginInfo && (
+              <div style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', color: '#065f46', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, marginBottom: '14px', textAlign: 'center' }}>
+                {loginInfo}
+              </div>
+            )}
+
             <form className="signin-form" onSubmit={handleUserLogin}>
               <div className="form-group">
                 <label className="form-label" htmlFor="user-login-email">
@@ -232,6 +264,16 @@ export default function SignInModal({
                   onChange={(e) => setLoginPassword(e.target.value)}
                   required
                 />
+                <div style={{ textAlign: 'right', marginTop: '6px', fontSize: '0.8rem' }}>
+                  <button
+                    type="button"
+                    style={{ color: '#0053e2', fontWeight: 600, cursor: isSubmitting ? 'wait' : 'pointer' }}
+                    onClick={handleForgotPassword}
+                    disabled={isSubmitting}
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
               </div>
 
               <button

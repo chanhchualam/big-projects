@@ -32,8 +32,16 @@ import {
   deleteOrderFromDb,
   saveProductToDb,
   deleteProductFromDb,
-  decrementProductStock
+  applyOrderStock
 } from './services/firestoreService';
+
+// Trạng thái admin đã xác nhận đơn → tồn kho trên Firestore được trừ
+const STOCK_DEDUCTED_STATUSES = [
+  'Đã thanh toán (Chờ chuẩn bị hàng)',
+  'Đang chuẩn bị hàng',
+  'Đang giao hàng',
+  'Giao thành công'
+];
 
 // Xoá dữ liệu cũ (mật khẩu, danh sách user, đơn hàng của người khác) còn sót trong localStorage
 purgeLegacyLocalData();
@@ -447,13 +455,8 @@ export default function App() {
     deductedOrderIdsRef.current.add(newOrder.id);
     setOrders(prev => [newOrder, ...prev.filter(o => o.id !== newOrder.id)]);
 
-    // Deduct stock for new orders
+    // Trừ tồn kho hiển thị cho khách; tồn kho trên Firestore chỉ admin trừ khi xác nhận đơn
     if (!alreadyDeducted && Array.isArray(newOrder.items) && newOrder.items.length > 0) {
-      // Atomic decrement in Firestore (rules only allow customers to lower `stock`)
-      newOrder.items.forEach(item => {
-        if (item.id) decrementProductStock(item.id, Number(item.qty) || 1);
-      });
-
       const qtyMap = {};
       newOrder.items.forEach(item => {
         const q = Number(item.qty) || 1;
@@ -546,7 +549,27 @@ export default function App() {
       alert('Không thể cập nhật trạng thái đơn hàng (không có quyền hoặc lỗi kết nối).');
       return false;
     }
-    setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
+
+    // Admin xác nhận đơn → trừ tồn kho; huỷ đơn đã trừ → hoàn tồn kho
+    let stockDeducted;
+    const order = orders.find(o => o.id === orderId);
+    if (user?.role === 'admin' && order) {
+      // Đơn cũ (không có trường stockDeducted) đã bị trừ tồn kho ngay lúc khách đặt
+      const deducted = order.stockDeducted !== false;
+      const shouldDeduct = STOCK_DEDUCTED_STATUSES.includes(newStatus);
+      const shouldRestore = newStatus === 'Đã huỷ';
+      if ((shouldDeduct && !deducted) || (shouldRestore && deducted)) {
+        if (await applyOrderStock(order, shouldDeduct ? -1 : 1)) {
+          stockDeducted = shouldDeduct;
+        } else {
+          alert('Đã đổi trạng thái nhưng không cập nhật được tồn kho. Vui lòng kiểm tra lại sản phẩm.');
+        }
+      }
+    }
+
+    setOrders(prev => prev.map(o => (o.id === orderId
+      ? { ...o, status: newStatus, ...(stockDeducted !== undefined && { stockDeducted }) }
+      : o)));
     return true;
   };
 

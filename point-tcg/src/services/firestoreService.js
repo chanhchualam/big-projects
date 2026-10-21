@@ -16,7 +16,8 @@ import {
   deleteDoc,
   query,
   where,
-  increment
+  increment,
+  writeBatch
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -48,14 +49,23 @@ export async function saveProductToDb(product) {
   }
 }
 
-// Giảm tồn kho nguyên tử khi khách đặt hàng (rules chặn tồn kho âm)
-export async function decrementProductStock(productId, qty) {
+// Trừ (direction = -1) hoặc hoàn (direction = 1) tồn kho theo các món trong đơn, chỉ admin.
+// Ghi cùng cờ stockDeducted trên đơn trong một batch để không bị trừ hai lần.
+export async function applyOrderStock(order, direction) {
   try {
-    if (!productId || !(qty > 0)) return false;
-    await updateDoc(doc(db, 'products', String(productId)), { stock: increment(-qty) });
+    if (!order?.id || !Array.isArray(order.items)) return false;
+    const batch = writeBatch(db);
+    order.items.forEach((item) => {
+      const qty = Number(item.qty) || 1;
+      if (item.id) {
+        batch.update(doc(db, 'products', String(item.id)), { stock: increment(direction * qty) });
+      }
+    });
+    batch.update(doc(db, 'orders', order.id), { stockDeducted: direction < 0 });
+    await batch.commit();
     return true;
   } catch (err) {
-    console.warn('Firestore decrementProductStock error:', err.message);
+    console.warn('Firestore applyOrderStock error:', err.message);
     return false;
   }
 }

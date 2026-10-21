@@ -12,6 +12,7 @@ import {
   updatePassword,
   reauthenticateWithCredential,
   linkWithCredential,
+  sendPasswordResetEmail,
   EmailAuthProvider
 } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -186,6 +187,18 @@ export async function changePassword(currentPassword, newPassword) {
   }
 }
 
+// Gửi email đặt lại mật khẩu. Không báo email có tồn tại hay không để tránh dò tài khoản.
+export async function sendPasswordReset(email) {
+  try {
+    auth.languageCode = 'vi';
+    await sendPasswordResetEmail(auth, (email || '').trim().toLowerCase());
+    return { success: true };
+  } catch (err) {
+    if (err.code === 'auth/user-not-found') return { success: true };
+    return { success: false, error: getAuthErrorMessage(err, 'Không gửi được email đặt lại mật khẩu. Vui lòng thử lại!') };
+  }
+}
+
 export async function updateUserProfile(userId, { name, phone, address }) {
   const fields = {};
   if (name !== undefined) fields.name = name.trim();
@@ -221,6 +234,8 @@ export function saveNewOrder(orderData) {
     items: sanitizedItems,
     amountVnd: orderData.amountVnd || Math.round((orderData.total || 0) * 25400),
     status: orderData.status || 'Chờ thanh toán QR (Đơn mới)',
+    // Tồn kho chỉ bị trừ khi admin xác nhận đơn; đơn cũ không có trường này đã trừ lúc đặt
+    stockDeducted: false,
     createdAt: orderData.createdAt || new Date().toLocaleString('vi-VN')
   };
 
