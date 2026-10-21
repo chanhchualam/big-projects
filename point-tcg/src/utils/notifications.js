@@ -13,11 +13,11 @@ const readKey = (viewerId) => `point-tcg-notif-read-at:${viewerId || 'guest'}`;
 
 // Trạng thái do shop đổi — trạng thái khách tự đặt / tự báo thì không thông báo lại cho khách
 const ORDER_STATUS_TEXT = {
-  'Đã thanh toán (Chờ chuẩn bị hàng)': { icon: '💳', text: 'đã được xác nhận thanh toán' },
-  'Đang chuẩn bị hàng': { icon: '📦', text: 'đang được đóng gói' },
-  'Đang giao hàng': { icon: '🚚', text: 'đã được giao cho đơn vị vận chuyển' },
-  'Giao thành công': { icon: '✅', text: 'đã giao thành công — hãy đánh giá sản phẩm nhé!' },
-  'Đã huỷ': { icon: '✕', text: 'đã bị huỷ' }
+  'Đã thanh toán (Chờ chuẩn bị hàng)': { text: 'đã được xác nhận thanh toán' },
+  'Đang chuẩn bị hàng': { text: 'đang được đóng gói' },
+  'Đang giao hàng': { text: 'đã được giao cho đơn vị vận chuyển' },
+  'Giao thành công': { text: 'đã giao thành công — hãy đánh giá sản phẩm nhé!' },
+  'Đã huỷ': { text: 'đã bị huỷ' }
 };
 
 function readJson(key, fallback) {
@@ -89,7 +89,6 @@ export function buildNotifications({ orders = [], wishlistEvents = [], announcem
       if (!info) return;
       list.push({
         id: `order-${order.id}-${h.status}-${h.at}`,
-        icon: info.icon,
         title: `Đơn #${order.id} ${info.text}`,
         at: h.at,
         action: { type: 'orders' }
@@ -98,7 +97,6 @@ export function buildNotifications({ orders = [], wishlistEvents = [], announcem
     if (order.trackingCode && order.trackingAt) {
       list.push({
         id: `tracking-${order.id}-${order.trackingCode}`,
-        icon: '🏷️',
         title: `Đơn #${order.id} có mã vận đơn ${order.carrier || ''} ${order.trackingCode}`.replace(/\s+/g, ' '),
         at: order.trackingAt,
         action: { type: 'orders' }
@@ -109,7 +107,6 @@ export function buildNotifications({ orders = [], wishlistEvents = [], announcem
   wishlistEvents.forEach((e) => {
     list.push({
       id: e.id,
-      icon: e.kind === 'restock' ? '🔔' : '🏷️',
       title: e.kind === 'restock'
         ? `"${e.title}" trong danh sách yêu thích đã có hàng lại`
         : `"${e.title}" giảm giá từ $${Number(e.from).toFixed(2)} còn $${Number(e.to).toFixed(2)}`,
@@ -121,7 +118,6 @@ export function buildNotifications({ orders = [], wishlistEvents = [], announcem
   announcements.forEach((a) => {
     list.push({
       id: `announcement-${a.id}`,
-      icon: '📢',
       title: a.text,
       at: a.createdAt,
       action: a.couponCode ? { type: 'coupon', code: a.couponCode } : null

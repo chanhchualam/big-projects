@@ -5,10 +5,10 @@ import React from 'react';
 import { DEFAULT_LABELS, getDrawingText, toLocalInputValue } from '../utils/countdown';
 
 const MODES = [
-  { value: 'timer', label: '⏳ Đếm ngược' },
-  { value: 'fixed', label: '📅 Thời gian cố định' },
-  { value: 'custom', label: '✍️ Chữ tự do' },
-  { value: 'none', label: '🚫 Không hẹn giờ' }
+  { value: 'timer', label: 'Đếm ngược' },
+  { value: 'fixed', label: 'Thời gian cố định' },
+  { value: 'custom', label: 'Chữ tự do' },
+  { value: 'none', label: 'Không hẹn giờ' }
 ];
 
 const LABEL_SUGGESTIONS = {
@@ -78,7 +78,7 @@ export default function CountdownEditor({ value, onChange, idPrefix = 'cd' }) {
             id={`${idPrefix}-custom`}
             type="text"
             className="form-input"
-            placeholder="VD: 🔥 Sắp kết thúc hôm nay"
+            placeholder="VD: Sắp kết thúc hôm nay"
             value={value.customText}
             onChange={(e) => set({ customText: e.target.value })}
           />
@@ -139,7 +139,7 @@ export default function CountdownEditor({ value, onChange, idPrefix = 'cd' }) {
             </div>
           </div>
           {isPast && (
-            <div className="cde-warning">⚠️ Thời điểm này đã qua — khách sẽ thấy "Drawing Ended".</div>
+            <div className="cde-warning">Thời điểm này đã qua — khách sẽ thấy "Drawing Ended".</div>
           )}
         </>
       )}

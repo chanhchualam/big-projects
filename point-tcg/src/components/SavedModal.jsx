@@ -52,7 +52,6 @@ export default function SavedModal({
         <div className="drawer-body">
           {savedProducts.length === 0 ? (
             <div className="drawer-empty">
-              <div className="drawer-empty-icon">🤍</div>
               <h3>No saved items yet</h3>
               <p>Click the heart icon on any Pokémon card drawing to bookmark items you want to track or reorder.</p>
             </div>
@@ -65,7 +64,7 @@ export default function SavedModal({
                     <h4 className="drawer-item-title">{product.title}</h4>
                     <div className="drawer-item-price">${product.price.toFixed(2)}</div>
                     <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
-                      {product.status === 'open' ? '⚡ Drawing Open' : '📦 Drawing Closed'}
+                      {product.status === 'open' ? 'Drawing Open' : 'Drawing Closed'}
                     </div>
                   </div>
 

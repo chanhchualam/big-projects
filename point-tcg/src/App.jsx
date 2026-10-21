@@ -685,7 +685,7 @@ export default function App() {
 
   const handleUpdateProduct = (updatedProduct, section) => {
     const prodToSave = { ...updatedProduct, status: section };
-    // Đổi khu vực Open ↔ Closed: bỏ khỏi danh sách cũ, thêm vào đầu danh sách mới
+    // Đổi khu vực Open Closed: bỏ khỏi danh sách cũ, thêm vào đầu danh sách mới
     const movedFrom = section === 'open'
       ? closedDrawings.some(p => p.id === updatedProduct.id)
       : openDrawings.some(p => p.id === updatedProduct.id);
@@ -902,7 +902,7 @@ export default function App() {
   }, [allProductsCombined, savedIds]);
 
   // -------------------------------------------------------------
-  // THÔNG BÁO TRONG WEB (chuông 🔔)
+  // THÔNG BÁO TRONG WEB (chuông )
   // -------------------------------------------------------------
   // Chỉ so sánh sản phẩm yêu thích sau khi đã tải giá/tồn kho thật từ Firestore
   const [wishlistEvents, setWishlistEvents] = useState([]);
@@ -956,7 +956,7 @@ export default function App() {
       return;
     }
     alert(
-      `🎉 Drawing entry submitted!\n\nCollector: ${user.name}\nItem: ${product.title}\nStatus: Active in raffle queue.\n\nYou will be notified immediately when the drawing closes!`
+      `Drawing entry submitted!\n\nCollector: ${user.name}\nItem: ${product.title}\nStatus: Active in raffle queue.\n\nYou will be notified immediately when the drawing closes!`
     );
   };
 
@@ -1384,7 +1384,6 @@ export default function App() {
         {/* Zero Results State */}
         {totalResultsCount === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', marginTop: '20px' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🔍</div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e293b' }}>
               Không tìm thấy sản phẩm nào phù hợp {searchQuery ? `cho "${searchQuery}"` : ''}
             </h3>

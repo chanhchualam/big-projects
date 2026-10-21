@@ -70,7 +70,7 @@ export default function AdminPage({
     return (
       <div className="admin-page-login-wrapper">
         <div className="admin-login-card" style={{ textAlign: 'center' }}>
-          <p className="admin-login-sub">⏳ Đang kiểm tra phiên đăng nhập...</p>
+          <p className="admin-login-sub">Đang kiểm tra phiên đăng nhập...</p>
         </div>
       </div>
     );
@@ -83,7 +83,6 @@ export default function AdminPage({
     return (
       <div className="admin-page-login-wrapper">
         <div className="admin-login-card" style={{ maxWidth: '500px', textAlign: 'center', padding: '38px 28px' }}>
-          <div style={{ fontSize: '3.6rem', marginBottom: '10px' }}>⛔</div>
           <div className="admin-portal-pill" style={{ background: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5' }}>
             KHÔNG CÓ QUYỀN TRUY CẬP
           </div>
@@ -116,7 +115,7 @@ export default function AdminPage({
                 if (onSignOut) onSignOut();
               }}
             >
-              🚪 Đăng Xuất Tài Khoản Này Để Đăng Nhập Admin
+              Đăng Xuất Tài Khoản Này Để Đăng Nhập Admin
             </button>
           </div>
         </div>
@@ -139,7 +138,7 @@ export default function AdminPage({
                 style={{ width: '48px', height: '48px', borderRadius: '12px', objectFit: 'cover', display: 'block' }}
               />
             </div>
-            <div className="admin-portal-pill">🛡️ CỔNG QUẢN TRỊ RIÊNG BIỆT</div>
+            <div className="admin-portal-pill">CỔNG QUẢN TRỊ RIÊNG BIỆT</div>
             <h1 className="admin-login-title">Đăng Nhập Quản Trị Point TCG</h1>
             <p className="admin-login-sub">
               Trang quản trị độc lập dành cho chủ cửa hàng Point TCG. Nhập đúng tài khoản admin đã cấp để truy cập bảng điều khiển.
@@ -148,7 +147,6 @@ export default function AdminPage({
 
           {loginError && (
             <div className="admin-login-error-alert" role="alert">
-              <span>⚠️</span>
               <span>{loginError}</span>
             </div>
           )}
@@ -159,7 +157,6 @@ export default function AdminPage({
                 Email Quản Trị <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div className="admin-input-icon-wrap">
-                <span className="input-icon">👤</span>
                 <input
                   id="admin-page-username"
                   type="email"
@@ -178,7 +175,6 @@ export default function AdminPage({
                 Mật Khẩu Quản Trị <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div className="admin-input-icon-wrap">
-                <span className="input-icon">🔑</span>
                 <input
                   id="admin-page-password"
                   type="password"
@@ -196,7 +192,7 @@ export default function AdminPage({
               className="btn-admin-login-submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? '⏳ Đang Xác Thực...' : '🔐 Đăng Nhập Vào Trang Quản Trị'}
+              {isSubmitting ? 'Đang Xác Thực...' : 'Đăng Nhập Vào Trang Quản Trị'}
             </button>
           </form>
 
@@ -258,7 +254,7 @@ export default function AdminPage({
             onClick={() => window.open('./#', '_blank')}
             title="Mở tab khách hàng để xem cửa hàng"
           >
-            🌐 Mở Tab Cửa Hàng ↗
+            Mở Tab Cửa Hàng ↗
           </button>
 
           <button
@@ -281,7 +277,6 @@ export default function AdminPage({
           </button>
 
           <div className="admin-profile-badge">
-            <span className="admin-avatar">👑</span>
             <div className="admin-info-text">
               <span className="admin-name">{adminUser.name || 'Quản Trị Viên'}</span>
               <span className="admin-email">{adminUser.email || 'admin@pointtcg.com'}</span>
@@ -294,7 +289,7 @@ export default function AdminPage({
             onClick={handleAdminLogout}
             title="Đăng xuất khỏi tài khoản admin"
           >
-            🚪 Đăng Xuất
+            Đăng Xuất
           </button>
         </div>
       </header>

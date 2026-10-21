@@ -24,7 +24,7 @@ export default function RestockNotify({ product, defaultEmail = '', onRequestRes
   if (state === 'done') {
     return (
       <div className="restock-done" onClick={stop}>
-        ✅ Đã ghi nhận! Shop sẽ báo cho <strong>{email.trim()}</strong> khi có hàng.
+        Đã ghi nhận! Shop sẽ báo cho <strong>{email.trim()}</strong> khi có hàng.
       </div>
     );
   }
@@ -39,7 +39,7 @@ export default function RestockNotify({ product, defaultEmail = '', onRequestRes
           setIsOpen(true);
         }}
       >
-        🔔 Báo khi có hàng
+        Báo khi có hàng
       </button>
     );
   }

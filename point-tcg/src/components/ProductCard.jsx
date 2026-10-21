@@ -241,15 +241,15 @@ export default function ProductCard({
           <div className="card-stock-row">
             {isOutOfStock ? (
               <span className="card-stock-tag out-of-stock">
-                🔴 Hết hàng
+                Hết hàng
               </span>
             ) : stock <= 5 ? (
               <span className="card-stock-tag low-stock" title="Số lượng sản phẩm còn rất ít">
-                ⚡ Chỉ còn {stock} sp!
+                Chỉ còn {stock} sp!
               </span>
             ) : (
               <span className="card-stock-tag in-stock">
-                📦 Còn {stock} sp
+                Còn {stock} sp
               </span>
             )}
           </div>
@@ -272,7 +272,7 @@ export default function ProductCard({
                 disabled
                 title="Sản phẩm này tạm thời đã hết hàng"
               >
-                <span>🔴 Đã Hết Hàng</span>
+                <span>Đã Hết Hàng</span>
               </button>
             )}
           </div>
@@ -291,7 +291,7 @@ export default function ProductCard({
               }}
               title="Đặt mua và thanh toán mã QR ngay"
             >
-              <span>⚡ Mua Ngay (QR)</span>
+              <span>Mua Ngay (QR)</span>
             </button>
 
             <button
@@ -303,7 +303,7 @@ export default function ProductCard({
               }}
               title="Thêm vào giỏ hàng"
             >
-              <span>🛒 Thêm Giỏ</span>
+              <span>Thêm Giỏ</span>
             </button>
           </div>
         )}

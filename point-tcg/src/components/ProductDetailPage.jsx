@@ -276,7 +276,7 @@ export default function ProductDetailPage({
                 onClick={() => window.open(`https://www.messenger.com/t/?link=${encodeURIComponent(window.location.href)}`, '_blank')}
                 title="Gửi Messenger"
               >
-                💬
+                
               </button>
               <button
                 type="button"
@@ -300,7 +300,7 @@ export default function ProductDetailPage({
                 onClick={handleCopyLink}
                 title="Sao chép liên kết"
               >
-                🔗
+                
               </button>
               {copyNotice && <span className="copy-notice-toast">✓ Đã sao chép liên kết!</span>}
             </div>
@@ -425,27 +425,21 @@ export default function ProductDetailPage({
             {/* 6 Guarantee & Trust Badges */}
             <div className="pdp-trust-grid">
               <div className="pdp-trust-item">
-                <span className="trust-icon">🛡️</span>
                 <span className="trust-label">Cam kết 100% chính hãng</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-icon">🚚</span>
                 <span className="trust-label">Miễn phí giao hàng</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-icon">📞</span>
                 <span className="trust-label">Hỗ trợ 24/7</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-icon">💎</span>
                 <span className="trust-label">Hoàn tiền 111% nếu hàng giả</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-icon">📦</span>
                 <span className="trust-label">Mở hộp kiểm tra nhận hàng</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-icon">🔄</span>
                 <span className="trust-label">Đổi trả trong 7 ngày</span>
               </div>
             </div>
@@ -711,7 +705,6 @@ export default function ProductDetailPage({
               }}
             >
               <div className="newsletter-input-wrap">
-                <span className="newsletter-icon">✉</span>
                 <input
                   type="email"
                   required
@@ -731,10 +724,6 @@ export default function ProductDetailPage({
             <span className="social-connect-title">Kết nối với chúng tôi</span>
             <div className="social-icons-row">
               <span className="social-circle-icon">f</span>
-              <span className="social-circle-icon">♪</span>
-              <span className="social-circle-icon">📷</span>
-              <span className="social-circle-icon">💬</span>
-              <span className="social-circle-icon">▶</span>
               <span className="social-circle-icon">𝕏</span>
             </div>
           </div>

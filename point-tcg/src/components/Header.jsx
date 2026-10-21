@@ -214,7 +214,7 @@ export default function Header({
                             }}
                           />
                         ) : (
-                          <div className="suggestion-thumb-fallback">🎴</div>
+                          <div className="suggestion-thumb-fallback"></div>
                         )}
                       </div>
                       <div className="suggestion-info">
@@ -326,7 +326,11 @@ export default function Header({
             aria-label="Track Orders"
             title="Track Orders"
           >
-            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>📦</span>
+            <svg className="header-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
             {pendingOrdersCount > 0 && <span className="header-badge">{pendingOrdersCount}</span>}
             <div className="header-btn-label">
               <span className="header-btn-sub">Track</span>
@@ -378,7 +382,7 @@ export default function Header({
                       if (onOpenOrders) onOpenOrders('profile');
                     }}
                   >
-                    👤 Thông tin tài khoản của tôi (Profile)
+                    Thông tin tài khoản của tôi (Profile)
                   </button>
 
                   {user.role === 'admin' && (
@@ -391,7 +395,7 @@ export default function Header({
                         if (onOpenAdmin) onOpenAdmin();
                       }}
                     >
-                      ⚙️ Vào Trang Quản Trị (Admin Page)
+                      Vào Trang Quản Trị (Admin Page)
                     </button>
                   )}
 
@@ -403,7 +407,7 @@ export default function Header({
                       onOpenSaved();
                     }}
                   >
-                    ❤️ My Saved Drawings ({savedCount})
+                    My Saved Drawings ({savedCount})
                   </button>
 
                   <button
@@ -414,7 +418,7 @@ export default function Header({
                       if (onOpenOrders) onOpenOrders();
                     }}
                   >
-                    📦 My Orders & History ({user.role === 'customer' ? 'My Orders' : 'All Orders'})
+                    My Orders & History ({user.role === 'customer' ? 'My Orders' : 'All Orders'})
                   </button>
 
                   <button
@@ -425,7 +429,7 @@ export default function Header({
                       alert('Bạn đang có lượt tham gia rút thăm Pokémon TCG chờ kết quả mở giải!');
                     }}
                   >
-                    🎟️ My Drawing Entries
+                    My Drawing Entries
                   </button>
 
                   <button
@@ -437,7 +441,7 @@ export default function Header({
                       onSignOut();
                     }}
                   >
-                    🚪 Đăng xuất (Sign Out)
+                    Đăng xuất (Sign Out)
                   </button>
                 </div>
               )}
