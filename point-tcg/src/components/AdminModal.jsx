@@ -1,6 +1,6 @@
 // src/components/AdminModal.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { createCardSvg, PRESET_CARD_STYLES, allProducts, getProductCatalogImage, embedImageInStoreFrame } from '../products';
+import { createCardSvg, PRESET_CARD_STYLES, allProducts, getProductCatalogImage, embedImageInStoreFrame, getFrameBadge } from '../products';
 import { saveNewOrder, changePassword } from '../utils/auth';
 import { checkOrderPricing } from '../utils/orderCheck';
 import CountdownEditor from './CountdownEditor';
@@ -746,7 +746,7 @@ export default function AdminModal({
       setFormData(prev => {
         const finalImg = prev.applyStoreFrame
           ? embedImageInStoreFrame(dataUrl, {
-              badgeText: prev.badge || '-35%',
+              badgeText: getFrameBadge(prev),
               badgeSubText: 'OFF'
             })
           : dataUrl;
@@ -773,7 +773,7 @@ export default function AdminModal({
       try {
         const dataUrl = await compressImageFile(file);
         added.push(formData.applyStoreFrame
-          ? embedImageInStoreFrame(dataUrl, { badgeText: formData.badge || '-35%', badgeSubText: 'OFF' })
+          ? embedImageInStoreFrame(dataUrl, { badgeText: getFrameBadge(formData), badgeSubText: 'OFF' })
           : dataUrl);
       } catch {
         // bỏ qua file lỗi
@@ -836,7 +836,7 @@ export default function AdminModal({
       const base = prev.rawUploadedImage || prev.imageUrl;
       if (base) {
         newImageUrl = newApplyFrame
-          ? embedImageInStoreFrame(base, { badgeText: prev.badge || '-35%', badgeSubText: 'OFF' })
+          ? embedImageInStoreFrame(base, { badgeText: getFrameBadge(prev), badgeSubText: 'OFF' })
           : base;
       }
       return {
@@ -863,7 +863,7 @@ export default function AdminModal({
   const handleQuickUpload = (product, section, file) => {
     processImageFile(file, (dataUrl, fileName, fileSize) => {
       const framedImage = embedImageInStoreFrame(dataUrl, {
-        badgeText: product.badge || '-35%',
+        badgeText: getFrameBadge(product),
         badgeSubText: 'OFF'
       });
       const updatedProduct = {
@@ -1183,7 +1183,7 @@ export default function AdminModal({
                           let nextImg = prev.imageUrl;
                           if (prev.imageType === 'upload' && prev.applyStoreFrame && prev.rawUploadedImage) {
                             nextImg = embedImageInStoreFrame(prev.rawUploadedImage, {
-                              badgeText: val || '-35%',
+                              badgeText: getFrameBadge({ ...prev, badge: val }),
                               badgeSubText: 'OFF'
                             });
                           }

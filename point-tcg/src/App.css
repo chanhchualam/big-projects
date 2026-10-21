@@ -9503,3 +9503,22 @@
 .card-image-box .card-options-text {
   z-index: 3;
 }
+
+/* Trang chi tiết: ảnh đã có khung shop → bỏ khung, nhãn và dải logo vẽ thêm */
+.pdp-main-image-frame.pdp-frame-plain {
+  border: 1px solid #e2e8f0;
+}
+
+.pdp-frame-plain .pdp-frame-header-banner,
+.pdp-frame-plain .pdp-frame-discount-tag,
+.pdp-frame-plain .pdp-frame-footer-badges {
+  display: none;
+}
+
+.pdp-frame-plain .pdp-image-viewport {
+  padding: 0;
+}
+
+.pdp-frame-plain .pdp-img-counter {
+  bottom: 12px;
+}

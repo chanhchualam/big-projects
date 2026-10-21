@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import RestockNotify from './RestockNotify';
 import { getProductImages } from '../utils/productImages';
+import { isStoreFramed } from '../products';
 
 function stars(n) {
   return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
@@ -189,7 +190,8 @@ export default function ProductDetailPage({
 
               {/* Main Showcase Showcase Box */}
               <div
-                className="pdp-main-image-frame"
+                // Ảnh đã có khung đỏ của shop → không vẽ thêm khung thứ hai
+                className={`pdp-main-image-frame ${isStoreFramed(galleryImages[0]?.src) ? 'pdp-frame-plain' : ''}`}
                 onMouseEnter={() => setGalleryPaused(true)}
                 onMouseLeave={() => setGalleryPaused(false)}
                 onPointerDown={(e) => { swipeStartX.current = e.clientX; }}

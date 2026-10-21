@@ -767,8 +767,24 @@ export const getProductCatalogImage = (idOrItem) => {
  * Wraps any custom image (uploaded file data URL or external URL)
  * inside the official Point TCG red retail showcase frame (Bánh Mì Games style)
  */
+// Ảnh đã nằm trong khung đỏ của shop (ảnh mẫu hoặc ảnh admin tải lên có bật khung)
+const FRAME_MARKER = encodeURIComponent('CHÍNH HÃNG - UY TÍN');
+export const isStoreFramed = (src) =>
+  typeof src === 'string' && src.startsWith('data:image/svg') && src.includes(FRAME_MARKER);
+
+// Nhãn giảm giá trên khung: badge admin nhập, nếu trống thì % giảm thật từ giá cũ → giá mới
+export const getFrameBadge = ({ badge, price, wasPrice } = {}) => {
+  if (badge && String(badge).trim()) return String(badge).trim();
+  const p = parseFloat(price);
+  const w = parseFloat(wasPrice);
+  if (p > 0 && w > p) return `-${Math.round(((w - p) / w) * 100)}%`;
+  return '';
+};
+
 export const embedImageInStoreFrame = (imageUrl, options = {}) => {
   if (!imageUrl) return '';
+  // Không bọc khung hai lần
+  if (isStoreFramed(imageUrl)) return imageUrl;
   const {
     badgeText = '-35%',
     badgeSubText = 'OFF'
