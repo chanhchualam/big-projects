@@ -315,6 +315,22 @@ export default function Header({
             </div>
           </button>
 
+          {/* Order History button */}
+          <button
+            type="button"
+            className="header-btn"
+            onClick={onOpenOrders}
+            aria-label="Track Orders"
+            title="Track Orders"
+          >
+            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>📦</span>
+            {pendingOrdersCount > 0 && <span className="header-badge">{pendingOrdersCount}</span>}
+            <div className="header-btn-label">
+              <span className="header-btn-sub">Track</span>
+              <span>Orders</span>
+            </div>
+          </button>
+
           {/* Sign In / Account */}
           {user ? (
             <div className="user-menu-wrapper" ref={dropdownRef}>
@@ -350,6 +366,18 @@ export default function Header({
                     <p className="user-dropdown-email">{user.email || 'collector@pointtcg.com'}</p>
                   </div>
 
+                  <button
+                    type="button"
+                    className="user-dropdown-item"
+                    style={{ fontWeight: 700, color: '#0f172a', background: '#f8fafc' }}
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      if (onOpenOrders) onOpenOrders('profile');
+                    }}
+                  >
+                    👤 Thông tin tài khoản của tôi (Profile)
+                  </button>
+
                   {user.role === 'admin' && (
                     <button
                       type="button"
@@ -383,7 +411,7 @@ export default function Header({
                       if (onOpenOrders) onOpenOrders();
                     }}
                   >
-                    📦 Lịch Sử Đơn Hàng ({user.role === 'customer' ? 'My Orders' : 'Tất cả đơn'})
+                    📦 My Orders & History ({user.role === 'customer' ? 'My Orders' : 'All Orders'})
                   </button>
 
                   <button

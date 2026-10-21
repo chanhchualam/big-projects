@@ -1,7 +1,7 @@
 // src/components/Footer.jsx
 import React from 'react';
 
-export default function Footer({ onOpenAdminLogin }) {
+export default function Footer({ onOpenAdminLogin, onOpenOrderHistory }) {
   return (
     <footer className="site-footer">
       <div className="footer-top">
@@ -17,6 +17,17 @@ export default function Footer({ onOpenAdminLogin }) {
 
         {/* Links */}
         <div className="footer-links-row">
+          <a
+            href="#orders"
+            className="footer-link"
+            style={{ color: '#ffc220', fontWeight: 600 }}
+            onClick={(e) => {
+              e.preventDefault();
+              if (onOpenOrderHistory) onOpenOrderHistory();
+            }}
+          >
+            📦 Track Orders
+          </a>
           <a href="#about" className="footer-link" onClick={(e) => { e.preventDefault(); alert('About Point TCG: The premier limited-stock drawing destination for authentic sealed Pokémon trading cards.'); }}>
             About Point TCG
           </a>

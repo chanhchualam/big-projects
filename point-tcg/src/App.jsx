@@ -11,7 +11,8 @@ import SignInModal from './components/SignInModal';
 import AdminModal from './components/AdminModal';
 import AdminPage from './components/AdminPage';
 import CheckoutModal from './components/CheckoutModal';
-import OrdersModal from './components/OrdersModal';
+import CustomerOrdersPage from './components/CustomerOrdersPage';
+import FloatingMessenger from './components/FloatingMessenger';
 import Footer from './components/Footer';
 import {
   openDrawings as initialOpenDrawings,
@@ -19,7 +20,23 @@ import {
   allProducts,
   getProductCatalogImage
 } from './products';
-import { getOrdersList, updateOrderStatus, deleteOrder, setAdminSession } from './utils/auth';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
+import { buildSessionUser, signOutUser, purgeLegacyLocalData } from './utils/auth';
+import {
+  fetchProductsFromDb,
+  fetchOrdersFromDb,
+  fetchOrdersForUser,
+  saveOrderToDb,
+  updateOrderStatusInDb,
+  deleteOrderFromDb,
+  saveProductToDb,
+  deleteProductFromDb,
+  decrementProductStock
+} from './services/firestoreService';
+
+// Xoá dữ liệu cũ (mật khẩu, danh sách user, đơn hàng của người khác) còn sót trong localStorage
+purgeLegacyLocalData();
 
 // Helper to safely persist products list to localStorage with quota-exceeded fallback
 export const safeSaveProducts = (key, products) => {
@@ -63,7 +80,6 @@ const sanitizeLoadedProducts = (savedList, fallbackList) => {
 const STORAGE_KEYS = {
   CART: 'point-tcg-cart',
   SAVED: 'point-tcg-saved',
-  USER: 'point-tcg-user',
   OPEN_PRODUCTS: 'point-tcg-open-drawings',
   CLOSED_PRODUCTS: 'point-tcg-closed-drawings'
 };
@@ -74,10 +90,11 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState('all');
   const deductedOrderIdsRef = useRef(new Set());
 
-  // Hash-based Page Routing (Trang chủ Store vs Trang Quản Trị Admin vs Trang Chi tiết Sản phẩm)
+  // Hash-based Page Routing (Trang chủ Store vs Trang Quản Trị Admin vs Trang Chi tiết Sản phẩm vs Trang Đơn Hàng)
   const [currentRoute, setCurrentRoute] = useState(() => {
     const hash = window.location.hash.toLowerCase();
     if (hash.startsWith('#admin')) return 'admin';
+    if (hash.startsWith('#orders') || hash.startsWith('#account') || hash.startsWith('#don-hang')) return 'orders';
     if (hash.startsWith('#product-')) return 'product';
     return 'store';
   });
@@ -85,7 +102,6 @@ export default function App() {
   // Modals & Drawers state
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [isSavedOpen, setIsSavedOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [signInMode, setSignInMode] = useState('login'); // 'login' | 'register' | 'admin'
@@ -93,17 +109,47 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [adminProductToEdit, setAdminProductToEdit] = useState(null);
 
-  // Centralized Orders State with Cross-Tab and Event Sync
-  const [orders, setOrders] = useState(() => getOrdersList());
+  // Authenticated user state — derived from Firebase Auth, never trusted from localStorage
+  const [user, setUser] = useState(null);
+  const [authUid, setAuthUid] = useState(null); // includes anonymous guest sessions
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    const handleSync = () => {
+    return onAuthStateChanged(auth, async (fbUser) => {
+      setAuthUid(fbUser ? fbUser.uid : null);
       try {
-        const fresh = getOrdersList();
-        setOrders(fresh);
-      } catch {}
-    };
+        setUser(await buildSessionUser(fbUser));
+      } catch (err) {
+        console.warn('Could not load session user:', err);
+        setUser(null);
+      }
+      setAuthReady(true);
+    });
+  }, []);
 
+  const isAdmin = user?.role === 'admin';
+
+  // Orders: admin sees every order, others only their own (enforced by firestore.rules)
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    if (!authReady) return;
+    let isMounted = true;
+    (async () => {
+      let list = [];
+      if (isAdmin) {
+        list = (await fetchOrdersFromDb()) || [];
+      } else if (authUid) {
+        list = (await fetchOrdersForUser(authUid)) || [];
+      }
+      if (isMounted) setOrders(list);
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [authReady, authUid, isAdmin]);
+
+  useEffect(() => {
     const handleNewOrder = (e) => {
       const newOrder = e.detail;
       if (newOrder) {
@@ -114,27 +160,15 @@ export default function App() {
     const handleOrderUpdated = (e) => {
       if (e.detail?.updated) {
         setOrders(e.detail.updated);
-      } else {
-        handleSync();
-      }
-    };
-
-    const handleStorageChange = (e) => {
-      if (e.key === 'point-tcg-orders') {
-        handleSync();
       }
     };
 
     window.addEventListener('point-tcg-new-order', handleNewOrder);
     window.addEventListener('point-tcg-order-updated', handleOrderUpdated);
-    window.addEventListener('point-tcg-order-deleted', handleOrderUpdated);
-    window.addEventListener('storage', handleStorageChange);
 
     return () => {
       window.removeEventListener('point-tcg-new-order', handleNewOrder);
       window.removeEventListener('point-tcg-order-updated', handleOrderUpdated);
-      window.removeEventListener('point-tcg-order-deleted', handleOrderUpdated);
-      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
@@ -166,6 +200,33 @@ export default function App() {
     }
   });
 
+  // Dedicated state for initial tab when opening CustomerOrdersPage ('orders' | 'profile')
+  const [ordersInitialTab, setOrdersInitialTab] = useState('orders');
+
+  // Live load & sync from Firebase Firestore on startup
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const cloudProducts = await fetchProductsFromDb();
+        if (!isMounted) return;
+
+        if (Array.isArray(cloudProducts) && cloudProducts.length > 0) {
+          const cloudOpen = cloudProducts.filter(p => p.status !== 'closed');
+          const cloudClosed = cloudProducts.filter(p => p.status === 'closed');
+          if (cloudOpen.length > 0) setOpenDrawings(cloudOpen);
+          if (cloudClosed.length > 0) setClosedDrawings(cloudClosed);
+        }
+      } catch (err) {
+        console.warn('Firebase initial sync notice:', err);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Open / Close dedicated Product Detail Page
   const handleOpenProductDetail = (product) => {
     if (!product) return;
@@ -186,6 +247,14 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleOpenOrdersPage = (tab = 'orders') => {
+    setSelectedProduct(null);
+    setOrdersInitialTab(tab);
+    setCurrentRoute('orders');
+    window.location.hash = tab === 'profile' ? '#profile' : '#orders';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Sync hash routing on hash change & on initial load
   useEffect(() => {
     const handleHashChange = () => {
@@ -193,6 +262,14 @@ export default function App() {
       const lower = hash.toLowerCase();
       if (lower.startsWith('#admin')) {
         setCurrentRoute('admin');
+        setSelectedProduct(null);
+      } else if (lower.startsWith('#profile') || lower.startsWith('#account')) {
+        setOrdersInitialTab('profile');
+        setCurrentRoute('orders');
+        setSelectedProduct(null);
+      } else if (lower.startsWith('#orders') || lower.startsWith('#don-hang')) {
+        setOrdersInitialTab('orders');
+        setCurrentRoute('orders');
         setSelectedProduct(null);
       } else if (lower.startsWith('#product-')) {
         const prodId = hash.slice(9);
@@ -245,18 +322,6 @@ export default function App() {
     }
   });
 
-  // Authenticated user state
-  const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  const isAdmin = user?.role === 'admin';
-
   // Live countdown target timestamps
   const [targetTimestamps, setTargetTimestamps] = useState(() => {
     try {
@@ -306,16 +371,6 @@ export default function App() {
       localStorage.setItem(STORAGE_KEYS.SAVED, JSON.stringify(savedIds));
     } catch (e) {}
   }, [savedIds]);
-
-  useEffect(() => {
-    if (user) {
-      try {
-        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-      } catch (e) {}
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.USER);
-    }
-  }, [user]);
 
   // Cross-tab synchronization ONLY (fires only when ANOTHER browser tab updates localStorage)
   useEffect(() => {
@@ -374,25 +429,31 @@ export default function App() {
 
   const handleSignOut = () => {
     setUser(null);
-    setAdminSession(null);
-    try {
-      localStorage.removeItem(STORAGE_KEYS.USER);
-      localStorage.removeItem('point-tcg-admin-session');
-    } catch {}
+    setOrders([]);
+    signOutUser();
   };
 
   // -------------------------------------------------------------
   // ORDER OPERATIONS: PLACE, UPDATE STATUS, DELETE & STOCK DEDUCTION
   // -------------------------------------------------------------
-  const handleOrderPlaced = (newOrder) => {
-    if (!newOrder || !newOrder.id) return;
+  // Returns true when the order was persisted to Firestore
+  const handleOrderPlaced = async (newOrder) => {
+    if (!newOrder || !newOrder.id) return false;
+
+    const saved = await saveOrderToDb(newOrder);
+    if (!saved) return false;
+
     const alreadyDeducted = deductedOrderIdsRef.current.has(newOrder.id);
     deductedOrderIdsRef.current.add(newOrder.id);
-
     setOrders(prev => [newOrder, ...prev.filter(o => o.id !== newOrder.id)]);
 
     // Deduct stock for new orders
     if (!alreadyDeducted && Array.isArray(newOrder.items) && newOrder.items.length > 0) {
+      // Atomic decrement in Firestore (rules only allow customers to lower `stock`)
+      newOrder.items.forEach(item => {
+        if (item.id) decrementProductStock(item.id, Number(item.qty) || 1);
+      });
+
       const qtyMap = {};
       newOrder.items.forEach(item => {
         const q = Number(item.qty) || 1;
@@ -416,7 +477,8 @@ export default function App() {
           if (purchased > 0) {
             const currentStock = typeof p.stock === 'number' ? p.stock : 20;
             const remaining = Math.max(0, currentStock - purchased);
-            return { ...p, stock: remaining };
+            const updatedProd = { ...p, stock: remaining };
+            return updatedProd;
           }
           return p;
         });
@@ -436,7 +498,8 @@ export default function App() {
           if (purchased > 0) {
             const currentStock = typeof p.stock === 'number' ? p.stock : 20;
             const remaining = Math.max(0, currentStock - purchased);
-            return { ...p, stock: remaining };
+            const updatedProd = { ...p, stock: remaining };
+            return updatedProd;
           }
           return p;
         });
@@ -476,24 +539,31 @@ export default function App() {
     }
   };
 
-  const handleUpdateOrderStatus = (orderId, newStatus) => {
-    const updated = updateOrderStatus(orderId, newStatus);
-    if (updated) {
-      setOrders(updated);
+  // Returns true when Firestore accepted the change (rules limit what customers may set)
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    const ok = await updateOrderStatusInDb(orderId, newStatus);
+    if (!ok) {
+      alert('Không thể cập nhật trạng thái đơn hàng (không có quyền hoặc lỗi kết nối).');
+      return false;
     }
+    setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
+    return true;
   };
 
-  const handleDeleteOrder = (orderId) => {
-    const filtered = deleteOrder(orderId);
-    if (filtered) {
-      setOrders(filtered);
+  const handleDeleteOrder = async (orderId) => {
+    const ok = await deleteOrderFromDb(orderId);
+    if (!ok) {
+      alert('Không thể xoá đơn hàng (không có quyền hoặc lỗi kết nối).');
+      return;
     }
+    setOrders(prev => prev.filter(o => o.id !== orderId));
   };
 
   // -------------------------------------------------------------
   // ADMIN OPERATIONS: ADD, EDIT, DELETE, RESET
   // -------------------------------------------------------------
   const handleAddProduct = (newProduct, section) => {
+    const prodToSave = { ...newProduct, status: section };
     if (section === 'open') {
       setOpenDrawings(prev => [newProduct, ...prev]);
       setTargetTimestamps(prev => ({
@@ -503,9 +573,11 @@ export default function App() {
     } else {
       setClosedDrawings(prev => [newProduct, ...prev]);
     }
+    saveProductToDb(prodToSave);
   };
 
   const handleUpdateProduct = (updatedProduct, section) => {
+    const prodToSave = { ...updatedProduct, status: section };
     if (section === 'open') {
       setOpenDrawings(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
       setTargetTimestamps(prev => ({
@@ -517,6 +589,7 @@ export default function App() {
     }
     // Live-sync currently viewed product on the detail page
     setSelectedProduct(prev => (prev && prev.id === updatedProduct.id ? updatedProduct : prev));
+    saveProductToDb(prodToSave);
   };
 
   const handleDeleteProduct = (productId, section) => {
@@ -527,6 +600,7 @@ export default function App() {
     }
     setCart(prev => prev.filter(item => item.id !== productId));
     setSavedIds(prev => prev.filter(id => id !== productId));
+    deleteProductFromDb(productId);
   };
 
   const handleResetDefaults = () => {
@@ -767,6 +841,7 @@ export default function App() {
     return (
       <AdminPage
         currentUser={user}
+        authReady={authReady}
         openDrawings={openDrawings}
         closedDrawings={closedDrawings}
         orders={orders}
@@ -796,6 +871,52 @@ export default function App() {
     );
   }
 
+  // -------------------------------------------------------------
+  // RENDER DEDICATED CUSTOMER ORDERS & ACCOUNT PAGE (#orders)
+  // -------------------------------------------------------------
+  if (currentRoute === 'orders') {
+    return (
+      <>
+        <CustomerOrdersPage
+          currentUser={user}
+          initialTab={ordersInitialTab}
+          onUpdateCurrentUser={(updated) => setUser(prev => (prev ? { ...prev, ...updated } : prev))}
+          orders={orders}
+          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onAddToCart={handleAddToCart}
+          onBackToStore={handleBackToStore}
+          onOpenSignIn={(mode) => {
+            setSignInMode(mode || 'login');
+            setIsSignInOpen(true);
+          }}
+          onOpenProductDetail={handleOpenProductDetail}
+        />
+        <SignInModal
+          isOpen={isSignInOpen}
+          onClose={() => setIsSignInOpen(false)}
+          initialMode={signInMode}
+          onSignInSuccess={(userData) => {
+            setUser(userData);
+            setIsSignInOpen(false);
+          }}
+        />
+        <CartDrawer
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          cartItems={cart}
+          onUpdateQty={handleUpdateCartQty}
+          onRemoveItem={handleRemoveFromCart}
+          cartTotal={cartTotal}
+          onProceedCheckout={() => {
+            setIsCartOpen(false);
+            setIsCheckoutOpen(true);
+          }}
+        />
+        <FloatingMessenger />
+      </>
+    );
+  }
+
   return (
     <div className="app-container">
       {/* 1. Header Bar (#0053e2, Sticky) */}
@@ -814,7 +935,7 @@ export default function App() {
         }}
         onSignOut={handleSignOut}
         onOpenAdmin={handleOpenAdmin}
-        onOpenOrders={() => setIsOrdersOpen(true)}
+        onOpenOrders={handleOpenOrdersPage}
         pendingOrdersCount={pendingOrdersCount}
         products={allStoreProducts}
         onSelectProduct={handleOpenProductDetail}
@@ -1070,14 +1191,8 @@ export default function App() {
         onRemoveItem={handleRemoveFromCart}
         onClearCart={() => setCart([])}
         onOrderPlaced={handleOrderPlaced}
-        onOpenOrderHistory={() => setIsOrdersOpen(true)}
-      />
-
-      {/* Orders History Modal */}
-      <OrdersModal
-        isOpen={isOrdersOpen}
-        onClose={() => setIsOrdersOpen(false)}
-        user={user}
+        onUpdateOrderStatus={handleUpdateOrderStatus}
+        onOpenOrderHistory={handleOpenOrdersPage}
       />
 
       <SavedModal
@@ -1099,10 +1214,6 @@ export default function App() {
             window.location.hash = '#admin';
             setCurrentRoute('admin');
           } else {
-            setAdminSession(null);
-            try {
-              localStorage.removeItem('point-tcg-admin-session');
-            } catch {}
             if (currentRoute === 'admin') {
               setCurrentRoute('store');
               window.location.hash = '';
@@ -1113,6 +1224,9 @@ export default function App() {
           }
         }}
       />
+
+      {/* Floating Messenger & Contact Widget */}
+      <FloatingMessenger />
     </div>
   );
 }

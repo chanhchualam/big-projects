@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { saveNewOrder, updateOrderStatus } from '../utils/auth';
+import { saveNewOrder, ensureSignedIn, getAuthErrorMessage } from '../utils/auth';
 import { getProductCatalogImage } from '../products';
-import { getQrConfig, generateQrUrl } from '../utils/qrConfig';
+import { getQrConfig, loadQrConfig, generateQrUrl } from '../utils/qrConfig';
+
+// Khách chỉ được báo đã chuyển khoản; admin kiểm tra sao kê rồi mới chuyển sang "Đã thanh toán"
+const CUSTOMER_REPORTED_PAID_STATUS = 'Khách báo đã chuyển khoản (Chờ xác nhận)';
 
 export default function CheckoutModal({
   isOpen,
@@ -13,7 +16,8 @@ export default function CheckoutModal({
   onRemoveItem,
   onClearCart,
   onOpenOrderHistory,
-  onOrderPlaced
+  onOrderPlaced,
+  onUpdateOrderStatus
 }) {
   // Step State: 'form' | 'processing' | 'qr_payment' | 'success'
   const [checkoutStep, setCheckoutStep] = useState('form');
@@ -62,6 +66,8 @@ export default function CheckoutModal({
   // Reset modal state when opening
   useEffect(() => {
     if (isOpen) {
+      // Always show the bank account the admin saved in Firestore
+      loadQrConfig().then(setQrConfig).catch(() => {});
       setCheckoutStep('form');
       setCompletedOrder(null);
       setCouponMessage('');
@@ -184,10 +190,21 @@ export default function CheckoutModal({
     // Step 2: Processing visual state briefly
     setCheckoutStep('processing');
 
-    setTimeout(() => {
+    setTimeout(async () => {
+      // Every order is tied to a Firebase uid (anonymous for guests) so only its owner can read it
+      let uid;
+      try {
+        uid = await ensureSignedIn();
+      } catch (err) {
+        alert(getAuthErrorMessage(err, 'Không thể khởi tạo phiên đặt hàng. Vui lòng thử lại!'));
+        setCheckoutStep('form');
+        return;
+      }
+
       const generatedOrderId = `PTCG-${Date.now().toString().slice(-6)}`;
       const orderPayload = {
         id: generatedOrderId,
+        uid,
         customerName: shippingInfo.name.trim(),
         customerEmail: shippingInfo.email.trim() || `${shippingInfo.phone.trim()}@guest.pointtcg.com`,
         customerPhone: shippingInfo.phone.trim(),
@@ -214,24 +231,22 @@ export default function CheckoutModal({
         createdAt: new Date().toLocaleString('vi-VN')
       };
 
-      // 1. Save directly into localStorage and emit event
-      let saved = null;
-      try {
-        saved = saveNewOrder(orderPayload);
-      } catch (err) {
-        console.error('Error saving order:', err);
-      }
-      const finalOrder = saved || orderPayload;
-      setCompletedOrder(finalOrder);
+      // 1. Normalize the order record
+      const finalOrder = saveNewOrder(orderPayload);
 
-      // 2. Propagate to parent App.jsx in real-time
-      if (onOrderPlaced) {
-        try {
-          onOrderPlaced(finalOrder);
-        } catch (err) {
-          console.error('Error in onOrderPlaced:', err);
-        }
+      // 2. Persist to Firestore via App.jsx — stop here if it was rejected
+      let persisted = false;
+      try {
+        persisted = onOrderPlaced ? await onOrderPlaced(finalOrder) : false;
+      } catch (err) {
+        console.error('Error in onOrderPlaced:', err);
       }
+      if (!persisted) {
+        alert('Không thể lưu đơn hàng lên hệ thống. Vui lòng thử lại!');
+        setCheckoutStep('form');
+        return;
+      }
+      setCompletedOrder(finalOrder);
 
       // 3. Clear cart
       if (onClearCart) {
@@ -253,23 +268,16 @@ export default function CheckoutModal({
   };
 
   // Customer clicks "I have transferred successfully"
-  const handleConfirmTransfer = () => {
-    const target = completedOrder || activeOrder;
+  const handleConfirmTransfer = async () => {
+    const target = completedOrder;
     if (!target) return;
-    const newStatus = 'Đã thanh toán (Chờ chuẩn bị hàng)';
-    try {
-      updateOrderStatus(target.id, newStatus);
-    } catch (err) {}
-    const updated = {
+    const newStatus = CUSTOMER_REPORTED_PAID_STATUS;
+    const ok = onUpdateOrderStatus ? await onUpdateOrderStatus(target.id, newStatus) : false;
+    if (!ok) return;
+    setCompletedOrder({
       ...target,
       status: newStatus
-    };
-    setCompletedOrder(updated);
-    if (onOrderPlaced) {
-      try {
-        onOrderPlaced(updated);
-      } catch (err) {}
-    }
+    });
     setCheckoutStep('success');
   };
 

@@ -27,6 +27,7 @@ export default function SignInModal({
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [regError, setRegError] = useState('');
   const [regSuccess, setRegSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -35,6 +36,7 @@ export default function SignInModal({
       setRegError('');
       setRegSuccess('');
       setLoginPassword('');
+      setIsSubmitting(false);
     }
   }, [isOpen, initialMode]);
 
@@ -61,7 +63,7 @@ export default function SignInModal({
   // -------------------------------------------------------------
   // 1. HANDLER: USER LOGIN
   // -------------------------------------------------------------
-  const handleUserLogin = (e) => {
+  const handleUserLogin = async (e) => {
     e.preventDefault();
     setLoginError('');
 
@@ -70,13 +72,20 @@ export default function SignInModal({
       return;
     }
 
-    const res = authenticateUser(loginEmail, loginPassword);
-    if (res.success) {
-      onSignInSuccess(res.user);
-      setLoginPassword('');
-      onClose();
-    } else {
-      setLoginError(res.error || 'Email hoặc mật khẩu không chính xác!');
+    setIsSubmitting(true);
+    try {
+      const res = await authenticateUser(loginEmail, loginPassword);
+      if (res.success) {
+        onSignInSuccess(res.user);
+        setLoginPassword('');
+        onClose();
+      } else {
+        setLoginError(res.error || 'Email hoặc mật khẩu không chính xác!');
+      }
+    } catch (err) {
+      setLoginError('Lỗi kết nối khi đăng nhập. Vui lòng thử lại!');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -84,7 +93,7 @@ export default function SignInModal({
   // -------------------------------------------------------------
   // 2. HANDLER: USER REGISTER
   // -------------------------------------------------------------
-  const handleUserRegister = (e) => {
+  const handleUserRegister = async (e) => {
     e.preventDefault();
     setRegError('');
     setRegSuccess('');
@@ -106,22 +115,29 @@ export default function SignInModal({
       return;
     }
 
-    const regResult = registerUser({
-      name: regName,
-      email: regEmail,
-      password: regPassword,
-      phone: regPhone,
-      address: regAddress
-    });
+    setIsSubmitting(true);
+    try {
+      const regResult = await registerUser({
+        name: regName,
+        email: regEmail,
+        password: regPassword,
+        phone: regPhone,
+        address: regAddress
+      });
 
-    if (regResult.success) {
-      setRegSuccess('🎉 Đăng ký tài khoản thành công! Đang tự động đăng nhập...');
-      setTimeout(() => {
-        onSignInSuccess(regResult.user);
-        onClose();
-      }, 900);
-    } else {
-      setRegError(regResult.error || 'Đăng ký không thành công. Vui lòng thử lại!');
+      if (regResult.success) {
+        setRegSuccess('🎉 Đăng ký tài khoản thành công! Đang tự động lưu lên Firebase và đăng nhập...');
+        setTimeout(() => {
+          onSignInSuccess(regResult.user);
+          onClose();
+        }, 900);
+      } else {
+        setRegError(regResult.error || 'Đăng ký không thành công. Vui lòng thử lại!');
+      }
+    } catch (err) {
+      setRegError('Lỗi kết nối khi đăng ký. Vui lòng thử lại!');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -188,13 +204,14 @@ export default function SignInModal({
             <form className="signin-form" onSubmit={handleUserLogin}>
               <div className="form-group">
                 <label className="form-label" htmlFor="user-login-email">
-                  Email / Tên đăng nhập <span style={{ color: '#ef4444' }}>*</span>
+                  Email <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
                   id="user-login-email"
-                  type="text"
+                  type="email"
+                  autoComplete="username"
                   className="form-input"
-                  placeholder="Email hoặc tên đăng nhập..."
+                  placeholder="email@vidu.com"
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   required
@@ -217,8 +234,13 @@ export default function SignInModal({
                 />
               </div>
 
-              <button type="submit" className="signin-submit-btn">
-                Đăng Nhập Ngay
+              <button
+                type="submit"
+                className="signin-submit-btn"
+                disabled={isSubmitting}
+                style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'wait' : 'pointer' }}
+              >
+                {isSubmitting ? '⏳ Đang kiểm tra đăng nhập...' : 'Đăng Nhập Ngay'}
               </button>
 
 
@@ -361,9 +383,10 @@ export default function SignInModal({
               <button
                 type="submit"
                 className="signin-submit-btn"
-                style={{ backgroundColor: '#059669', color: '#ffffff' }}
+                disabled={isSubmitting}
+                style={{ backgroundColor: '#059669', color: '#ffffff', opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'wait' : 'pointer' }}
               >
-                Hoàn Tất Đăng Ký Tài Khoản
+                {isSubmitting ? '⏳ Đang lưu tài khoản lên Firebase...' : 'Hoàn Tất Đăng Ký Tài Khoản'}
               </button>
 
               <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.82rem', color: '#64748b' }}>
