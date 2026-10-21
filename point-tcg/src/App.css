@@ -9532,3 +9532,167 @@
 .admin-vnd-hint strong {
   color: #0053e2;
 }
+
+/* =====================================================================
+   ĐIỆN THOẠI: KHUNG THANH TOÁN & HỘP THOẠI KHÔNG TRÀN NGANG
+   ===================================================================== */
+/* Phần tử flex/grid mặc định không co nhỏ hơn nội dung → tràn ra ngoài màn hình hẹp */
+.checkout-modal-card,
+.signin-modal-card,
+.cop-detail-modal {
+  min-width: 0;
+}
+
+.checkout-grid-layout {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
+}
+
+.checkout-col-left,
+.checkout-col-right,
+.checkout-section-block,
+.form-group {
+  min-width: 0;
+}
+
+.form-input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Nút Liên hệ / Messenger nằm dưới hộp thoại, không che form */
+.floating-contact-widget {
+  z-index: 1500;
+}
+
+body:has(.modal-overlay) .floating-contact-widget,
+body:has(.drawer-container) .floating-contact-widget {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .checkout-grid-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Hộp thanh toán chiếm trọn màn hình như một trang */
+  .modal-overlay:has(.checkout-modal-card) {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .checkout-modal-card {
+    width: 100%;
+    max-width: 100% !important;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .checkout-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-right: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .checkout-title {
+    font-size: 1.1rem;
+  }
+
+  .checkout-col-left {
+    gap: 14px;
+  }
+
+  .checkout-section-block {
+    padding: 14px;
+  }
+
+  .shipping-option-card {
+    padding: 10px 12px;
+  }
+
+  /* Chữ ≥16px để iPhone không tự phóng to khi bấm vào ô nhập */
+  .form-input,
+  .coupon-input,
+  .restock-input,
+  .cop-input-editable {
+    font-size: 16px;
+  }
+}
+
+/* =====================================================================
+   ĐIỆN THOẠI: THANH ĐẦU TRANG GỌN TRONG MÀN HÌNH
+   ===================================================================== */
+/* Chặn mọi phần tử làm trang rộng hơn màn hình (iPhone sẽ tự thu nhỏ cả trang) */
+html,
+body {
+  overflow-x: clip;
+}
+
+@media (max-width: 640px) {
+  .header-top {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .brand-logo-link {
+    min-width: 0;
+  }
+
+  /* Hàng nút: chỉ còn biểu tượng, chia đều bề ngang */
+  .header-actions {
+    grid-column: 1 / -1;
+    order: 2;
+    display: flex;
+    justify-content: space-between;
+    gap: 2px;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .header-btn {
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .header-btn-label {
+    display: none;
+  }
+
+  /* Giỏ hàng vẫn hiện tổng tiền */
+  .cart-btn .header-btn-label {
+    display: flex;
+  }
+
+  .header-badge {
+    left: auto;
+    right: 0;
+    top: 0;
+  }
+
+  .header-search-container,
+  .header-search-form {
+    grid-column: 1 / -1;
+  }
+
+  /* Thanh danh mục cuộn ngang thay vì bị cắt */
+  .sub-nav-chips {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .sub-nav-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sub-chip {
+    flex-shrink: 0;
+  }
+}
