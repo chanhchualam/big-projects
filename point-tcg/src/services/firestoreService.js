@@ -72,9 +72,35 @@ export async function applyOrderStock(order, direction) {
   }
 }
 
+// Ảnh gốc + ảnh phụ của sản phẩm nằm ở product_media/{id}, chỉ tải khi mở trang chi tiết.
+// products/{id} chỉ giữ ảnh thu nhỏ để trang chủ tải nhanh và tốn ít băng thông.
+export async function fetchProductMedia(productId) {
+  try {
+    const snap = await getDoc(doc(db, 'product_media', String(productId)));
+    return snap.exists() ? snap.data() : null;
+  } catch (err) {
+    console.warn('Firestore fetchProductMedia error:', err.message);
+    return null;
+  }
+}
+
+export async function saveProductMediaToDb(productId, media) {
+  try {
+    await setDoc(doc(db, 'product_media', String(productId)), {
+      image: media.image || '',
+      gallery: Array.isArray(media.gallery) ? media.gallery : []
+    });
+    return true;
+  } catch (err) {
+    console.error('Firestore saveProductMedia error:', err);
+    return false;
+  }
+}
+
 export async function deleteProductFromDb(productId) {
   try {
     await deleteDoc(doc(db, 'products', productId));
+    await deleteDoc(doc(db, 'product_media', productId)).catch(() => {});
     return true;
   } catch (err) {
     console.error('Firestore deleteProduct error:', err);
