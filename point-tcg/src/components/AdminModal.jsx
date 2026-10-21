@@ -4,6 +4,7 @@ import { createCardSvg, PRESET_CARD_STYLES, allProducts, getProductCatalogImage,
 import { saveNewOrder, changePassword } from '../utils/auth';
 import { checkOrderPricing } from '../utils/orderCheck';
 import CountdownEditor from './CountdownEditor';
+import { usdToVnd, formatVndAmount, VND_RATE } from '../utils/currency';
 import {
   compressImageFile,
   estimateDocBytes,
@@ -452,7 +453,7 @@ export default function AdminModal({
       shippingFee: 0,
       discountAmount: 0,
       total: sampleProduct.price,
-      amountVnd: Math.round(sampleProduct.price * 25400),
+      amountVnd: usdToVnd(sampleProduct.price),
       status: 'Chờ thanh toán QR (Đơn mới)',
       createdAt: new Date().toLocaleString('vi-VN')
     };
@@ -500,7 +501,7 @@ export default function AdminModal({
           shippingFee: 0,
           discountAmount: 0,
           total: prod1.price,
-          amountVnd: Math.round(prod1.price * 25400),
+          amountVnd: usdToVnd(prod1.price),
           status: 'Chờ thanh toán QR (Đơn mới)',
           createdAt: new Date().toLocaleString('vi-VN')
         },
@@ -526,7 +527,7 @@ export default function AdminModal({
           shippingFee: 15.0,
           discountAmount: 9.99,
           total: prod2.price * 2 + 15.0 - 9.99,
-          amountVnd: Math.round((prod2.price * 2 + 15.0 - 9.99) * 25400),
+          amountVnd: usdToVnd(prod2.price * 2 + 15.0 - 9.99),
           status: 'Đang chuẩn bị hàng',
           createdAt: '09/10/2026, 16:45:22'
         }
@@ -1210,6 +1211,11 @@ export default function AdminModal({
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                       required
                     />
+                    {parseFloat(formData.price) > 0 && (
+                      <div className="admin-vnd-hint">
+                        = <strong>{formatVndAmount(usdToVnd(formData.price))}</strong> (× {VND_RATE.toLocaleString('vi-VN')})
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-group">
@@ -1222,6 +1228,11 @@ export default function AdminModal({
                       value={formData.wasPrice}
                       onChange={(e) => setFormData({ ...formData, wasPrice: e.target.value })}
                     />
+                    {parseFloat(formData.wasPrice) > 0 && (
+                      <div className="admin-vnd-hint">
+                        = <strong>{formatVndAmount(usdToVnd(formData.wasPrice))}</strong>
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-group">

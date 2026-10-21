@@ -14,6 +14,7 @@ import {
   deleteAnnouncementFromDb
 } from '../services/firestoreService';
 import { CARRIERS } from '../utils/orderStatus';
+import { orderVndRate } from '../utils/currency';
 
 // Đơn được tính doanh thu: admin đã xác nhận thanh toán trở đi
 export const REVENUE_STATUSES = [
@@ -23,9 +24,8 @@ export const REVENUE_STATUSES = [
   'Giao thành công'
 ];
 
-const VND_RATE = 25400;
 const vnd = (n) => `${Math.round(n || 0).toLocaleString('vi-VN')} đ`;
-const orderVnd = (o) => o.amountVnd || Math.round((Number(o.total) || 0) * VND_RATE);
+const orderVnd = (o) => o.amountVnd || Math.round((Number(o.total) || 0) * orderVndRate(o));
 
 // Ngày đặt đơn: ưu tiên mốc ISO đầu tiên trong statusHistory, nếu không thì đọc chuỗi vi-VN "hh:mm:ss dd/mm/yyyy"
 export function getOrderDate(order) {
@@ -184,7 +184,7 @@ export function StatsTab({ orders = [], products = [] }) {
         const key = String(i.id || i.title);
         const row = map.get(key) || { title: i.title, qty: 0, revenue: 0 };
         row.qty += Number(i.qty) || 0;
-        row.revenue += (Number(i.price) || 0) * (Number(i.qty) || 0) * VND_RATE;
+        row.revenue += (Number(i.price) || 0) * (Number(i.qty) || 0) * orderVndRate(o);
         map.set(key, row);
       });
     });

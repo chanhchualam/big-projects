@@ -2,7 +2,8 @@
 // Đối chiếu giá trong đơn với giá sản phẩm hiện tại. Giá và tổng tiền do trình duyệt
 // của khách gửi lên nên có thể bị sửa — admin xem cảnh báo này trước khi xác nhận đơn.
 // Quy tắc phí ship / mã giảm giá phải khớp với CheckoutModal.
-const VND_RATE = 25400;
+import { orderVndRate } from './currency';
+
 const FREE_SHIPPING_THRESHOLD = 75;
 const LEGACY_MAX_DISCOUNT_PERCENT = 10; // đơn cũ trước khi có bảng coupons
 const TOLERANCE = 0.01;
@@ -87,13 +88,15 @@ export function checkOrderPricing(order, products = [], coupons = null) {
   if (differs(order.total, expectedTotal)) {
     warnings.push(`Tổng tiền trong đơn ${money(order.total)}, tính lại ra ${money(expectedTotal)}.`);
   }
-  if (order.amountVnd && Math.abs(order.amountVnd - Math.round((Number(order.total) || 0) * VND_RATE)) > VND_RATE * TOLERANCE) {
+  // So với tỷ giá lúc đặt đơn; cho lệch tối đa 1.000đ do làm tròn tới nghìn
+  const rate = orderVndRate(order);
+  if (order.amountVnd && Math.abs(order.amountVnd - (Number(order.total) || 0) * rate) > 1000) {
     warnings.push(`Số tiền VNĐ (${order.amountVnd.toLocaleString('vi-VN')} đ) không khớp với tổng ${money(order.total)}.`);
   }
 
   return {
     warnings,
     expectedTotal,
-    expectedVnd: Math.round(expectedTotal * VND_RATE)
+    expectedVnd: order.vndRate ? Math.round((expectedTotal * rate) / 1000) * 1000 : Math.round(expectedTotal * rate)
   };
 }

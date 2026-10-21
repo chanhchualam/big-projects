@@ -15,7 +15,7 @@ test('đơn hợp lệ không có cảnh báo', () => {
   const r = computeOrderPrice(baseOrder, products, null);
   assert.deepEqual(r.issues, []);
   assert.equal(r.total, 100);
-  assert.equal(r.amountVnd, 2540000);
+  assert.equal(r.amountVnd, 2650000);
 });
 
 test('phát hiện khách sửa đơn giá', () => {

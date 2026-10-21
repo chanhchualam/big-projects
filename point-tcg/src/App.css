@@ -9522,3 +9522,13 @@
 .pdp-frame-plain .pdp-img-counter {
   bottom: 12px;
 }
+
+.admin-vnd-hint {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.admin-vnd-hint strong {
+  color: #0053e2;
+}

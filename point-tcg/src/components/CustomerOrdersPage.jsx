@@ -2,6 +2,7 @@
 // Trang Tài Khoản & Lịch Sử Đơn Hàng Dành Cho Khách Hàng (Customer Orders & Account Portal)
 import React, { useState, useMemo, useEffect } from 'react';
 import { getProductCatalogImage } from '../products';
+import { usdToVnd } from '../utils/currency';
 import { OrderTimeline, TrackingInfo, ProfileEditor, ReviewsPanel } from './AccountPanels';
 
 // Must match customerCancellableStatuses() in firestore.rules
@@ -16,7 +17,7 @@ function formatVndPrice(usdPrice) {
   if (typeof usdPrice !== 'number') {
     usdPrice = parseFloat(usdPrice) || 0;
   }
-  const vnd = Math.round((usdPrice * 25400) / 1000) * 1000;
+  const vnd = usdToVnd(usdPrice);
   return vnd.toLocaleString('vi-VN') + '₫';
 }
 
