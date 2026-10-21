@@ -9757,3 +9757,76 @@ body {
   font-weight: 600;
   line-height: 1.45;
 }
+
+/* Admin: nhóm sản phẩm theo dòng (series) */
+.admin-product-search {
+  flex: 1 1 220px;
+  max-width: 360px;
+  margin: 0;
+}
+
+.admin-series-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-series-group {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.admin-series-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #f1f5f9;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.admin-series-header:hover {
+  background: #e8eef6;
+}
+
+.admin-series-caret {
+  display: inline-block;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #64748b;
+  transition: transform 0.15s;
+}
+
+.admin-series-caret.open {
+  transform: rotate(90deg);
+}
+
+.admin-series-name {
+  font-weight: 800;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.admin-series-count,
+.admin-series-stock {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.admin-series-group .admin-product-cards-list {
+  border: none;
+  border-radius: 0;
+}
