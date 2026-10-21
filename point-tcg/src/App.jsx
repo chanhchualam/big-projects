@@ -18,6 +18,7 @@ import FloatingMessenger from './components/FloatingMessenger';
 import Footer from './components/Footer';
 import NotificationBell from './components/NotificationBell';
 import AnnouncementBar from './components/AnnouncementBar';
+import HeroBanner from './components/HeroBanner';
 import { getDrawingText } from './utils/countdown';
 import {
   buildNotifications,
@@ -1296,6 +1297,11 @@ export default function App() {
 
           {/* Main Content Area */}
           <main className="main-content">
+            {!searchQuery && (
+              <HeroBanner
+                onShopNow={() => document.getElementById('products-catalog-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              />
+            )}
             {/* Search & Sort Filter Toolbar */}
         <div className="section-toolbar" id="products-catalog-section">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
