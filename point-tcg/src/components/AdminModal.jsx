@@ -16,6 +16,7 @@ import {
 import { getCountdownMode, getDrawingText, toLocalInputValue, DEFAULT_LABELS } from '../utils/countdown';
 import { StatsTab, CouponsTab, RestockTab, AnnouncementsTab, TrackingEditor } from './AdminExtraTabs';
 import { auth } from '../firebase';
+import { detectSeries, getProductSeries, groupProductsBySeries, knownSeriesNames, OTHER_SERIES } from '../utils/productSeries';
 import {
   getQrConfig,
   loadQrConfig,
@@ -71,6 +72,8 @@ export default function AdminModal({
 
   // Tab "Sản phẩm": gộp Open + Closed Drawings, lọc bằng ô chọn
   const [productSectionFilter, setProductSectionFilter] = useState('all'); // 'all' | 'open' | 'closed'
+  const [productSearch, setProductSearch] = useState('');
+  const [collapsedSeries, setCollapsedSeries] = useState(() => new Set());
   const sectionOf = (product) => (closedDrawings.some((p) => p.id === product.id) ? 'closed' : 'open');
 
   // Danh sách mã giảm giá để đối chiếu phần giảm giá trong đơn
@@ -263,6 +266,7 @@ export default function AdminModal({
     wasPrice: '',
     stock: 20,
     badge: '',
+    series: '',
     optionsText: '',
     unitPrice: '',
     rating: 4.8,
@@ -628,6 +632,7 @@ export default function AdminModal({
       wasPrice: '',
       stock: 20,
       badge: '',
+      series: '',
       optionsText: '',
       unitPrice: '',
       rating: 4.9,
@@ -662,6 +667,7 @@ export default function AdminModal({
       wasPrice: product.wasPrice || '',
       stock: typeof product.stock === 'number' ? product.stock : 20,
       badge: product.badge || '',
+      series: product.series || '',
       optionsText: product.optionsText || '',
       unitPrice: product.unitPrice || '',
       rating: product.rating || 5,
@@ -937,6 +943,7 @@ export default function AdminModal({
       stock: validStock,
       isSale,
       badge: formData.badge.trim() || null,
+      series: (formData.series || '').trim() || null,
       optionsText: formData.optionsText.trim() || null,
       unitPrice: formData.unitPrice.trim() || null,
       rating: parseFloat(formData.rating) || 5.0,
@@ -1088,10 +1095,21 @@ export default function AdminModal({
     reader.readAsDataURL(file);
   };
 
+  const searchText = productSearch.trim().toLowerCase();
   const currentProductList = [
     ...(productSectionFilter !== 'closed' ? openDrawings : []),
     ...(productSectionFilter !== 'open' ? closedDrawings : [])
-  ];
+  ].filter((p) => !searchText || `${p.title} ${getProductSeries(p)}`.toLowerCase().includes(searchText));
+  const productGroups = groupProductsBySeries(currentProductList);
+  const seriesSuggestions = [...new Set([
+    ...[...openDrawings, ...closedDrawings].map(getProductSeries).filter((n) => n !== OTHER_SERIES),
+    ...knownSeriesNames()
+  ])];
+  const toggleSeries = (name) => setCollapsedSeries((prev) => {
+    const next = new Set(prev);
+    if (next.has(name)) next.delete(name); else next.add(name);
+    return next;
+  });
 
   const modalInner = (
     <div className={isFullPage ? "admin-fullpage-card" : "admin-modal-card admin-modal-wide"} onClick={(e) => e.stopPropagation()}>
@@ -1215,6 +1233,21 @@ export default function AdminModal({
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
                   />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Dòng sản phẩm (nhóm trong danh sách)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    list="admin-series-suggestions"
+                    placeholder={`Để trống = tự nhận: ${detectSeries(formData.title) || OTHER_SERIES}`}
+                    value={formData.series}
+                    onChange={(e) => setFormData({ ...formData, series: e.target.value })}
+                  />
+                  <datalist id="admin-series-suggestions">
+                    {seriesSuggestions.map((name) => <option key={name} value={name} />)}
+                  </datalist>
                 </div>
 
                 <div className="form-row-2">
@@ -2255,6 +2288,13 @@ export default function AdminModal({
                       </button>
                     ))}
                   </div>
+                  <input
+                    type="search"
+                    className="form-input admin-product-search"
+                    placeholder="Tìm theo tên hoặc dòng sản phẩm..."
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                  />
                   <button type="button" className="btn-admin-add" onClick={startAddNew}>
                     + Thêm Sản Phẩm Mới
                   </button>
@@ -2264,8 +2304,26 @@ export default function AdminModal({
                     Chưa có sản phẩm nào trong mục này. Bấm <strong>+ Thêm Sản Phẩm Mới</strong> để tạo!
                   </div>
                 ) : (
+                  <div className="admin-series-groups">
+                    {productGroups.map((group) => {
+                      const isCollapsed = collapsedSeries.has(group.name) && !searchText;
+                      const groupStock = group.items.reduce((sum, p) => sum + (typeof p.stock === 'number' ? p.stock : 20), 0);
+                      return (
+                  <div key={group.name} className="admin-series-group">
+                    <button
+                      type="button"
+                      className="admin-series-header"
+                      onClick={() => toggleSeries(group.name)}
+                      aria-expanded={!isCollapsed}
+                    >
+                      <span className={`admin-series-caret ${isCollapsed ? '' : 'open'}`} aria-hidden="true">›</span>
+                      <span className="admin-series-name">{group.name}</span>
+                      <span className="admin-series-count">{group.items.length} sản phẩm</span>
+                      <span className="admin-series-stock">Tổng kho: {groupStock}</span>
+                    </button>
+                    {!isCollapsed && (
                   <div className="admin-product-cards-list">
-                    {currentProductList.map((product) => {
+                    {group.items.map((product) => {
                       const section = sectionOf(product);
                       return (
                       <div key={product.id} className="admin-item-row">
@@ -2373,6 +2431,11 @@ export default function AdminModal({
                           </button>
                         </div>
                       </div>
+                      );
+                    })}
+                  </div>
+                    )}
+                  </div>
                       );
                     })}
                   </div>
