@@ -1,6 +1,7 @@
 // src/components/ProductDetailPage.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import RestockNotify from './RestockNotify';
+import { getProductImages } from '../utils/productImages';
 
 function stars(n) {
   return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
@@ -80,17 +81,21 @@ export default function ProductDetailPage({
   const vndWasPrice = product.wasPrice ? formatVnd(product.wasPrice) : formatVnd(product.price * 1.19);
   const productIdCode = `SP${(product.id || '').replace(/\D/g, '').padStart(6, '0') || '001305'}`;
 
-  // Gallery images (Main image + 3 supplementary pack/promo illustrations)
-  const galleryImages = useMemo(() => {
-    const list = [product.image];
-    // Create supplementary SVG views if only 1 image exists
-    return [
-      { id: 0, label: 'Hộp nguyên seal', src: product.image },
-      { id: 1, label: 'Mặt nghiêng', src: product.image },
-      { id: 2, label: 'Chi tiết gói pack', src: product.image },
-      { id: 3, label: 'Thẻ promo & phụ kiện', src: product.image }
-    ];
-  }, [product.image]);
+  // Ảnh thật của sản phẩm: ảnh chính + ảnh phụ admin tải lên
+  const galleryImages = useMemo(
+    () => getProductImages(product).map((src, i) => ({ id: i, label: `Ảnh ${i + 1}`, src })),
+    [product.image, product.gallery]
+  );
+
+  // Tự đổi ảnh chính khi có nhiều ảnh; dừng khi rê chuột vào khung ảnh
+  const [galleryPaused, setGalleryPaused] = useState(false);
+  const swipeStartX = useRef(null);
+  useEffect(() => {
+    if (galleryImages.length < 2 || galleryPaused) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = setTimeout(() => setActiveImgIndex((i) => (i + 1) % galleryImages.length), 4000);
+    return () => clearTimeout(timer);
+  }, [activeImgIndex, galleryImages.length, galleryPaused]);
 
   // Related products from same store catalog (excluding current product)
   const relatedProducts = useMemo(() => {
@@ -164,7 +169,8 @@ export default function ProductDetailPage({
           {/* LEFT: Image Gallery & Social Share */}
           <div className="pdp-gallery-column">
             <div className="pdp-gallery-layout">
-              {/* Vertical Thumbnail Strip */}
+              {/* Vertical Thumbnail Strip (chỉ khi có nhiều ảnh) */}
+              {galleryImages.length > 1 && (
               <div className="pdp-thumbnails-strip">
                 {galleryImages.map((img, idx) => (
                   <button
@@ -179,9 +185,21 @@ export default function ProductDetailPage({
                   </button>
                 ))}
               </div>
+              )}
 
               {/* Main Showcase Showcase Box */}
-              <div className="pdp-main-image-frame">
+              <div
+                className="pdp-main-image-frame"
+                onMouseEnter={() => setGalleryPaused(true)}
+                onMouseLeave={() => setGalleryPaused(false)}
+                onPointerDown={(e) => { swipeStartX.current = e.clientX; }}
+                onPointerUp={(e) => {
+                  if (swipeStartX.current === null) return;
+                  const dx = e.clientX - swipeStartX.current;
+                  swipeStartX.current = null;
+                  if (Math.abs(dx) > 40 && galleryImages.length > 1) (dx < 0 ? handleNextImg : handlePrevImg)();
+                }}
+              >
                 {/* Top Banner Tag */}
                 <div className="pdp-frame-header-banner">
                   <span>CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</span>
@@ -199,10 +217,13 @@ export default function ProductDetailPage({
                     src={galleryImages[activeImgIndex]?.src || product.image}
                     alt={product.title}
                     className="pdp-active-main-img"
+                    draggable="false"
                   />
                 </div>
 
                 {/* Left / Right Carousel Arrows */}
+                {galleryImages.length > 1 && (
+                <>
                 <button
                   type="button"
                   className="pdp-arrow-btn prev"
@@ -219,6 +240,9 @@ export default function ProductDetailPage({
                 >
                   ›
                 </button>
+                <div className="pdp-img-counter">{activeImgIndex + 1}/{galleryImages.length}</div>
+                </>
+                )}
 
                 {/* Bottom Authenticity Strip */}
                 <div className="pdp-frame-footer-badges">

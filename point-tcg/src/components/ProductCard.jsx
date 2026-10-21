@@ -1,6 +1,8 @@
 // src/components/ProductCard.jsx
 import React from 'react';
 import RestockNotify from './RestockNotify';
+import ImageSlider from './ImageSlider';
+import { getProductImages } from '../utils/productImages';
 
 // Star rating component with partial fill support
 function StarRating({ rating = 0, count = 0 }) {
@@ -152,12 +154,8 @@ export default function ProductCard({
           </div>
         )}
 
-        <img
-          src={image}
-          alt={title}
-          className="card-image"
-          loading="lazy"
-        />
+        {/* Nhiều ảnh: tự đổi, vuốt được; một ảnh: hiện như cũ */}
+        <ImageSlider images={getProductImages(product)} alt={title} imgClassName="card-image" />
 
         {/* Optional text "+ 5 options" centered under the image */}
         {optionsText && (

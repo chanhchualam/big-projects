@@ -9276,3 +9276,230 @@
   color: #475569;
   font-size: 0.85rem;
 }
+
+/* =====================================================================
+   TRÌNH CHIẾU ẢNH SẢN PHẨM
+   ===================================================================== */
+.img-slider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.img-slider-track {
+  display: flex;
+  height: 100%;
+  transition: transform 0.45s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .img-slider-track {
+    transition: none;
+  }
+}
+
+.img-slider-slide {
+  flex: 0 0 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.img-slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+  color: #0f172a;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 2;
+}
+
+.img-slider-arrow.prev { left: 6px; }
+.img-slider-arrow.next { right: 6px; }
+
+.img-slider:hover .img-slider-arrow,
+.img-slider-arrow:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .img-slider-arrow {
+    opacity: 0.85;
+  }
+}
+
+.img-slider-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  z-index: 2;
+}
+
+.img-slider-dots button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.25);
+  cursor: pointer;
+}
+
+.img-slider-dots button.active {
+  width: 18px;
+  border-radius: 4px;
+  background: #0053e2;
+}
+
+.pdp-img-counter {
+  position: absolute;
+  right: 12px;
+  bottom: 48px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.7);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 2;
+}
+
+/* Ảnh phụ trong form admin */
+.admin-gallery-box {
+  margin: 4px 0 16px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.admin-gallery-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.admin-gallery-head p {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.admin-gallery-head .xadmin-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.admin-gallery-item {
+  position: relative;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.admin-gallery-item img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.admin-gallery-num {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-gallery-actions {
+  display: flex;
+  border-top: 1px solid #e2e8f0;
+}
+
+.admin-gallery-actions button {
+  flex: 1;
+  padding: 5px 0;
+  border: none;
+  background: #ffffff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.admin-gallery-actions button + button {
+  border-left: 1px solid #e2e8f0;
+}
+
+.admin-gallery-actions button:disabled {
+  color: #cbd5e1;
+  cursor: default;
+}
+
+.admin-gallery-actions button.danger {
+  color: #b91c1c;
+}
+
+.admin-gallery-size {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.76rem;
+  color: #475569;
+}
+
+.admin-gallery-size-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.admin-gallery-size-bar div {
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* Nút ♡ và nhãn góc nằm trên trình chiếu ảnh */
+.card-image-box .card-heart-btn,
+.card-image-box .card-circle-badge,
+.card-image-box .card-options-text {
+  z-index: 3;
+}

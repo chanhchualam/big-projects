@@ -4,6 +4,13 @@ import { createCardSvg, PRESET_CARD_STYLES, allProducts, getProductCatalogImage,
 import { saveNewOrder, changePassword } from '../utils/auth';
 import { checkOrderPricing } from '../utils/orderCheck';
 import CountdownEditor from './CountdownEditor';
+import {
+  compressImageFile,
+  estimateDocBytes,
+  formatKb,
+  MAX_GALLERY_IMAGES,
+  PRODUCT_DOC_BUDGET
+} from '../utils/productImages';
 import { getCountdownMode, getDrawingText, toLocalInputValue, DEFAULT_LABELS } from '../utils/countdown';
 import { StatsTab, CouponsTab, RestockTab, AnnouncementsTab, TrackingEditor } from './AdminExtraTabs';
 import { auth } from '../firebase';
@@ -265,7 +272,8 @@ export default function AdminModal({
     uploadedFileName: '',
     uploadedFileSize: '',
     applyStoreFrame: true,
-    selectedPresetIdx: 0
+    selectedPresetIdx: 0,
+    gallery: []
   });
 
   // Load the live QR / bank settings from Firestore when the panel opens
@@ -629,7 +637,8 @@ export default function AdminModal({
       uploadedFileName: '',
       uploadedFileSize: '',
       applyStoreFrame: true,
-      selectedPresetIdx: 0
+      selectedPresetIdx: 0,
+      gallery: []
     });
   };
 
@@ -662,7 +671,8 @@ export default function AdminModal({
       uploadedFileName: product.image ? 'Ảnh sản phẩm hiện tại' : '',
       uploadedFileSize: '',
       applyStoreFrame: true,
-      selectedPresetIdx: 0
+      selectedPresetIdx: 0,
+      gallery: Array.isArray(product.gallery) ? product.gallery : []
     });
   };
 
@@ -752,11 +762,52 @@ export default function AdminModal({
     });
   };
 
-  const handleFileInputChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileUpload(file);
+  // Ảnh phụ: nén nhỏ, đóng khung giống ảnh chính nếu đang bật khung
+  const [galleryBusy, setGalleryBusy] = useState(false);
+  const addGalleryFiles = async (files) => {
+    const list = [...files].filter((f) => f.type?.startsWith('image/'));
+    if (list.length === 0) return;
+    setGalleryBusy(true);
+    const added = [];
+    for (const file of list) {
+      try {
+        const dataUrl = await compressImageFile(file);
+        added.push(formData.applyStoreFrame
+          ? embedImageInStoreFrame(dataUrl, { badgeText: formData.badge || '-35%', badgeSubText: 'OFF' })
+          : dataUrl);
+      } catch {
+        // bỏ qua file lỗi
+      }
     }
+    setGalleryBusy(false);
+    setFormData((prev) => {
+      const room = MAX_GALLERY_IMAGES - (prev.gallery || []).length;
+      if (added.length > room) {
+        alert(`Mỗi sản phẩm tối đa ${MAX_GALLERY_IMAGES} ảnh phụ — đã bỏ bớt ${added.length - Math.max(0, room)} ảnh.`);
+      }
+      return { ...prev, gallery: [...(prev.gallery || []), ...added.slice(0, Math.max(0, room))] };
+    });
+  };
+
+  const moveGalleryImage = (from, to) => {
+    setFormData((prev) => {
+      const g = [...prev.gallery];
+      if (to < 0 || to >= g.length) return prev;
+      [g[from], g[to]] = [g[to], g[from]];
+      return { ...prev, gallery: g };
+    });
+  };
+
+  // Chọn nhiều file ở ô ảnh chính: file đầu là ảnh chính, các file còn lại thành ảnh phụ
+  const handleMainFiles = (files) => {
+    const list = [...(files || [])];
+    if (list.length === 0) return;
+    handleFileUpload(list[0]);
+    if (list.length > 1) addGalleryFiles(list.slice(1));
+  };
+
+  const handleFileInputChange = (e) => {
+    handleMainFiles(e.target.files);
     e.target.value = '';
   };
 
@@ -776,10 +827,7 @@ export default function AdminModal({
     e.preventDefault();
     e.stopPropagation();
     setIsDraggingOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      handleFileUpload(file);
-    }
+    handleMainFiles(e.dataTransfer.files);
   };
 
   const handleToggleFrame = (newApplyFrame) => {
@@ -890,6 +938,13 @@ export default function AdminModal({
         drawingDate: formData.section === 'open' ? 'Ends today' : formData.statusTime
       }
     };
+
+    productPayload.gallery = formData.gallery || [];
+    const docBytes = estimateDocBytes(productPayload);
+    if (docBytes > PRODUCT_DOC_BUDGET) {
+      alert(`Ảnh của sản phẩm quá nặng (${formatKb(docBytes)}, tối đa khoảng ${formatKb(PRODUCT_DOC_BUDGET)}). Hãy xoá bớt ảnh phụ hoặc dùng ảnh nhỏ hơn.`);
+      return;
+    }
 
     if (isCreatingNew) {
       onAddProduct(productPayload, formData.section);
@@ -1340,6 +1395,7 @@ export default function AdminModal({
                           ref={fileInputRef}
                           type="file"
                           accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml,image/gif"
+                          multiple
                           style={{ display: 'none' }}
                           onChange={handleFileInputChange}
                         />
@@ -1351,7 +1407,7 @@ export default function AdminModal({
                               Kéo thả file ảnh vào đây hoặc <span>bấm để chọn từ máy tính</span>
                             </div>
                             <div className="dropzone-sub-text">
-                              Hỗ trợ PNG, JPG, JPEG, WEBP, SVG • Tối ưu hóa dung lượng tự động
+                              Hỗ trợ PNG, JPG, JPEG, WEBP, SVG • Chọn nhiều ảnh cùng lúc: ảnh đầu là ảnh chính, các ảnh sau thành ảnh phụ
                             </div>
                             <button
                               type="button"
@@ -1466,6 +1522,69 @@ export default function AdminModal({
                       ))}
                     </select>
                   )}
+                </div>
+
+                {/* ẢNH PHỤ: khách xem dạng trình chiếu, tự đổi ảnh */}
+                <div className="admin-gallery-box">
+                  <div className="admin-gallery-head">
+                    <div>
+                      <strong>🖼️ Ảnh phụ ({(formData.gallery || []).length}/{MAX_GALLERY_IMAGES})</strong>
+                      <p>Khách sẽ thấy ảnh chính + các ảnh phụ tự đổi lần lượt, có thể vuốt hoặc bấm mũi tên để xem.</p>
+                    </div>
+                    <label className={`xadmin-btn ${galleryBusy || (formData.gallery || []).length >= MAX_GALLERY_IMAGES ? 'disabled' : ''}`}>
+                      {galleryBusy ? '⏳ Đang nén ảnh...' : '+ Thêm ảnh phụ'}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                        multiple
+                        style={{ display: 'none' }}
+                        disabled={galleryBusy || (formData.gallery || []).length >= MAX_GALLERY_IMAGES}
+                        onChange={(e) => {
+                          addGalleryFiles(e.target.files);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {(formData.gallery || []).length > 0 && (
+                    <div className="admin-gallery-grid">
+                      {formData.gallery.map((src, i) => (
+                        <div key={i} className="admin-gallery-item">
+                          <img src={src} alt={`Ảnh phụ ${i + 1}`} />
+                          <span className="admin-gallery-num">{i + 2}</span>
+                          <div className="admin-gallery-actions">
+                            <button type="button" onClick={() => moveGalleryImage(i, i - 1)} disabled={i === 0} aria-label="Chuyển lên trước">←</button>
+                            <button type="button" onClick={() => moveGalleryImage(i, i + 1)} disabled={i === formData.gallery.length - 1} aria-label="Chuyển ra sau">→</button>
+                            <button
+                              type="button"
+                              className="danger"
+                              aria-label="Xoá ảnh này"
+                              onClick={() => setFormData((prev) => ({ ...prev, gallery: prev.gallery.filter((_, j) => j !== i) }))}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {(() => {
+                    const bytes = estimateDocBytes({ image: getComputedImage(), gallery: formData.gallery || [] });
+                    const pct = Math.min(100, Math.round((bytes / PRODUCT_DOC_BUDGET) * 100));
+                    return (
+                      <div className="admin-gallery-size">
+                        <div className="admin-gallery-size-bar">
+                          <div style={{ width: `${pct}%`, background: pct >= 100 ? '#dc2626' : pct >= 80 ? '#d97706' : '#16a34a' }} />
+                        </div>
+                        <span>
+                          Dung lượng ảnh: {formatKb(bytes)} / {formatKb(PRODUCT_DOC_BUDGET)}
+                          {pct >= 100 ? ' — quá giới hạn, hãy xoá bớt ảnh' : pct >= 80 ? ' — sắp đầy' : ''}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="admin-form-actions">
