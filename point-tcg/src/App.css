@@ -9236,3 +9236,35 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Ô chỉnh thời gian kết thúc raffle */
+.cde {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cde-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.cde .countdown-preset-chips {
+  margin-top: 8px;
+}
+
+.cde-warning {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .cde-row {
+    grid-template-columns: 1fr;
+  }
+}

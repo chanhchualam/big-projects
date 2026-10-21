@@ -16,6 +16,7 @@ import FloatingMessenger from './components/FloatingMessenger';
 import Footer from './components/Footer';
 import NotificationBell from './components/NotificationBell';
 import AnnouncementBar from './components/AnnouncementBar';
+import { getDrawingText } from './utils/countdown';
 import {
   buildNotifications,
   trackWishlistChanges,
@@ -495,28 +496,11 @@ export default function App() {
     };
   }, []);
 
-  // Format countdown string with full customization support (Label & Text)
+  // Dòng thời gian của sản phẩm: dùng mốc endsAt chung cho mọi khách; sản phẩm cũ dùng mốc tính từ lúc mở web
   const getCountdownString = (itemId) => {
     const product = openDrawings.find(p => p.id === itemId) || closedDrawings.find(p => p.id === itemId);
-
-    // If product has custom fixed text
-    if (product?.customCountdownText && product.customCountdownText.trim()) {
-      return product.customCountdownText.trim();
-    }
-
-    const labelPrefix = product?.countdownLabel?.trim() || 'Drawing ends in';
-    const target = targetTimestamps[itemId];
-    if (!target) return `${labelPrefix} 02:14:33`;
-
-    const diffSeconds = Math.max(0, Math.floor((target - currentTime) / 1000));
-    if (diffSeconds === 0) {
-      return product?.countdownEndedText?.trim() || 'Drawing Ended';
-    }
-
-    const hours = String(Math.floor(diffSeconds / 3600)).padStart(2, '0');
-    const minutes = String(Math.floor((diffSeconds % 3600) / 60)).padStart(2, '0');
-    const seconds = String(diffSeconds % 60).padStart(2, '0');
-    return `${labelPrefix} ${hours}:${minutes}:${seconds}`;
+    if (!product) return '';
+    return getDrawingText(product, currentTime, targetTimestamps[itemId] || null);
   };
 
   // -------------------------------------------------------------
