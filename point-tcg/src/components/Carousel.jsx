@@ -9,7 +9,9 @@ export default function Carousel({
   onAddToCart,
   onRequestJoin,
   onBuyNow,
-  onOpenDetails
+  onOpenDetails,
+  onRequestRestock,
+  defaultEmail
 }) {
   const containerRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -96,6 +98,8 @@ export default function Carousel({
             onRequestJoin={onRequestJoin}
             onBuyNow={onBuyNow}
             onOpenDetails={onOpenDetails}
+            onRequestRestock={onRequestRestock}
+            defaultEmail={defaultEmail}
             isCarousel={true}
           />
         ))}

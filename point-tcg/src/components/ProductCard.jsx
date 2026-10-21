@@ -1,5 +1,6 @@
 // src/components/ProductCard.jsx
 import React from 'react';
+import RestockNotify from './RestockNotify';
 
 // Star rating component with partial fill support
 function StarRating({ rating = 0, count = 0 }) {
@@ -70,6 +71,8 @@ export default function ProductCard({
   onRequestJoin,
   onBuyNow,
   onOpenDetails,
+  onRequestRestock,
+  defaultEmail,
   countdownString,
   isCarousel = false
 }) {
@@ -82,7 +85,7 @@ export default function ProductCard({
     badge,
     optionsText,
     unitPrice,
-    rating = 5,
+    rating = 0,
     reviewsCount = 0,
     status,
     statusTime,
@@ -201,8 +204,12 @@ export default function ProductCard({
           {title}
         </h3>
 
-        {/* Star Rating with Review Count */}
-        <StarRating rating={rating} count={reviewsCount} />
+        {/* Star Rating with Review Count (đánh giá thật của khách) */}
+        {reviewsCount > 0 ? (
+          <StarRating rating={rating} count={reviewsCount} />
+        ) : (
+          <div className="card-rating-row card-no-reviews">Chưa có đánh giá</div>
+        )}
 
         {/* Status Line & Stock Indicator */}
         <div className="card-meta-indicators">
@@ -250,14 +257,23 @@ export default function ProductCard({
         {/* Action Buttons: Mua Ngay (QR) & Thêm Giỏ */}
         {isOutOfStock ? (
           <div className="card-actions-grid single-col">
-            <button
-              type="button"
-              className="card-action-btn btn-out-of-stock"
-              disabled
-              title="Sản phẩm này tạm thời đã hết hàng"
-            >
-              <span>🔴 Đã Hết Hàng</span>
-            </button>
+            {onRequestRestock ? (
+              <RestockNotify
+                product={product}
+                defaultEmail={defaultEmail}
+                onRequestRestock={onRequestRestock}
+                compact
+              />
+            ) : (
+              <button
+                type="button"
+                className="card-action-btn btn-out-of-stock"
+                disabled
+                title="Sản phẩm này tạm thời đã hết hàng"
+              >
+                <span>🔴 Đã Hết Hàng</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="card-actions-grid">

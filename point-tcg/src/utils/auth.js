@@ -236,6 +236,11 @@ export function saveNewOrder(orderData) {
     status: orderData.status || 'Chờ thanh toán QR (Đơn mới)',
     // Tồn kho chỉ bị trừ khi admin xác nhận đơn; đơn cũ không có trường này đã trừ lúc đặt
     stockDeducted: false,
+    // productIds: để rules kiểm tra khách đã mua sản phẩm trước khi cho đánh giá
+    productIds: [...new Set(sanitizedItems.map(item => String(item.id)).filter(Boolean))],
+    statusHistory: orderData.statusHistory || [
+      { status: orderData.status || 'Chờ thanh toán QR (Đơn mới)', at: new Date().toISOString() }
+    ],
     createdAt: orderData.createdAt || new Date().toLocaleString('vi-VN')
   };
 

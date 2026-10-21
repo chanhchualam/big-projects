@@ -32,8 +32,15 @@ import {
   deleteOrderFromDb,
   saveProductToDb,
   deleteProductFromDb,
-  applyOrderStock
+  applyOrderStock,
+  makeStatusEntry,
+  updateOrderTrackingInDb,
+  saveWishlistToDb,
+  fetchUserProfile,
+  fetchReviewsFromDb,
+  saveRestockRequest
 } from './services/firestoreService';
+import { ensureSignedIn } from './utils/auth';
 
 // Trạng thái admin đã xác nhận đơn → tồn kho trên Firestore được trừ
 const STOCK_DEDUCTED_STATUSES = [
@@ -42,6 +49,20 @@ const STOCK_DEDUCTED_STATUSES = [
   'Đang giao hàng',
   'Giao thành công'
 ];
+
+// Loại sản phẩm: lấy từ trường category, sản phẩm cũ không có thì đoán theo tên
+export function getProductCategory(product) {
+  if (product?.category) return product.category;
+  const t = (product?.title || '').toLowerCase();
+  if (t.includes('elite trainer')) return 'Elite Trainer Box';
+  if (t.includes('booster bundle')) return 'Booster Bundle';
+  if (t.includes('booster box')) return 'Booster Box';
+  if (t.includes('ultra-premium') || t.includes('ultra premium')) return 'Ultra Premium Collection';
+  if (t.includes('collection')) return 'Special Collection';
+  return 'Khác';
+}
+
+const isInStock = (item) => typeof item.stock !== 'number' || item.stock > 0;
 
 // Xoá dữ liệu cũ (mật khẩu, danh sách user, đơn hàng của người khác) còn sót trong localStorage
 purgeLegacyLocalData();
@@ -96,6 +117,11 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [activeCategory, setActiveCategory] = useState('all');
+  // Bộ lọc sản phẩm: loại, khoảng giá (USD), tình trạng kho ('in' | 'out' | 'all')
+  const [productType, setProductType] = useState('all');
+  const [priceMin, setPriceMin] = useState('');
+  const [priceMax, setPriceMax] = useState('');
+  const [stockFilter, setStockFilter] = useState('in');
   const deductedOrderIdsRef = useRef(new Set());
 
   // Hash-based Page Routing (Trang chủ Store vs Trang Quản Trị Admin vs Trang Chi tiết Sản phẩm vs Trang Đơn Hàng)
@@ -136,6 +162,26 @@ export default function App() {
   }, []);
 
   const isAdmin = user?.role === 'admin';
+
+  // Đánh giá thật của khách (đọc công khai), gom theo sản phẩm
+  const [reviews, setReviews] = useState([]);
+  useEffect(() => {
+    fetchReviewsFromDb().then(setReviews);
+  }, []);
+  const reviewStats = useMemo(() => {
+    const map = {};
+    reviews.forEach((r) => {
+      const s = map[r.productId] || (map[r.productId] = { sum: 0, count: 0 });
+      s.sum += r.rating;
+      s.count += 1;
+    });
+    Object.values(map).forEach((s) => { s.avg = s.sum / s.count; });
+    return map;
+  }, [reviews]);
+  const withReviewStats = (p) => {
+    const s = reviewStats[String(p.id)];
+    return { ...p, rating: s ? s.avg : 0, reviewsCount: s ? s.count : 0 };
+  };
 
   // Orders: admin sees every order, others only their own (enforced by firestore.rules)
   const [orders, setOrders] = useState([]);
@@ -329,6 +375,27 @@ export default function App() {
       return [];
     }
   });
+
+  // Khách đăng nhập: gộp danh sách yêu thích trên máy với danh sách lưu trên tài khoản
+  const wishlistLoadedRef = useRef(false);
+  useEffect(() => {
+    wishlistLoadedRef.current = false;
+    if (!user || user.role === 'admin') return;
+    let isMounted = true;
+    fetchUserProfile(user.id).then((profile) => {
+      if (!isMounted) return;
+      const cloud = Array.isArray(profile?.wishlist) ? profile.wishlist : [];
+      setSavedIds((local) => {
+        const merged = [...new Set([...cloud, ...local])];
+        if (merged.length !== cloud.length) saveWishlistToDb(user.id, merged);
+        return merged;
+      });
+      wishlistLoadedRef.current = true;
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id, user?.role]);
 
   // Live countdown target timestamps
   const [targetTimestamps, setTargetTimestamps] = useState(() => {
@@ -568,7 +635,12 @@ export default function App() {
     }
 
     setOrders(prev => prev.map(o => (o.id === orderId
-      ? { ...o, status: newStatus, ...(stockDeducted !== undefined && { stockDeducted }) }
+      ? {
+          ...o,
+          status: newStatus,
+          statusHistory: [...(o.statusHistory || []), makeStatusEntry(newStatus)],
+          ...(stockDeducted !== undefined && { stockDeducted })
+        }
       : o)));
     return true;
   };
@@ -750,14 +822,42 @@ export default function App() {
     return cart.reduce((count, item) => count + item.qty, 0);
   }, [cart]);
 
-  // Saved Items handlers
+  // Saved Items handlers — khách đăng nhập thì lưu cả lên tài khoản để xem trên thiết bị khác
   const handleToggleSave = (product) => {
     setSavedIds((prev) => {
-      if (prev.includes(product.id)) {
-        return prev.filter((id) => id !== product.id);
+      const next = prev.includes(product.id)
+        ? prev.filter((id) => id !== product.id)
+        : [...prev, product.id];
+      if (user && user.role !== 'admin' && wishlistLoadedRef.current) {
+        saveWishlistToDb(user.id, next);
       }
-      return [...prev, product.id];
+      return next;
     });
+  };
+
+  // Báo khi có hàng lại: khách vãng lai dùng phiên ẩn danh để ghi yêu cầu
+  const handleRequestRestock = async (product, email) => {
+    try {
+      const uid = await ensureSignedIn();
+      return await saveRestockRequest({ productId: product.id, productTitle: product.title, email, uid });
+    } catch {
+      return false;
+    }
+  };
+
+  const handleReviewSaved = (review) => {
+    setReviews((prev) => [review, ...prev.filter((r) => r.id !== review.id)]);
+  };
+
+  // Admin nhập đơn vị vận chuyển + mã vận đơn
+  const handleUpdateOrderTracking = async (orderId, tracking) => {
+    const ok = await updateOrderTrackingInDb(orderId, tracking);
+    if (!ok) {
+      alert('Không lưu được mã vận đơn (không có quyền hoặc lỗi kết nối).');
+      return false;
+    }
+    setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, ...tracking } : o)));
+    return true;
   };
 
   const allProductsCombined = useMemo(() => {
@@ -765,10 +865,12 @@ export default function App() {
   }, [openDrawings, closedDrawings]);
 
   const savedProductsList = useMemo(() => {
-    return allProductsCombined
-      .filter((p) => savedIds.includes(p.id))
-      .filter((p) => typeof p.stock !== 'number' || p.stock > 0);
+    return allProductsCombined.filter((p) => savedIds.includes(p.id));
   }, [allProductsCombined, savedIds]);
+
+  const productTypes = useMemo(() => {
+    return [...new Set(allProductsCombined.map(getProductCategory))].sort();
+  }, [allProductsCombined]);
 
   // Request to join drawing handler
   const handleRequestJoin = (product) => {
@@ -831,22 +933,39 @@ export default function App() {
     );
   };
 
-  // Filter storefront products: Only in-stock items (stock > 0) are shown to customers
+  // Lọc theo loại, khoảng giá và tình trạng kho
+  const filterByAttributes = (items) => {
+    const min = priceMin === '' ? null : Number(priceMin);
+    const max = priceMax === '' ? null : Number(priceMax);
+    return items.filter((item) => {
+      if (stockFilter === 'in' && !isInStock(item)) return false;
+      if (stockFilter === 'out' && isInStock(item)) return false;
+      if (productType !== 'all' && getProductCategory(item) !== productType) return false;
+      if (min !== null && item.price < min) return false;
+      if (max !== null && item.price > max) return false;
+      return true;
+    });
+  };
+
+  const hasAttributeFilter = productType !== 'all' || priceMin !== '' || priceMax !== '' || stockFilter !== 'in';
+  const resetAttributeFilters = () => {
+    setProductType('all');
+    setPriceMin('');
+    setPriceMax('');
+    setStockFilter('in');
+  };
+
   const filteredOpenDrawings = useMemo(() => {
     if (activeCategory === 'closed') return [];
-    const inStock = openDrawings.filter((item) => typeof item.stock !== 'number' || item.stock > 0);
-    const searchFiltered = filterBySearch(inStock);
-    const catFiltered = filterByCategory(searchFiltered);
-    return sortProducts(catFiltered);
-  }, [openDrawings, searchQuery, sortBy, activeCategory]);
+    const list = filterByCategory(filterBySearch(filterByAttributes(openDrawings)));
+    return sortProducts(list.map(withReviewStats));
+  }, [openDrawings, searchQuery, sortBy, activeCategory, productType, priceMin, priceMax, stockFilter, reviewStats]);
 
   const filteredClosedDrawings = useMemo(() => {
     if (activeCategory === 'open') return [];
-    const inStock = closedDrawings.filter((item) => typeof item.stock !== 'number' || item.stock > 0);
-    const searchFiltered = filterBySearch(inStock);
-    const catFiltered = filterByCategory(searchFiltered);
-    return sortProducts(catFiltered);
-  }, [closedDrawings, searchQuery, sortBy, activeCategory]);
+    const list = filterByCategory(filterBySearch(filterByAttributes(closedDrawings)));
+    return sortProducts(list.map(withReviewStats));
+  }, [closedDrawings, searchQuery, sortBy, activeCategory, productType, priceMin, priceMax, stockFilter, reviewStats]);
 
   const totalResultsCount = filteredOpenDrawings.length + filteredClosedDrawings.length;
 
@@ -869,6 +988,7 @@ export default function App() {
         closedDrawings={closedDrawings}
         orders={orders}
         onUpdateOrderStatus={handleUpdateOrderStatus}
+        onUpdateOrderTracking={handleUpdateOrderTracking}
         onDeleteOrder={handleDeleteOrder}
         onAddProduct={handleAddProduct}
         onUpdateProduct={handleUpdateProduct}
@@ -905,6 +1025,8 @@ export default function App() {
           initialTab={ordersInitialTab}
           onUpdateCurrentUser={(updated) => setUser(prev => (prev ? { ...prev, ...updated } : prev))}
           orders={orders}
+          reviews={reviews}
+          onReviewSaved={handleReviewSaved}
           onUpdateOrderStatus={handleUpdateOrderStatus}
           onAddToCart={handleAddToCart}
           onBackToStore={handleBackToStore}
@@ -968,7 +1090,10 @@ export default function App() {
       {/* 2. Main View: Product Detail Page OR Storefront */}
       {currentRoute === 'product' && selectedProduct ? (
         <ProductDetailPage
-          product={selectedProduct}
+          product={withReviewStats(selectedProduct)}
+          reviews={reviews.filter((r) => r.productId === String(selectedProduct.id))}
+          user={user}
+          onRequestRestock={handleRequestRestock}
           allProducts={allStoreProducts}
           onBackToStore={handleBackToStore}
           onSelectProduct={handleOpenProductDetail}
@@ -1041,6 +1166,54 @@ export default function App() {
           </div>
         </div>
 
+        {/* Bộ lọc: loại sản phẩm, khoảng giá, tình trạng kho */}
+        <div className="product-filter-bar" aria-label="Lọc sản phẩm">
+          <label className="filter-field">
+            <span>Loại</span>
+            <select value={productType} onChange={(e) => setProductType(e.target.value)}>
+              <option value="all">Tất cả loại</option>
+              {productTypes.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </label>
+          <label className="filter-field">
+            <span>Giá từ ($)</span>
+            <input
+              type="number"
+              min="0"
+              inputMode="decimal"
+              placeholder="0"
+              value={priceMin}
+              onChange={(e) => setPriceMin(e.target.value)}
+            />
+          </label>
+          <label className="filter-field">
+            <span>đến ($)</span>
+            <input
+              type="number"
+              min="0"
+              inputMode="decimal"
+              placeholder="Không giới hạn"
+              value={priceMax}
+              onChange={(e) => setPriceMax(e.target.value)}
+            />
+          </label>
+          <label className="filter-field">
+            <span>Tình trạng</span>
+            <select value={stockFilter} onChange={(e) => setStockFilter(e.target.value)}>
+              <option value="in">Còn hàng</option>
+              <option value="out">Hết hàng</option>
+              <option value="all">Tất cả</option>
+            </select>
+          </label>
+          {hasAttributeFilter && (
+            <button type="button" className="filter-reset-btn" onClick={resetAttributeFilters}>
+              Xoá bộ lọc
+            </button>
+          )}
+        </div>
+
         {/* -------------------------------------------------------------
             3. SECTION "OPEN DRAWINGS" (Placed above Closed drawings)
            ------------------------------------------------------------- */}
@@ -1072,6 +1245,8 @@ export default function App() {
                   onRequestJoin={handleRequestJoin}
                   onBuyNow={handleBuyNow}
                   onOpenDetails={handleOpenProductDetail}
+                  onRequestRestock={handleRequestRestock}
+                  defaultEmail={user?.email}
                   countdownString={getCountdownString(product.id)}
                 />
               ))}
@@ -1115,6 +1290,8 @@ export default function App() {
               onRequestJoin={handleRequestJoin}
               onBuyNow={handleBuyNow}
               onOpenDetails={handleOpenProductDetail}
+              onRequestRestock={handleRequestRestock}
+              defaultEmail={user?.email}
             />
           </section>
         )}
@@ -1157,6 +1334,7 @@ export default function App() {
                 onClick={() => {
                   setSearchQuery('');
                   setActiveCategory('all');
+                  resetAttributeFilters();
                 }}
               >
                 Reset Bộ Lọc & Tìm Kiếm
@@ -1182,6 +1360,7 @@ export default function App() {
         closedDrawings={closedDrawings}
         orders={orders}
         onUpdateOrderStatus={handleUpdateOrderStatus}
+        onUpdateOrderTracking={handleUpdateOrderTracking}
         onDeleteOrder={handleDeleteOrder}
         onAddProduct={handleAddProduct}
         onUpdateProduct={handleUpdateProduct}
