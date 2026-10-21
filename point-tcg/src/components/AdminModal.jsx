@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createCardSvg, PRESET_CARD_STYLES, allProducts, getProductCatalogImage, embedImageInStoreFrame } from '../products';
 import { saveNewOrder, changePassword } from '../utils/auth';
 import { checkOrderPricing } from '../utils/orderCheck';
+import CountdownEditor from './CountdownEditor';
+import { getCountdownMode, getDrawingText, toLocalInputValue, DEFAULT_LABELS } from '../utils/countdown';
 import { StatsTab, CouponsTab, RestockTab, AnnouncementsTab, TrackingEditor } from './AdminExtraTabs';
 import { auth } from '../firebase';
 import {
@@ -72,12 +74,15 @@ export default function AdminModal({
   const [quickTimerProduct, setQuickTimerProduct] = useState(null);
   const [quickTimerData, setQuickTimerData] = useState({
     label: 'Drawing ends in',
-    hours: 2,
-    minutes: 14,
-    seconds: 0,
+    endsAt: '',
     customText: '',
     mode: 'timer'
   });
+
+  // Mốc kết thúc để sửa: sản phẩm cũ chưa có endsAt thì lấy bây giờ + thời gian còn lại đã lưu
+  const getProductEndsAtInput = (product) => toLocalInputValue(
+    product.endsAt || Date.now() + (product.secondsRemaining || 7200) * 1000
+  );
 
   // Customers State
   const [customers, setCustomers] = useState([]);
@@ -249,9 +254,7 @@ export default function AdminModal({
     rating: 4.8,
     reviewsCount: 120,
     countdownLabel: 'Drawing ends in',
-    countdownHours: 2,
-    countdownMinutes: 14,
-    countdownSeconds: 0,
+    countdownEndsAt: '',
     customCountdownText: '',
     countdownMode: 'timer',
     statusTime: '10:00am PDT',
@@ -615,9 +618,7 @@ export default function AdminModal({
       rating: 4.9,
       reviewsCount: 88,
       countdownLabel: 'Drawing ends in',
-      countdownHours: 2,
-      countdownMinutes: 14,
-      countdownSeconds: 0,
+      countdownEndsAt: toLocalInputValue(Date.now() + 2 * 3600 * 1000),
       customCountdownText: '',
       countdownMode: 'timer',
       statusTime: '10:00am PDT',
@@ -635,11 +636,6 @@ export default function AdminModal({
   const startEdit = (product, section) => {
     setIsCreatingNew(false);
     setEditingProduct(product);
-    const totalSec = product.secondsRemaining || 7200;
-    const hours = Math.floor(totalSec / 3600);
-    const minutes = Math.floor((totalSec % 3600) / 60);
-    const seconds = totalSec % 60;
-
     const isUrl = product.image && (product.image.startsWith('http://') || product.image.startsWith('https://'));
 
     setFormData({
@@ -654,12 +650,10 @@ export default function AdminModal({
       unitPrice: product.unitPrice || '',
       rating: product.rating || 5,
       reviewsCount: product.reviewsCount || 0,
-      countdownLabel: product.countdownLabel || 'Drawing ends in',
-      countdownHours: hours,
-      countdownMinutes: minutes,
-      countdownSeconds: seconds,
+      countdownLabel: product.countdownLabel || DEFAULT_LABELS[getCountdownMode(product)] || 'Drawing ends in',
+      countdownEndsAt: getProductEndsAtInput(product),
       customCountdownText: product.customCountdownText || '',
-      countdownMode: product.customCountdownText ? 'custom' : 'timer',
+      countdownMode: getCountdownMode(product),
       statusTime: product.statusTime || '10:00am PDT',
       description: product.description || '',
       imageType: isUrl ? 'url' : 'upload',
@@ -694,44 +688,46 @@ export default function AdminModal({
   };
 
   const handleOpenQuickTimer = (product) => {
-    const totalSec = product.secondsRemaining || 7200;
+    const mode = getCountdownMode(product);
     setQuickTimerProduct(product);
     setQuickTimerData({
-      label: product.countdownLabel || 'Drawing ends in',
-      hours: Math.floor(totalSec / 3600),
-      minutes: Math.floor((totalSec % 3600) / 60),
-      seconds: totalSec % 60,
+      label: product.countdownLabel || DEFAULT_LABELS[mode] || 'Drawing ends in',
+      endsAt: getProductEndsAtInput(product),
       customText: product.customCountdownText || '',
-      mode: product.customCountdownText ? 'custom' : 'timer'
+      mode
     });
   };
 
-  const handleSaveQuickTimer = () => {
-    if (!quickTimerProduct) return;
-    const totalSec = (parseInt(quickTimerData.hours) || 0) * 3600 +
-                     (parseInt(quickTimerData.minutes) || 0) * 60 +
-                     (parseInt(quickTimerData.seconds) || 0);
-    const updated = {
-      ...quickTimerProduct,
-      countdownLabel: quickTimerData.label?.trim() || 'Drawing ends in',
-      customCountdownText: quickTimerData.mode === 'custom' ? quickTimerData.customText.trim() : '',
-      secondsRemaining: totalSec > 0 ? totalSec : 7200
+  // Gom các trường thời gian từ ô chỉnh → dữ liệu sản phẩm
+  const buildCountdownFields = ({ mode, label, endsAt, customText }) => {
+    const end = endsAt ? new Date(endsAt) : null;
+    return {
+      countdownMode: mode,
+      countdownLabel: label?.trim() || DEFAULT_LABELS[mode] || 'Drawing ends in',
+      customCountdownText: mode === 'custom' ? (customText || '').trim() : '',
+      endsAt: end && !Number.isNaN(end.getTime()) ? end.toISOString() : null,
+      secondsRemaining: end ? Math.max(0, Math.round((end - Date.now()) / 1000)) : 7200
     };
-    onUpdateProduct(updated, sectionOf(quickTimerProduct));
-    setUploadToast(`Đã cập nhật thời gian đếm ngược cho "${quickTimerProduct.title}" thành công!`);
-    setQuickTimerProduct(null);
-    setTimeout(() => setUploadToast(''), 3500);
   };
 
-  const getPreviewCountdownText = () => {
-    if (formData.countdownMode === 'custom' && formData.customCountdownText.trim()) {
-      return formData.customCountdownText.trim();
+  const getPreviewCountdownText = () => getDrawingText(buildCountdownFields({
+    mode: formData.countdownMode,
+    label: formData.countdownLabel,
+    endsAt: formData.countdownEndsAt,
+    customText: formData.customCountdownText
+  }));
+
+  const handleSaveQuickTimer = () => {
+    if (!quickTimerProduct) return;
+    if (quickTimerData.mode !== 'custom' && !quickTimerData.endsAt) {
+      alert('Vui lòng chọn thời điểm kết thúc.');
+      return;
     }
-    const prefix = formData.countdownLabel?.trim() || 'Drawing ends in';
-    const h = String(Math.max(0, parseInt(formData.countdownHours) || 0)).padStart(2, '0');
-    const m = String(Math.max(0, Math.min(59, parseInt(formData.countdownMinutes) || 0))).padStart(2, '0');
-    const s = String(Math.max(0, Math.min(59, parseInt(formData.countdownSeconds) || 0))).padStart(2, '0');
-    return `${prefix} ${h}:${m}:${s}`;
+    const updated = { ...quickTimerProduct, ...buildCountdownFields(quickTimerData) };
+    onUpdateProduct(updated, sectionOf(quickTimerProduct));
+    setUploadToast(`Đã cập nhật thời gian cho "${quickTimerProduct.title}" thành công!`);
+    setQuickTimerProduct(null);
+    setTimeout(() => setUploadToast(''), 3500);
   };
 
   const handleFileUpload = (file) => {
@@ -863,9 +859,6 @@ export default function AdminModal({
     const isSale = !!formData.wasPrice && parseFloat(formData.wasPrice) > parsedPrice;
     const parsedStock = parseInt(formData.stock, 10);
     const validStock = isNaN(parsedStock) ? 20 : Math.max(0, parsedStock);
-    const totalSeconds = (parseInt(formData.countdownHours) || 0) * 3600 +
-                         (parseInt(formData.countdownMinutes) || 0) * 60 +
-                         (parseInt(formData.countdownSeconds) || 0);
 
     const productPayload = {
       id: formData.id || `custom-${Date.now()}`,
@@ -881,9 +874,12 @@ export default function AdminModal({
       reviewsCount: parseInt(formData.reviewsCount) || 1,
       status: formData.section,
       statusTime: formData.statusTime || '10:00am PDT',
-      countdownLabel: formData.countdownLabel?.trim() || 'Drawing ends in',
-      customCountdownText: formData.countdownMode === 'custom' ? formData.customCountdownText.trim() : '',
-      secondsRemaining: totalSeconds > 0 ? totalSeconds : 7200,
+      ...buildCountdownFields({
+        mode: formData.countdownMode,
+        label: formData.countdownLabel,
+        endsAt: formData.countdownEndsAt,
+        customText: formData.customCountdownText
+      }),
       image: finalImage,
       description: formData.description.trim() || 'Verified authentic factory sealed Pokémon TCG collectible.',
       drawingDetails: {
@@ -1264,7 +1260,8 @@ export default function AdminModal({
                   </div>
                 </div>
 
-                {/* COUNTDOWN SETTINGS CARD: "Drawing ends in" CUSTOMIZER */}
+                {/* COUNTDOWN SETTINGS CARD: "Drawing ends in" CUSTOMIZER (chỉ Open Drawing) */}
+                {formData.section === 'open' && (
                 <div className="admin-countdown-setting-card">
                   <div className="countdown-card-header">
                     <div className="countdown-card-title">
@@ -1276,172 +1273,26 @@ export default function AdminModal({
                         </p>
                       </div>
                     </div>
-                    <div className="countdown-mode-toggle">
-                      <button
-                        type="button"
-                        className={`btn-mode-chip ${formData.countdownMode === 'timer' ? 'active' : ''}`}
-                        onClick={() => setFormData({ ...formData, countdownMode: 'timer' })}
-                      >
-                        ⏳ Đếm Ngược Giờ : Phút : Giây
-                      </button>
-                      <button
-                        type="button"
-                        className={`btn-mode-chip ${formData.countdownMode === 'custom' ? 'active' : ''}`}
-                        onClick={() => setFormData({ ...formData, countdownMode: 'custom' })}
-                      >
-                        ✍️ Chữ Tự Do (Cố Định)
-                      </button>
-                    </div>
                   </div>
 
-                  {formData.countdownMode === 'timer' ? (
-                    <div className="countdown-mode-body">
-                      {/* 1. Countdown Label / Prefix */}
-                      <div className="form-group" style={{ marginBottom: '12px' }}>
-                        <label className="form-label" style={{ fontSize: '0.82rem' }}>
-                          Tiêu đề / Tiền tố đếm ngược (Prefix)
-                        </label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="Drawing ends in"
-                          value={formData.countdownLabel}
-                          onChange={(e) => setFormData({ ...formData, countdownLabel: e.target.value })}
-                        />
-                        <div className="countdown-preset-chips">
-                          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Gợi ý nhanh:</span>
-                          {['Drawing ends in', 'Kết thúc trong', 'Sắp hết hạn sau', 'Raffle closes in', 'Thời gian còn lại:'].map((txt) => (
-                            <button
-                              key={txt}
-                              type="button"
-                              className={`preset-text-chip ${formData.countdownLabel === txt ? 'active' : ''}`}
-                              onClick={() => setFormData({ ...formData, countdownLabel: txt })}
-                            >
-                              {txt}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* 2. Duration inputs: Hours, Minutes, Seconds */}
-                      <div className="countdown-inputs-grid">
-                        <div className="countdown-input-unit">
-                          <label className="unit-label">Số Giờ (Hours)</label>
-                          <input
-                            type="number"
-                            min="0"
-                            max="999"
-                            className="form-input unit-input"
-                            value={formData.countdownHours}
-                            onChange={(e) => setFormData({ ...formData, countdownHours: Math.max(0, parseInt(e.target.value) || 0) })}
-                          />
-                        </div>
-                        <div className="countdown-separator">:</div>
-                        <div className="countdown-input-unit">
-                          <label className="unit-label">Số Phút (Minutes)</label>
-                          <input
-                            type="number"
-                            min="0"
-                            max="59"
-                            className="form-input unit-input"
-                            value={formData.countdownMinutes}
-                            onChange={(e) => setFormData({ ...formData, countdownMinutes: Math.max(0, Math.min(59, parseInt(e.target.value) || 0)) })}
-                          />
-                        </div>
-                        <div className="countdown-separator">:</div>
-                        <div className="countdown-input-unit">
-                          <label className="unit-label">Số Giây (Seconds)</label>
-                          <input
-                            type="number"
-                            min="0"
-                            max="59"
-                            className="form-input unit-input"
-                            value={formData.countdownSeconds}
-                            onChange={(e) => setFormData({ ...formData, countdownSeconds: Math.max(0, Math.min(59, parseInt(e.target.value) || 0)) })}
-                          />
-                        </div>
-                      </div>
-
-                      {/* 3. Quick preset duration buttons */}
-                      <div className="countdown-duration-presets">
-                        <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Cài nhanh thời gian:</span>
-                        <div className="presets-list">
-                          {[
-                            { label: '⚡ 30 phút', h: 0, m: 30, s: 0 },
-                            { label: '🔥 1 giờ', h: 1, m: 0, s: 0 },
-                            { label: '🕒 2 giờ 14p (Mặc định)', h: 2, m: 14, s: 4 },
-                            { label: '🕒 3 giờ', h: 3, m: 0, s: 0 },
-                            { label: '⭐ 6 giờ', h: 6, m: 0, s: 0 },
-                            { label: '🌙 12 giờ', h: 12, m: 0, s: 0 },
-                            { label: '📅 24 giờ (1 ngày)', h: 24, m: 0, s: 0 },
-                            { label: '🗓️ 3 ngày', h: 72, m: 0, s: 0 },
-                            { label: '✨ 7 ngày', h: 168, m: 0, s: 0 },
-                          ].map((preset, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              className={`btn-time-chip ${formData.countdownHours === preset.h && formData.countdownMinutes === preset.m ? 'selected' : ''}`}
-                              onClick={() => setFormData({
-                                ...formData,
-                                countdownHours: preset.h,
-                                countdownMinutes: preset.m,
-                                countdownSeconds: preset.s
-                              })}
-                            >
-                              {preset.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="countdown-mode-body">
-                      <div className="form-group">
-                        <label className="form-label" style={{ fontSize: '0.82rem' }}>
-                          Nhập chuỗi hiển thị tuỳ ý (Thay thế toàn bộ dòng đếm ngược)
-                        </label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="ví dụ: Drawing ends in 02:59:31, Sắp kết thúc hôm nay, v.v..."
-                          value={formData.customCountdownText}
-                          onChange={(e) => setFormData({ ...formData, customCountdownText: e.target.value })}
-                        />
-                        <div className="countdown-preset-chips" style={{ marginTop: '8px' }}>
-                          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>Mẫu có sẵn:</span>
-                          {[
-                            'Drawing ends in 02:59:31',
-                            'Drawing ends in 02:14:04',
-                            'Drawing ends in 05:07:01',
-                            'Drawing ends in 23:59:59',
-                            '🔥 Sắp kết thúc hôm nay',
-                            '⚡ Kết thúc lúc 20:00 tối nay'
-                          ].map((sample) => (
-                            <button
-                              key={sample}
-                              type="button"
-                              className="preset-text-chip"
-                              onClick={() => setFormData({ ...formData, customCountdownText: sample })}
-                            >
-                              {sample}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="countdown-live-badge-preview">
-                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700 }}>Xem trước hiển thị:</span>
-                    <div className="countdown-status-badge" style={{ display: 'inline-flex', margin: 0 }}>
-                      <svg className="countdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                      </svg>
-                      <span>{getPreviewCountdownText()}</span>
-                    </div>
-                  </div>
+                  <CountdownEditor
+                    idPrefix="form-cd"
+                    value={{
+                      mode: formData.countdownMode,
+                      label: formData.countdownLabel,
+                      endsAt: formData.countdownEndsAt,
+                      customText: formData.customCountdownText
+                    }}
+                    onChange={(v) => setFormData((prev) => ({
+                      ...prev,
+                      countdownMode: v.mode,
+                      countdownLabel: v.label,
+                      countdownEndsAt: v.endsAt,
+                      customCountdownText: v.customText
+                    }))}
+                  />
                 </div>
+                )}
 
                 <div className="form-group">
                   <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2266,7 +2117,7 @@ export default function AdminModal({
                               )}
                             </span>
                             <span style={{ color: '#d97706', fontWeight: 700, background: '#fffbeb', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fde68a', fontSize: '0.74rem' }}>
-                              ⏱️ {product.customCountdownText || `${product.countdownLabel || 'Drawing ends in'} ${Math.floor((product.secondsRemaining || 7200) / 3600)}h ${Math.floor(((product.secondsRemaining || 7200) % 3600) / 60)}m`}
+                              ⏱️ {getDrawingText(product, Date.now(), Date.now() + (product.secondsRemaining || 7200) * 1000)}
                             </span>
                           </div>
                         </div>
@@ -3527,154 +3378,7 @@ export default function AdminModal({
               </div>
 
               <div className="quick-timer-body">
-                {/* Mode selector */}
-                <div className="countdown-mode-toggle" style={{ marginBottom: '14px' }}>
-                  <button
-                    type="button"
-                    className={`btn-mode-chip ${quickTimerData.mode === 'timer' ? 'active' : ''}`}
-                    onClick={() => setQuickTimerData({ ...quickTimerData, mode: 'timer' })}
-                  >
-                    ⏳ Đếm Giờ : Phút : Giây
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn-mode-chip ${quickTimerData.mode === 'custom' ? 'active' : ''}`}
-                    onClick={() => setQuickTimerData({ ...quickTimerData, mode: 'custom' })}
-                  >
-                    ✍️ Chữ Cố Định
-                  </button>
-                </div>
-
-                {quickTimerData.mode === 'timer' ? (
-                  <>
-                    <div className="form-group" style={{ marginBottom: '12px' }}>
-                      <label className="form-label">Tiền tố hiển thị (Label):</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={quickTimerData.label}
-                        onChange={(e) => setQuickTimerData({ ...quickTimerData, label: e.target.value })}
-                      />
-                      <div className="countdown-preset-chips" style={{ marginTop: '6px' }}>
-                        {['Drawing ends in', 'Kết thúc trong', 'Sắp hết hạn sau', 'Raffle closes in'].map((txt) => (
-                          <button
-                            key={txt}
-                            type="button"
-                            className={`preset-text-chip ${quickTimerData.label === txt ? 'active' : ''}`}
-                            onClick={() => setQuickTimerData({ ...quickTimerData, label: txt })}
-                          >
-                            {txt}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="countdown-inputs-grid" style={{ marginBottom: '14px' }}>
-                      <div className="countdown-input-unit">
-                        <label className="unit-label">Giờ</label>
-                        <input
-                          type="number"
-                          min="0"
-                          className="form-input unit-input"
-                          value={quickTimerData.hours}
-                          onChange={(e) => setQuickTimerData({ ...quickTimerData, hours: Math.max(0, parseInt(e.target.value) || 0) })}
-                        />
-                      </div>
-                      <div className="countdown-separator">:</div>
-                      <div className="countdown-input-unit">
-                        <label className="unit-label">Phút</label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="59"
-                          className="form-input unit-input"
-                          value={quickTimerData.minutes}
-                          onChange={(e) => setQuickTimerData({ ...quickTimerData, minutes: Math.max(0, Math.min(59, parseInt(e.target.value) || 0)) })}
-                        />
-                      </div>
-                      <div className="countdown-separator">:</div>
-                      <div className="countdown-input-unit">
-                        <label className="unit-label">Giây</label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="59"
-                          className="form-input unit-input"
-                          value={quickTimerData.seconds}
-                          onChange={(e) => setQuickTimerData({ ...quickTimerData, seconds: Math.max(0, Math.min(59, parseInt(e.target.value) || 0)) })}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="countdown-duration-presets" style={{ marginBottom: '16px' }}>
-                      <div className="presets-list">
-                        {[
-                          { label: '⚡ 30 phút', h: 0, m: 30, s: 0 },
-                          { label: '🔥 1 giờ', h: 1, m: 0, s: 0 },
-                          { label: '🕒 2 giờ 14p', h: 2, m: 14, s: 4 },
-                          { label: '🕒 3 giờ', h: 3, m: 0, s: 0 },
-                          { label: '⭐ 6 giờ', h: 6, m: 0, s: 0 },
-                          { label: '🌙 12 giờ', h: 12, m: 0, s: 0 },
-                          { label: '📅 24 giờ (1 ngày)', h: 24, m: 0, s: 0 },
-                          { label: '✨ 7 ngày', h: 168, m: 0, s: 0 }
-                        ].map((preset, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            className={`btn-time-chip ${quickTimerData.hours === preset.h && quickTimerData.minutes === preset.m ? 'selected' : ''}`}
-                            onClick={() => setQuickTimerData({
-                              ...quickTimerData,
-                              hours: preset.h,
-                              minutes: preset.m,
-                              seconds: preset.s
-                            })}
-                          >
-                            {preset.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="form-group" style={{ marginBottom: '16px' }}>
-                    <label className="form-label">Nhập chữ tuỳ chỉnh:</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="ví dụ: Drawing ends in 02:59:31"
-                      value={quickTimerData.customText}
-                      onChange={(e) => setQuickTimerData({ ...quickTimerData, customText: e.target.value })}
-                    />
-                    <div className="countdown-preset-chips" style={{ marginTop: '8px' }}>
-                      {['Drawing ends in 02:59:31', 'Drawing ends in 02:14:04', 'Drawing ends in 05:07:01', '🔥 Sắp kết thúc hôm nay'].map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          className="preset-text-chip"
-                          onClick={() => setQuickTimerData({ ...quickTimerData, customText: s })}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Live Preview Bar */}
-                <div className="countdown-live-badge-preview" style={{ marginBottom: '18px' }}>
-                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700 }}>Xem trước:</span>
-                  <div className="countdown-status-badge" style={{ display: 'inline-flex', margin: 0 }}>
-                    <svg className="countdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                    <span>
-                      {quickTimerData.mode === 'custom' && quickTimerData.customText.trim()
-                        ? quickTimerData.customText.trim()
-                        : `${quickTimerData.label} ${String(quickTimerData.hours).padStart(2, '0')}:${String(quickTimerData.minutes).padStart(2, '0')}:${String(quickTimerData.seconds).padStart(2, '0')}`}
-                    </span>
-                  </div>
-                </div>
+                <CountdownEditor idPrefix="quick-cd" value={quickTimerData} onChange={setQuickTimerData} />
 
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button
