@@ -215,6 +215,8 @@ export default function ProductCard({
         <div className="card-meta-indicators">
           <div className="card-status-line">
             {status === 'open' ? (
+              // Sản phẩm "Không hẹn giờ" → không hiện dòng thời gian
+              countdownString && (
               <div className="countdown-status-badge">
                 <svg
                   className="countdown-icon"
@@ -228,8 +230,9 @@ export default function ProductCard({
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                <span>{countdownString || 'Drawing ends in 02:14:33'}</span>
+                <span>{countdownString}</span>
               </div>
+              )
             ) : (
               <span>
                 Drawing ended today, <strong>{statusTime || '10:00am PDT'}</strong>

@@ -700,7 +700,7 @@ export default function AdminModal({
 
   // Gom các trường thời gian từ ô chỉnh → dữ liệu sản phẩm
   const buildCountdownFields = ({ mode, label, endsAt, customText }) => {
-    const end = endsAt ? new Date(endsAt) : null;
+    const end = endsAt && (mode === 'timer' || mode === 'fixed') ? new Date(endsAt) : null;
     return {
       countdownMode: mode,
       countdownLabel: label?.trim() || DEFAULT_LABELS[mode] || 'Drawing ends in',
@@ -719,7 +719,7 @@ export default function AdminModal({
 
   const handleSaveQuickTimer = () => {
     if (!quickTimerProduct) return;
-    if (quickTimerData.mode !== 'custom' && !quickTimerData.endsAt) {
+    if ((quickTimerData.mode === 'timer' || quickTimerData.mode === 'fixed') && !quickTimerData.endsAt) {
       alert('Vui lòng chọn thời điểm kết thúc.');
       return;
     }
@@ -1510,6 +1510,7 @@ export default function AdminModal({
                       )}
                     </div>
                     <h4 className="card-title">{formData.title || 'Tên sản phẩm'}</h4>
+                    {getPreviewCountdownText() && (
                     <div className="card-status-line" style={{ marginTop: '8px' }}>
                       <div className="countdown-status-badge">
                         <svg
@@ -1527,6 +1528,7 @@ export default function AdminModal({
                         <span>{getPreviewCountdownText()}</span>
                       </div>
                     </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2117,7 +2119,7 @@ export default function AdminModal({
                               )}
                             </span>
                             <span style={{ color: '#d97706', fontWeight: 700, background: '#fffbeb', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fde68a', fontSize: '0.74rem' }}>
-                              ⏱️ {getDrawingText(product, Date.now(), Date.now() + (product.secondsRemaining || 7200) * 1000)}
+                              ⏱️ {getDrawingText(product, Date.now(), Date.now() + (product.secondsRemaining || 7200) * 1000) || 'Không hẹn giờ'}
                             </span>
                           </div>
                         </div>

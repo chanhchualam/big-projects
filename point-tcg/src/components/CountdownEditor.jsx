@@ -1,13 +1,14 @@
 // src/components/CountdownEditor.jsx
 // Ô chỉnh thời gian kết thúc raffle (dùng trong form sản phẩm và hộp "Đổi giờ" nhanh của admin).
-// value: { mode: 'timer' | 'fixed' | 'custom', label, endsAt: 'YYYY-MM-DDTHH:mm', customText }
+// value: { mode: 'timer' | 'fixed' | 'custom' | 'none', label, endsAt: 'YYYY-MM-DDTHH:mm', customText }
 import React from 'react';
 import { DEFAULT_LABELS, getDrawingText, toLocalInputValue } from '../utils/countdown';
 
 const MODES = [
   { value: 'timer', label: '⏳ Đếm ngược' },
   { value: 'fixed', label: '📅 Thời gian cố định' },
-  { value: 'custom', label: '✍️ Chữ tự do' }
+  { value: 'custom', label: '✍️ Chữ tự do' },
+  { value: 'none', label: '🚫 Không hẹn giờ' }
 ];
 
 const LABEL_SUGGESTIONS = {
@@ -47,7 +48,7 @@ export default function CountdownEditor({ value, onChange, idPrefix = 'cd' }) {
     customCountdownText: value.customText,
     endsAt: value.endsAt ? new Date(value.endsAt).toISOString() : null
   });
-  const isPast = value.mode !== 'custom' && value.endsAt && new Date(value.endsAt) <= new Date();
+  const isPast = (value.mode === 'timer' || value.mode === 'fixed') && value.endsAt && new Date(value.endsAt) <= new Date();
 
   return (
     <div className="cde">
@@ -66,7 +67,11 @@ export default function CountdownEditor({ value, onChange, idPrefix = 'cd' }) {
         ))}
       </div>
 
-      {value.mode === 'custom' ? (
+      {value.mode === 'none' ? (
+        <div className="cde-note">
+          Sản phẩm bán bình thường, không hiện đồng hồ hay ngày giờ kết thúc.
+        </div>
+      ) : value.mode === 'custom' ? (
         <div className="form-group">
           <label className="form-label" htmlFor={`${idPrefix}-custom`}>Chữ hiển thị (thay cho dòng thời gian)</label>
           <input
@@ -139,6 +144,7 @@ export default function CountdownEditor({ value, onChange, idPrefix = 'cd' }) {
         </>
       )}
 
+      {value.mode !== 'none' && (
       <div className="countdown-live-badge-preview">
         <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700 }}>Xem trước:</span>
         <div className="countdown-status-badge" style={{ display: 'inline-flex', margin: 0 }}>
@@ -149,6 +155,7 @@ export default function CountdownEditor({ value, onChange, idPrefix = 'cd' }) {
           <span>{preview}</span>
         </div>
       </div>
+      )}
     </div>
   );
 }
