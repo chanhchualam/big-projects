@@ -2,7 +2,7 @@
 // Giao diện đa ngôn ngữ cho khách: Tiếng Việt (mặc định) và English.
 // t('Chuỗi gốc', { n: 3 }) → tra từ điển theo ngôn ngữ đang chọn; không có bản dịch thì giữ chuỗi gốc.
 // Chuỗi gốc là chữ đang viết trong code (tiếng Việt hoặc tiếng Anh), nên mỗi từ điển dịch sang ngôn ngữ của nó.
-// Tiền tệ hiển thị (VNĐ / USD) chọn riêng; giá gốc của sản phẩm và đơn hàng vẫn lưu bằng USD.
+// Tiền tệ đi theo ngôn ngữ: Tiếng Việt → VNĐ, English → USD; giá gốc của sản phẩm và đơn hàng vẫn lưu bằng USD.
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import en from './en';
 import vi from './vi';
@@ -14,12 +14,6 @@ export const LANGUAGES = [
 ];
 const DICTS = { vi, en };
 const STORAGE_KEY = 'point-tcg-lang';
-const CURRENCY_KEY = 'point-tcg-currency';
-
-export const CURRENCIES = [
-  { code: 'vnd', label: '₫ VND', name: 'Việt Nam Đồng' },
-  { code: 'usd', label: '$ USD', name: 'US Dollar' }
-];
 
 function initialLang() {
   try {
@@ -33,17 +27,8 @@ function initialLang() {
 
 let currentLang = initialLang();
 
-function initialCurrency() {
-  try {
-    const saved = localStorage.getItem(CURRENCY_KEY);
-    if (CURRENCIES.some((c) => c.code === saved)) return saved;
-  } catch {
-    // localStorage không khả dụng
-  }
-  return 'vnd';
-}
-
-let currentCurrency = initialCurrency();
+const currencyOf = (lang) => (lang === 'en' ? 'usd' : 'vnd');
+let currentCurrency = currencyOf(currentLang);
 export const getCurrency = () => currentCurrency;
 
 // Giá USD → chuỗi theo tiền tệ đang chọn: "4.600.000₫" hoặc "$173.60"
@@ -74,18 +59,17 @@ const I18nContext = createContext({
   setLang: () => {},
   t: translate,
   currency: currentCurrency,
-  setCurrency: () => {},
   money: formatMoney,
   moneyAlt: formatMoneyAlt
 });
 
 export function LanguageProvider({ children }) {
   const [lang, setLangState] = useState(currentLang);
-  const [currency, setCurrencyState] = useState(currentCurrency);
 
   const setLang = useCallback((next) => {
     if (!DICTS[next]) return;
     currentLang = next;
+    currentCurrency = currencyOf(next);
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {
@@ -95,28 +79,17 @@ export function LanguageProvider({ children }) {
     setLangState(next);
   }, []);
 
-  const setCurrency = useCallback((next) => {
-    if (!CURRENCIES.some((c) => c.code === next)) return;
-    currentCurrency = next;
-    try {
-      localStorage.setItem(CURRENCY_KEY, next);
-    } catch {
-      // bỏ qua
-    }
-    setCurrencyState(next);
-  }, []);
-
   if (typeof document !== 'undefined') document.documentElement.lang = lang;
 
+  const currency = currencyOf(lang);
   const value = useMemo(() => ({
     lang,
     setLang,
     t: (text, vars) => translate(text, vars, lang),
     currency,
-    setCurrency,
     money: (usd) => formatMoney(usd, currency),
     moneyAlt: (usd) => formatMoneyAlt(usd, currency)
-  }), [lang, setLang, currency, setCurrency]);
+  }), [lang, setLang, currency]);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
