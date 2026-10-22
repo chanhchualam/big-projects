@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { getProductCatalogImage } from '../products';
 import { usdToVnd } from '../utils/currency';
 import { OrderTimeline, TrackingInfo, ProfileEditor, ReviewsPanel } from './AccountPanels';
+import { useI18n } from '../i18n';
 
 // Must match customerCancellableStatuses() in firestore.rules
 const CUSTOMER_CANCELLABLE_STATUSES = [
@@ -34,6 +35,7 @@ export default function CustomerOrdersPage({
   onOpenSignIn,
   onOpenProductDetail
 }) {
+  const { t } = useI18n();
   // Navigation sidebar tab: 'orders' | 'profile' | 'addresses' | 'reviews'
   const [activeMenuTab, setActiveMenuTab] = useState(initialTab || 'orders');
   useEffect(() => {
@@ -51,10 +53,10 @@ export default function CustomerOrdersPage({
   const [viewingOrderDetail, setViewingOrderDetail] = useState(null);
 
   // User profile state
-  const displayName = currentUser?.name || 'Khách';
-  const displayEmail = currentUser?.email || 'Chưa đăng nhập';
-  const displayPhone = currentUser?.phone || 'Chưa cập nhật';
-  const displayAddress = currentUser?.address || 'Chưa cập nhật';
+  const displayName = currentUser?.name || t('Khách');
+  const displayEmail = currentUser?.email || t('Chưa đăng nhập');
+  const displayPhone = currentUser?.phone || t('Chưa cập nhật');
+  const displayAddress = currentUser?.address || t('Chưa cập nhật');
 
   // Get avatar initial
   const avatarLetter = useMemo(() => {
@@ -142,7 +144,7 @@ export default function CustomerOrdersPage({
 
   // Handler for cancelling pending order
   const handleCancelOrder = (orderId) => {
-    if (window.confirm(`Bạn có chắc chắn muốn huỷ đơn hàng #${orderId} không?`)) {
+    if (window.confirm(t('Bạn có chắc chắn muốn huỷ đơn hàng #{id} không?', { id: orderId }))) {
       if (onUpdateOrderStatus) {
         onUpdateOrderStatus(orderId, 'Đã huỷ');
       }
@@ -156,7 +158,7 @@ export default function CustomerOrdersPage({
       order.items.forEach((item) => {
         onAddToCart(item, item.qty || 1);
       });
-      alert(`Đã thêm ${order.items.length} sản phẩm của đơn hàng #${order.id} vào giỏ hàng!`);
+      alert(t('Đã thêm {n} sản phẩm của đơn hàng #{id} vào giỏ hàng!', { n: order.items.length, id: order.id }));
     }
   };
 
@@ -169,7 +171,7 @@ export default function CustomerOrdersPage({
     <div className="cop-page-wrapper">
       {/* 1. Top Green Announcement Bar (Matching Screenshot) */}
       <div className="cop-top-announcement">
-        POINT TCG | Pokémon TCG Chính Hãng - Uy Tín - Chất Lượng
+        {t('POINT TCG | Pokémon TCG Chính Hãng - Uy Tín - Chất Lượng')}
       </div>
 
       {/* 2. Top Navigation Bar */}
@@ -179,19 +181,19 @@ export default function CustomerOrdersPage({
             <img src="/logo.jpg" alt="Point TCG" className="cop-brand-logo" />
             <div className="cop-brand-texts">
               <span className="cop-brand-title">Point TCG</span>
-              <span className="cop-brand-sub">Trung tâm thẻ bài Pokémon Chính Hãng</span>
+              <span className="cop-brand-sub">{t('Trung tâm thẻ bài Pokémon Chính Hãng')}</span>
             </div>
           </div>
 
           <div className="cop-breadcrumbs">
-            <span onClick={onBackToStore} className="cop-crumb-link">Trang chủ</span>
+            <span onClick={onBackToStore} className="cop-crumb-link">{t('Trang chủ')}</span>
             <span className="cop-crumb-sep">/</span>
-            <span className="cop-crumb-current">Tài khoản & Đơn hàng</span>
+            <span className="cop-crumb-current">{t('Tài khoản & Đơn hàng')}</span>
           </div>
 
           <div className="cop-nav-actions">
             <button type="button" className="cop-btn-back-home" onClick={onBackToStore}>
-              ← Quay lại cửa hàng
+              {t('← Quay lại cửa hàng')}
             </button>
             {!currentUser && onOpenSignIn && (
               <button
@@ -199,7 +201,7 @@ export default function CustomerOrdersPage({
                 className="cop-btn-signin"
                 onClick={() => onOpenSignIn('login')}
               >
-                Đăng nhập
+                {t('Đăng nhập')}
               </button>
             )}
           </div>
@@ -218,7 +220,7 @@ export default function CustomerOrdersPage({
                   {displayName}
                 </span>
                 <span className="cop-user-role-badge">
-                  {currentUser?.role === 'admin' ? 'Quản trị viên' : 'Thành viên thân thiết'}
+                  {currentUser?.role === 'admin' ? t('Quản trị viên') : t('Thành viên thân thiết')}
                 </span>
               </div>
               <div className="cop-avatar-circle" aria-label="Avatar">
@@ -234,7 +236,7 @@ export default function CustomerOrdersPage({
               className={`cop-menu-item ${activeMenuTab === 'profile' ? 'active' : ''}`}
               onClick={() => setActiveMenuTab('profile')}
             >
-              <span className="cop-menu-text">Thông tin tài khoản</span>
+              <span className="cop-menu-text">{t('Thông tin tài khoản')}</span>
               <span className="cop-menu-arrow">›</span>
             </button>
 
@@ -243,7 +245,7 @@ export default function CustomerOrdersPage({
               className={`cop-menu-item ${activeMenuTab === 'orders' ? 'active' : ''}`}
               onClick={() => setActiveMenuTab('orders')}
             >
-              <span className="cop-menu-text">Lịch sử đơn hàng</span>
+              <span className="cop-menu-text">{t('Lịch sử đơn hàng')}</span>
               <span className="cop-menu-arrow">›</span>
             </button>
 
@@ -252,7 +254,7 @@ export default function CustomerOrdersPage({
               className={`cop-menu-item ${activeMenuTab === 'addresses' ? 'active' : ''}`}
               onClick={() => setActiveMenuTab('addresses')}
             >
-              <span className="cop-menu-text">Địa chỉ đã lưu</span>
+              <span className="cop-menu-text">{t('Địa chỉ đã lưu')}</span>
               <span className="cop-menu-arrow">›</span>
             </button>
 
@@ -261,7 +263,7 @@ export default function CustomerOrdersPage({
               className={`cop-menu-item ${activeMenuTab === 'reviews' ? 'active' : ''}`}
               onClick={() => setActiveMenuTab('reviews')}
             >
-              <span className="cop-menu-text">Đánh giá đơn hàng</span>
+              <span className="cop-menu-text">{t('Đánh giá đơn hàng')}</span>
               <span className="cop-menu-arrow">›</span>
             </button>
 
@@ -288,7 +290,7 @@ export default function CustomerOrdersPage({
               className="cop-btn-return-home"
               onClick={onBackToStore}
             >
-              Trở lại trang chủ
+              {t('Trở lại trang chủ')}
             </button>
           </div>
         </aside>
@@ -300,14 +302,14 @@ export default function CustomerOrdersPage({
           {/* ======================================================== */}
           {activeMenuTab === 'orders' && (
             <div className="cop-orders-section">
-              <h1 className="cop-section-title">Lịch sử đơn hàng</h1>
+              <h1 className="cop-section-title">{t('Lịch sử đơn hàng')}</h1>
 
               {/* Search Bar: Tìm theo mã đơn hàng hoặc tên sản phẩm */}
               <div className="cop-search-bar">
                 <input
                   type="text"
                   className="cop-search-input"
-                  placeholder="Tìm theo mã đơn hàng hoặc tên sản phẩm"
+                  placeholder={t('Tìm theo mã đơn hàng hoặc tên sản phẩm')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -316,7 +318,7 @@ export default function CustomerOrdersPage({
                     type="button"
                     className="cop-clear-search-btn"
                     onClick={() => setSearchQuery('')}
-                    title="Xoá tìm kiếm"
+                    title={t('Xoá tìm kiếm')}
                   >
                     ✕
                   </button>
@@ -332,7 +334,7 @@ export default function CustomerOrdersPage({
                   className={`cop-status-tab ${activeStatusTab === 'pending_confirm' ? 'active' : ''}`}
                   onClick={() => setActiveStatusTab('pending_confirm')}
                 >
-                  Chờ xác nhận {tabCounts.pending_confirm > 0 && `(${tabCounts.pending_confirm})`}
+                  {t('Chờ xác nhận')} {tabCounts.pending_confirm > 0 && `(${tabCounts.pending_confirm})`}
                 </button>
 
                 <button
@@ -342,7 +344,7 @@ export default function CustomerOrdersPage({
                   className={`cop-status-tab ${activeStatusTab === 'pending_pickup' ? 'active' : ''}`}
                   onClick={() => setActiveStatusTab('pending_pickup')}
                 >
-                  Chờ lấy hàng {tabCounts.pending_pickup > 0 && `(${tabCounts.pending_pickup})`}
+                  {t('Chờ lấy hàng')} {tabCounts.pending_pickup > 0 && `(${tabCounts.pending_pickup})`}
                 </button>
 
                 <button
@@ -352,7 +354,7 @@ export default function CustomerOrdersPage({
                   className={`cop-status-tab ${activeStatusTab === 'shipping' ? 'active' : ''}`}
                   onClick={() => setActiveStatusTab('shipping')}
                 >
-                  Đang giao hàng {tabCounts.shipping > 0 && `(${tabCounts.shipping})`}
+                  {t('Đang giao hàng')} {tabCounts.shipping > 0 && `(${tabCounts.shipping})`}
                 </button>
 
                 <button
@@ -362,7 +364,7 @@ export default function CustomerOrdersPage({
                   className={`cop-status-tab ${activeStatusTab === 'delivered' ? 'active' : ''}`}
                   onClick={() => setActiveStatusTab('delivered')}
                 >
-                  Đã giao {tabCounts.delivered > 0 && `(${tabCounts.delivered})`}
+                  {t('Đã giao')} {tabCounts.delivered > 0 && `(${tabCounts.delivered})`}
                 </button>
 
                 <button
@@ -372,7 +374,7 @@ export default function CustomerOrdersPage({
                   className={`cop-status-tab ${activeStatusTab === 'returned' ? 'active' : ''}`}
                   onClick={() => setActiveStatusTab('returned')}
                 >
-                  Trả hàng {tabCounts.returned > 0 && `(${tabCounts.returned})`}
+                  {t('Trả hàng')} {tabCounts.returned > 0 && `(${tabCounts.returned})`}
                 </button>
 
                 <button
@@ -382,7 +384,7 @@ export default function CustomerOrdersPage({
                   className={`cop-status-tab ${activeStatusTab === 'cancelled' ? 'active' : ''}`}
                   onClick={() => setActiveStatusTab('cancelled')}
                 >
-                  Đã huỷ {tabCounts.cancelled > 0 && `(${tabCounts.cancelled})`}
+                  {t('Đã huỷ')} {tabCounts.cancelled > 0 && `(${tabCounts.cancelled})`}
                 </button>
               </div>
 
@@ -403,13 +405,13 @@ export default function CustomerOrdersPage({
                         <rect x="22" y="30" width="20" height="8" rx="2" fill="#f1f5f9" />
                       </svg>
                     </div>
-                    <p className="cop-empty-text">Bạn chưa có đơn hàng nào</p>
+                    <p className="cop-empty-text">{t('Bạn chưa có đơn hàng nào')}</p>
                     <button
                       type="button"
                       className="cop-btn-shop-now"
                       onClick={onBackToStore}
                     >
-                      Khám phá sản phẩm Pokémon
+                      {t('Khám phá sản phẩm Pokémon')}
                     </button>
                   </div>
                 ) : (
@@ -431,7 +433,7 @@ export default function CustomerOrdersPage({
                           {/* Card Header */}
                           <div className="cop-card-header">
                             <div className="cop-card-header-left">
-                              <span className="cop-order-id-label">Mã đơn:</span>
+                              <span className="cop-order-id-label">{t('Mã đơn:')}</span>
                               <strong className="cop-order-id-val">#{order.id}</strong>
                               <span className="cop-order-date">{order.createdAt}</span>
                             </div>
@@ -451,7 +453,7 @@ export default function CustomerOrdersPage({
                                           : 'status-default'
                                   }`}
                               >
-                                {order.status}
+                                {t(order.status)}
                               </span>
                             </div>
                           </div>
@@ -492,7 +494,7 @@ export default function CustomerOrdersPage({
                                       {item.title}
                                     </h3>
                                     <div className="cop-item-sub">
-                                      <span className="cop-item-qty">Số lượng: x{item.qty || 1}</span>
+                                      <span className="cop-item-qty">{t('Số lượng:')} x{item.qty || 1}</span>
                                       <span className="cop-item-price">
                                         ${Number(item.price || 0).toFixed(2)} ({formatVndPrice(item.price)})
                                       </span>
@@ -507,19 +509,19 @@ export default function CustomerOrdersPage({
                           <div className="cop-card-footer">
                             <div className="cop-footer-info">
                               <div className="cop-recipient-line">
-                                <strong>Người nhận:</strong> {order.customerName || displayName} -{' '}
+                                <strong>{t('Người nhận:')}</strong> {order.customerName || displayName} -{' '}
                                 {order.customerPhone || displayPhone}
                               </div>
                               <div className="cop-address-line">
-                                <strong>Địa chỉ:</strong> {order.shippingAddress || displayAddress}
+                                <strong>{t('Địa chỉ:')}</strong> {order.shippingAddress || displayAddress}
                               </div>
                               <div className="cop-payment-method-line">
-                                <strong>Phương thức:</strong> {order.paymentMethod || 'Chuyển khoản QR'}
+                                <strong>{t('Phương thức:')}</strong> {t(order.paymentMethod || 'Chuyển khoản QR')}
                               </div>
                             </div>
 
                             <div className="cop-footer-pricing">
-                              <div className="cop-total-label">Tổng thanh toán:</div>
+                              <div className="cop-total-label">{t('Tổng thanh toán:')}</div>
                               <div className="cop-total-amount">
                                 ${Number(order.total || 0).toFixed(2)}
                                 <span className="cop-total-vnd">
@@ -534,7 +536,7 @@ export default function CustomerOrdersPage({
                                     className="cop-btn-cancel-order"
                                     onClick={() => handleCancelOrder(order.id)}
                                   >
-                                    Huỷ đơn hàng
+                                    {t('Huỷ đơn hàng')}
                                   </button>
                                 )}
                                 <button
@@ -542,14 +544,14 @@ export default function CustomerOrdersPage({
                                   className="cop-btn-reorder"
                                   onClick={() => handleReorder(order)}
                                 >
-                                  Mua lại
+                                  {t('Mua lại')}
                                 </button>
                                 <button
                                   type="button"
                                   className="cop-btn-view-detail"
                                   onClick={() => setViewingOrderDetail(order)}
                                 >
-                                  Xem chi tiết
+                                  {t('Xem chi tiết')}
                                 </button>
                               </div>
                             </div>
@@ -568,14 +570,14 @@ export default function CustomerOrdersPage({
           {/* ======================================================== */}
           {activeMenuTab === 'profile' && (
             <div className="cop-profile-section">
-              <h1 className="cop-section-title">Thông tin tài khoản</h1>
+              <h1 className="cop-section-title">{t('Thông tin tài khoản')}</h1>
               <div className="cop-profile-card">
                 <div className="cop-profile-header">
                   <div className="cop-profile-avatar-large">{avatarLetter}</div>
                   <div>
                     <h2 className="cop-profile-name">{displayName}</h2>
                     <p className="cop-profile-email">{displayEmail}</p>
-                    <span className="cop-badge-tag">Tài khoản mua hàng chính thức</span>
+                    <span className="cop-badge-tag">{t('Tài khoản mua hàng chính thức')}</span>
                   </div>
                 </div>
 
@@ -588,7 +590,7 @@ export default function CustomerOrdersPage({
                 ) : (
                   <div className="cop-profile-actions">
                     <button type="button" className="cop-btn-edit-profile" onClick={() => onOpenSignIn?.('login')}>
-                      Đăng nhập để sửa thông tin
+                      {t('Đăng nhập để sửa thông tin')}
                     </button>
                   </div>
                 )}
@@ -601,9 +603,9 @@ export default function CustomerOrdersPage({
           {/* ======================================================== */}
           {activeMenuTab === 'addresses' && (
             <div className="cop-addresses-section">
-              <h1 className="cop-section-title">Địa chỉ đã lưu</h1>
+              <h1 className="cop-section-title">{t('Địa chỉ đã lưu')}</h1>
               <div className="cop-address-card">
-                <div className="cop-address-badge">MẶC ĐỊNH</div>
+                <div className="cop-address-badge">{t('MẶC ĐỊNH')}</div>
                 <h3 className="cop-address-recipient">{displayName} — {displayPhone}</h3>
                 <p className="cop-address-text">{displayAddress}</p>
                 <div className="cop-address-actions">
@@ -612,7 +614,7 @@ export default function CustomerOrdersPage({
                     className="cop-btn-small"
                     onClick={() => setActiveMenuTab('profile')}
                   >
-                    Thay đổi
+                    {t('Thay đổi')}
                   </button>
                 </div>
               </div>
@@ -624,7 +626,7 @@ export default function CustomerOrdersPage({
           {/* ======================================================== */}
           {activeMenuTab === 'reviews' && (
             <div className="cop-reviews-section">
-              <h1 className="cop-section-title">Đánh giá đơn hàng</h1>
+              <h1 className="cop-section-title">{t('Đánh giá đơn hàng')}</h1>
               <div className="cop-reviews-card">
                 <ReviewsPanel
                   currentUser={currentUser}
@@ -644,7 +646,7 @@ export default function CustomerOrdersPage({
         <div className="modal-overlay" onClick={() => setViewingOrderDetail(null)}>
           <div className="cop-detail-modal" onClick={(e) => e.stopPropagation()}>
             <div className="cop-detail-modal-header">
-              <h3>Chi Tiết Đơn Hàng #{viewingOrderDetail.id}</h3>
+              <h3>{t('Chi Tiết Đơn Hàng #{id}', { id: viewingOrderDetail.id })}</h3>
               <button
                 type="button"
                 className="cop-detail-close-btn"
@@ -656,27 +658,27 @@ export default function CustomerOrdersPage({
 
             <div className="cop-detail-modal-body">
               <div className="cop-detail-status-bar">
-                <span>Trạng thái hiện tại:</span>
-                <strong style={{ color: '#2563eb' }}>{viewingOrderDetail.status}</strong>
+                <span>{t('Trạng thái hiện tại:')}</span>
+                <strong style={{ color: '#2563eb' }}>{t(viewingOrderDetail.status)}</strong>
               </div>
               <OrderTimeline order={viewingOrderDetail} />
               <TrackingInfo order={viewingOrderDetail} />
 
               <div className="cop-detail-section">
-                <h4>Thông tin người nhận:</h4>
-                <p><strong>Khách hàng:</strong> {viewingOrderDetail.customerName}</p>
-                <p><strong>Số điện thoại:</strong> {viewingOrderDetail.customerPhone}</p>
+                <h4>{t('Thông tin người nhận:')}</h4>
+                <p><strong>{t('Khách hàng:')}</strong> {viewingOrderDetail.customerName}</p>
+                <p><strong>{t('Số điện thoại:')}</strong> {viewingOrderDetail.customerPhone}</p>
                 <p><strong>Email:</strong> {viewingOrderDetail.customerEmail}</p>
-                <p><strong>Địa chỉ nhận hàng:</strong> {viewingOrderDetail.shippingAddress}</p>
-                <p><strong>Phương thức giao hàng:</strong> {viewingOrderDetail.shippingMethod || 'Giao hàng niêm phong an toàn'}</p>
-                <p><strong>Phương thức thanh toán:</strong> {viewingOrderDetail.paymentMethod}</p>
+                <p><strong>{t('Địa chỉ nhận hàng:')}</strong> {viewingOrderDetail.shippingAddress}</p>
+                <p><strong>{t('Phương thức giao hàng:')}</strong> {t(viewingOrderDetail.shippingMethod || 'Giao hàng niêm phong an toàn')}</p>
+                <p><strong>{t('Phương thức thanh toán:')}</strong> {t(viewingOrderDetail.paymentMethod)}</p>
                 {viewingOrderDetail.orderNotes && (
-                  <p><strong>Ghi chú đơn hàng:</strong> {viewingOrderDetail.orderNotes}</p>
+                  <p><strong>{t('Ghi chú đơn hàng:')}</strong> {viewingOrderDetail.orderNotes}</p>
                 )}
               </div>
 
               <div className="cop-detail-section">
-                <h4>Danh sách sản phẩm ({viewingOrderDetail.items?.length || 0}):</h4>
+                <h4>{t('Danh sách sản phẩm ({n}):', { n: viewingOrderDetail.items?.length || 0 })}</h4>
                 <div className="cop-detail-items">
                   {(viewingOrderDetail.items || []).map((item, idx) => (
                     <div key={idx} className="cop-detail-item-line">
@@ -688,7 +690,7 @@ export default function CustomerOrdersPage({
               </div>
 
               <div className="cop-detail-total-row">
-                <span>Tổng cộng:</span>
+                <span>{t('Tổng cộng:')}</span>
                 <strong>
                   ${Number(viewingOrderDetail.total || 0).toFixed(2)} (
                   {viewingOrderDetail.amountVnd
@@ -705,7 +707,7 @@ export default function CustomerOrdersPage({
                 className="cop-btn-small"
                 onClick={() => setViewingOrderDetail(null)}
               >
-                Đóng
+                {t('Đóng')}
               </button>
             </div>
           </div>

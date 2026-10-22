@@ -19,6 +19,7 @@ import Footer from './components/Footer';
 import NotificationBell from './components/NotificationBell';
 import AnnouncementBar from './components/AnnouncementBar';
 import HeroBanner from './components/HeroBanner';
+import { useI18n } from './i18n';
 import { getDrawingText } from './utils/countdown';
 import {
   buildNotifications,
@@ -153,6 +154,7 @@ function loadSavedCart(uid) {
 }
 
 export default function App() {
+  const { t, lang } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [activeCategory, setActiveCategory] = useState('all');
@@ -344,7 +346,7 @@ export default function App() {
   const requireLogin = (action) => {
     if (user) return true;
     setPendingAction(action);
-    setSignInNotice('Vui lòng đăng nhập để xem chi tiết và đặt hàng sản phẩm của shop.');
+    setSignInNotice(t('Vui lòng đăng nhập để xem chi tiết và đặt hàng sản phẩm của shop.'));
     setSignInMode('login');
     setIsSignInOpen(true);
     return false;
@@ -814,7 +816,7 @@ export default function App() {
   const addToCartNow = (product, qtyToAdd = 1) => {
     const currentStock = typeof product.stock === 'number' ? product.stock : 20;
     if (currentStock <= 0) {
-      alert(`Sản phẩm "${product.title}" hiện tại đã hết hàng!`);
+      alert(t('Sản phẩm "{title}" hiện tại đã hết hàng!', { title: product.title }));
       return;
     }
 
@@ -848,7 +850,7 @@ export default function App() {
     });
 
     if (reachedLimit) {
-      alert(`Bạn đã chọn tối đa ${currentStock} sản phẩm có sẵn trong kho!`);
+      alert(t('Bạn đã chọn tối đa {n} sản phẩm có sẵn trong kho!', { n: currentStock }));
     } else {
       setIsCartOpen(true);
     }
@@ -862,7 +864,7 @@ export default function App() {
   const buyNowNow = (product, qtyToAdd = 1) => {
     const currentStock = typeof product.stock === 'number' ? product.stock : 20;
     if (currentStock <= 0) {
-      alert(`Sản phẩm "${product.title}" hiện tại đã hết hàng!`);
+      alert(t('Sản phẩm "{title}" hiện tại đã hết hàng!', { title: product.title }));
       return;
     }
 
@@ -904,7 +906,7 @@ export default function App() {
 
     let finalQty = newQty;
     if (newQty > maxStock) {
-      alert(`Số lượng yêu cầu vượt quá tồn kho hiện tại (chỉ còn ${maxStock} sản phẩm)!`);
+      alert(t('Số lượng yêu cầu vượt quá tồn kho hiện tại (chỉ còn {n} sản phẩm)!', { n: maxStock }));
       finalQty = Math.max(1, maxStock);
     }
 
@@ -993,7 +995,8 @@ export default function App() {
       wishlistEvents,
       announcements: liveAnnouncements
     }),
-    [orders, isAdmin, wishlistEvents, liveAnnouncements]
+    // lang: tiêu đề thông báo được dịch lúc tạo
+    [orders, isAdmin, wishlistEvents, liveAnnouncements, lang]
   );
 
   const handleMarkNotificationsRead = () => {
@@ -1009,7 +1012,7 @@ export default function App() {
       if (product) handleOpenProductDetail(product);
     } else if (n.action?.type === 'coupon') {
       navigator.clipboard?.writeText(n.action.code);
-      alert(`Đã sao chép mã giảm giá ${n.action.code}. Dán vào ô voucher khi thanh toán nhé!`);
+      alert(t('Đã sao chép mã giảm giá {code}. Dán vào ô voucher khi thanh toán nhé!', { code: n.action.code }));
     }
   };
 
@@ -1053,7 +1056,7 @@ export default function App() {
       return;
     }
     alert(
-      `Drawing entry submitted!\n\nCollector: ${user.name}\nItem: ${product.title}\nStatus: Active in raffle queue.\n\nYou will be notified immediately when the drawing closes!`
+      t('Drawing entry submitted!\n\nCollector: {name}\nItem: {title}\nStatus: Active in raffle queue.\n\nYou will be notified immediately when the drawing closes!', { name: user.name, title: product.title })
     );
   };
 
@@ -1327,68 +1330,68 @@ export default function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {searchQuery ? (
               <div className="search-active-pill">
-                <span>Search results for: <strong>"{searchQuery}"</strong> ({totalResultsCount} items found)</span>
+                <span>{t('Search results for:')} <strong>"{searchQuery}"</strong> ({t('{n} items found', { n: totalResultsCount })})</span>
                 <span
                   className="clear-search-link"
                   onClick={() => setSearchQuery('')}
                   role="button"
                   tabIndex={0}
                 >
-                  Clear
+                  {t('Clear')}
                 </span>
               </div>
             ) : activeCategory !== 'all' ? (
               <div className="search-active-pill">
-                <span>Filter: <strong>{activeCategory}</strong></span>
+                <span>{t('Filter:')} <strong>{t(activeCategory)}</strong></span>
                 <span
                   className="clear-search-link"
                   onClick={() => setActiveCategory('all')}
                   role="button"
                   tabIndex={0}
                 >
-                  Reset Filter
+                  {t('Reset Filter')}
                 </span>
               </div>
             ) : (
               <span style={{ fontSize: '0.88rem', color: '#64748b' }}>
-                Showing <strong>{totalResultsCount}</strong> Pokémon collectible opportunities
+                {t('Showing')} <strong>{totalResultsCount}</strong> {t('Pokémon collectible opportunities')}
               </span>
             )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div className="sort-select-wrapper">
-              <label htmlFor="sort-dropdown">Sort by:</label>
+              <label htmlFor="sort-dropdown">{t('Sort by:')}</label>
               <select
                 id="sort-dropdown"
                 className="sort-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                aria-label="Sort products"
+                aria-label={t('Sort products')}
               >
-                <option value="default">Featured</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Highest Customer Rating</option>
-                <option value="newest">Newest Releases</option>
+                <option value="default">{t('Featured')}</option>
+                <option value="price-low">{t('Price: Low to High')}</option>
+                <option value="price-high">{t('Price: High to Low')}</option>
+                <option value="rating">{t('Highest Customer Rating')}</option>
+                <option value="newest">{t('Newest Releases')}</option>
               </select>
             </div>
           </div>
         </div>
 
         {/* Bộ lọc: loại sản phẩm, khoảng giá, tình trạng kho */}
-        <div className="product-filter-bar" aria-label="Lọc sản phẩm">
+        <div className="product-filter-bar" aria-label={t('Lọc sản phẩm')}>
           <label className="filter-field">
-            <span>Loại</span>
+            <span>{t('Loại')}</span>
             <select value={productType} onChange={(e) => setProductType(e.target.value)}>
-              <option value="all">Tất cả loại</option>
-              {productTypes.map((t) => (
-                <option key={t} value={t}>{t}</option>
+              <option value="all">{t('Tất cả loại')}</option>
+              {productTypes.map((type) => (
+                <option key={type} value={type}>{t(type)}</option>
               ))}
             </select>
           </label>
           <label className="filter-field">
-            <span>Giá từ ($)</span>
+            <span>{t('Giá từ ($)')}</span>
             <input
               type="number"
               min="0"
@@ -1399,39 +1402,39 @@ export default function App() {
             />
           </label>
           <label className="filter-field">
-            <span>đến ($)</span>
+            <span>{t('đến ($)')}</span>
             <input
               type="number"
               min="0"
               inputMode="decimal"
-              placeholder="Không giới hạn"
+              placeholder={t('Không giới hạn')}
               value={priceMax}
               onChange={(e) => setPriceMax(e.target.value)}
             />
           </label>
           <label className="filter-field">
-            <span>Tình trạng</span>
+            <span>{t('Tình trạng')}</span>
             <select value={stockFilter} onChange={(e) => setStockFilter(e.target.value)}>
-              <option value="in">Còn hàng</option>
-              <option value="out">Hết hàng</option>
-              <option value="all">Tất cả</option>
+              <option value="in">{t('Còn hàng')}</option>
+              <option value="out">{t('Hết hàng')}</option>
+              <option value="all">{t('Tất cả')}</option>
             </select>
           </label>
           {hasAttributeFilter && (
             <button type="button" className="filter-reset-btn" onClick={resetAttributeFilters}>
-              Xoá bộ lọc
+              {t('Xoá bộ lọc')}
             </button>
           )}
         </div>
 
         {seriesChips.length > 1 && (
-          <div className="series-chip-row" role="group" aria-label="Chọn dòng sản phẩm">
+          <div className="series-chip-row" role="group" aria-label={t('Chọn dòng sản phẩm')}>
             <button
               type="button"
               className={`series-chip ${selectedSeries === 'all' ? 'active' : ''}`}
               onClick={() => setActiveSeries('all')}
             >
-              Tất cả dòng
+              {t('Tất cả dòng')}
             </button>
             {seriesChips.map((chip) => (
               <button
@@ -1440,7 +1443,7 @@ export default function App() {
                 className={`series-chip ${selectedSeries === chip.name ? 'active' : ''}`}
                 onClick={() => setActiveSeries(chip.name)}
               >
-                {chip.name} <span className="series-chip-count">{chip.count}</span>
+                {t(chip.name)} <span className="series-chip-count">{chip.count}</span>
               </button>
             ))}
           </div>
@@ -1454,14 +1457,14 @@ export default function App() {
             <div className="section-header">
               <div className="section-title-wrap">
                 <h2 id="open-drawings-heading" className="section-title">
-                  <span>Open drawings</span>
+                  <span>{t('Open drawings')}</span>
                   <span className="live-indicator">
                     <span className="live-pulse" />
-                    Live Now
+                    {t('Live Now')}
                   </span>
                 </h2>
                 <p className="section-subtitle">
-                  Active raffles closing today. Request to join before timer expires for a chance to purchase.
+                  {t('Active raffles closing today. Request to join before timer expires for a chance to purchase.')}
                 </p>
               </div>
             </div>
@@ -1469,7 +1472,7 @@ export default function App() {
             {openGroups.map((group) => (
             <div key={group.name} className="series-group">
               <h3 className="series-group-title">
-                {group.name} <span className="series-group-count">{group.items.length} sản phẩm</span>
+                {t(group.name)} <span className="series-group-count">{t('{n} sản phẩm', { n: group.items.length })}</span>
               </h3>
             <div className="open-drawings-grid">
               {group.items.map((product) => (
@@ -1501,9 +1504,9 @@ export default function App() {
             <div className="section-header">
               <div className="section-title-wrap">
                 <h2 id="closed-drawings-heading" className="section-title">
-                  Closed drawings
+                  {t('Closed drawings')}
                 </h2>
-                <p className="section-subtitle">See previous ones now closed.</p>
+                <p className="section-subtitle">{t('See previous ones now closed.')}</p>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -1512,10 +1515,10 @@ export default function App() {
                   className="section-view-all"
                   onClick={(e) => {
                     e.preventDefault();
-                    alert(`Hiển thị tất cả ${visibleClosedCount} sản phẩm closed drawings còn hàng.`);
+                    alert(t('Hiển thị tất cả {n} sản phẩm closed drawings còn hàng.', { n: visibleClosedCount }));
                   }}
                 >
-                  View all ({visibleClosedCount})
+                  {t('View all ({n})', { n: visibleClosedCount })}
                 </a>
               </div>
             </div>
@@ -1524,7 +1527,7 @@ export default function App() {
             {closedGroups.map((group) => (
             <div key={group.name} className="series-group">
               <h3 className="series-group-title">
-                {group.name} <span className="series-group-count">{group.items.length} sản phẩm</span>
+                {t(group.name)} <span className="series-group-count">{t('{n} sản phẩm', { n: group.items.length })}</span>
               </h3>
             <Carousel
               products={group.items}
@@ -1546,10 +1549,10 @@ export default function App() {
         {totalResultsCount === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', marginTop: '20px' }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e293b' }}>
-              Không tìm thấy sản phẩm nào phù hợp {searchQuery ? `cho "${searchQuery}"` : ''}
+              {t('Không tìm thấy sản phẩm nào phù hợp')} {searchQuery ? `"${searchQuery}"` : ''}
             </h3>
             <p style={{ color: '#64748b', marginTop: '6px' }}>
-              Thử tìm kiếm với các từ khoá phổ biến:
+              {t('Thử tìm kiếm với các từ khoá phổ biến:')}
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '14px', flexWrap: 'wrap' }}>
               {['Booster Box', '151', 'Charizard', 'Pikachu', 'Crown Zenith', 'Elite Trainer'].map((tag) => (
@@ -1582,7 +1585,7 @@ export default function App() {
                   resetAttributeFilters();
                 }}
               >
-                Reset Bộ Lọc & Tìm Kiếm
+                {t('Xoá bộ lọc & tìm kiếm')}
               </button>
             </div>
           </div>

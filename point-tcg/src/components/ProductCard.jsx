@@ -3,14 +3,16 @@ import React from 'react';
 import RestockNotify from './RestockNotify';
 import ImageSlider from './ImageSlider';
 import { getProductImages } from '../utils/productImages';
+import { useI18n } from '../i18n';
 
 // Star rating component with partial fill support
 function StarRating({ rating = 0, count = 0 }) {
+  const { t } = useI18n();
   const fullStars = Math.floor(rating);
   const remainder = rating - fullStars;
 
   return (
-    <div className="card-rating-row" aria-label={`Rating: ${rating} out of 5 stars from ${count} reviews`}>
+    <div className="card-rating-row" aria-label={t('Rating: {rating} out of 5 stars from {count} reviews', { rating, count })}>
       <div className="stars-wrapper" aria-hidden="true">
         {[1, 2, 3, 4, 5].map((starIndex) => {
           let fillPercent = 0;
@@ -94,6 +96,7 @@ export default function ProductCard({
     image
   } = product;
 
+  const { t } = useI18n();
   const currentPriceFormatted = formatPrice(price);
   const wasPriceFormatted = wasPrice ? Number(wasPrice).toFixed(2) : null;
   const stock = typeof product.stock === 'number' ? product.stock : 20;
@@ -132,8 +135,8 @@ export default function ProductCard({
           type="button"
           className={`card-heart-btn ${isSaved ? 'saved' : ''}`}
           onClick={handleHeartClick}
-          aria-label={isSaved ? `Remove ${title} from saved items` : `Save ${title} to My Items`}
-          title={isSaved ? 'Saved in My Items' : 'Save to My Items'}
+          aria-label={isSaved ? t('Remove {title} from saved items', { title }) : t('Save {title} to My Items', { title })}
+          title={isSaved ? t('Saved in My Items') : t('Save to My Items')}
         >
           <svg
             viewBox="0 0 24 24"
@@ -172,7 +175,7 @@ export default function ProductCard({
           {isSale ? (
             <>
               <span className="price-sale-tag">
-                <span className="price-prefix">Now</span>
+                <span className="price-prefix">{t('Now')}</span>
                 <span>${currentPriceFormatted.dollars}</span>
                 <sup className="cents-sup">{currentPriceFormatted.cents}</sup>
               </span>
@@ -206,7 +209,7 @@ export default function ProductCard({
         {reviewsCount > 0 ? (
           <StarRating rating={rating} count={reviewsCount} />
         ) : (
-          <div className="card-rating-row card-no-reviews">Chưa có đánh giá</div>
+          <div className="card-rating-row card-no-reviews">{t('Chưa có đánh giá')}</div>
         )}
 
         {/* Status Line & Stock Indicator */}
@@ -233,7 +236,7 @@ export default function ProductCard({
               )
             ) : (
               <span>
-                Drawing ended today, <strong>{statusTime || '10:00am PDT'}</strong>
+                {t('Drawing ended today,')} <strong>{statusTime || '10:00am PDT'}</strong>
               </span>
             )}
           </div>
@@ -241,15 +244,15 @@ export default function ProductCard({
           <div className="card-stock-row">
             {isOutOfStock ? (
               <span className="card-stock-tag out-of-stock">
-                Hết hàng
+                {t('Hết hàng')}
               </span>
             ) : stock <= 5 ? (
-              <span className="card-stock-tag low-stock" title="Số lượng sản phẩm còn rất ít">
-                Chỉ còn {stock} sp!
+              <span className="card-stock-tag low-stock" title={t('Số lượng sản phẩm còn rất ít')}>
+                {t('Chỉ còn {n} sp!', { n: stock })}
               </span>
             ) : (
               <span className="card-stock-tag in-stock">
-                Còn {stock} sp
+                {t('Còn {n} sp', { n: stock })}
               </span>
             )}
           </div>
@@ -270,9 +273,9 @@ export default function ProductCard({
                 type="button"
                 className="card-action-btn btn-out-of-stock"
                 disabled
-                title="Sản phẩm này tạm thời đã hết hàng"
+                title={t('Sản phẩm này tạm thời đã hết hàng')}
               >
-                <span>Đã Hết Hàng</span>
+                <span>{t('Đã Hết Hàng')}</span>
               </button>
             )}
           </div>
@@ -289,9 +292,9 @@ export default function ProductCard({
                   onAddToCart(product);
                 }
               }}
-              title="Đặt mua và thanh toán mã QR ngay"
+              title={t('Đặt mua và thanh toán mã QR ngay')}
             >
-              <span>Mua Ngay (QR)</span>
+              <span>{t('Mua Ngay (QR)')}</span>
             </button>
 
             <button
@@ -301,9 +304,9 @@ export default function ProductCard({
                 e.stopPropagation();
                 if (onAddToCart) onAddToCart(product);
               }}
-              title="Thêm vào giỏ hàng"
+              title={t('Thêm vào giỏ hàng')}
             >
-              <span>Thêm Giỏ</span>
+              <span>{t('Thêm Giỏ')}</span>
             </button>
           </div>
         )}

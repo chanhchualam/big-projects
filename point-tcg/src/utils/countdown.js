@@ -5,6 +5,7 @@
 //   'fixed'  — hiện mốc cố định, không đếm giờ:  "Kết thúc lúc 20:00, 25/10/2026"
 //   'custom' — chữ tự do do admin nhập
 //   'none'   — không hẹn giờ, không hiện dòng thời gian
+import { translate } from '../i18n';
 
 export const DEFAULT_LABELS = {
   timer: 'Drawing ends in',
@@ -39,7 +40,8 @@ export function getDrawingText(product, now = Date.now(), legacyEnd = null) {
   }
 
   const end = product.endsAt ? new Date(product.endsAt).getTime() : legacyEnd;
-  const label = product.countdownLabel?.trim() || DEFAULT_LABELS[mode] || DEFAULT_LABELS.timer;
+  // Nhãn mặc định (hoặc admin giữ nguyên nhãn mặc định) được dịch theo ngôn ngữ khách chọn
+  const label = translate(product.countdownLabel?.trim() || DEFAULT_LABELS[mode] || DEFAULT_LABELS.timer);
   if (!end) return label;
 
   if (mode === 'fixed') {
@@ -47,8 +49,8 @@ export function getDrawingText(product, now = Date.now(), legacyEnd = null) {
   }
 
   const diff = Math.max(0, Math.floor((end - now) / 1000));
-  if (diff === 0) return product.countdownEndedText?.trim() || 'Drawing Ended';
+  if (diff === 0) return product.countdownEndedText?.trim() || translate('Drawing Ended');
   const days = Math.floor(diff / 86400);
   const clock = `${pad(Math.floor((diff % 86400) / 3600))}:${pad(Math.floor((diff % 3600) / 60))}:${pad(diff % 60)}`;
-  return `${label} ${days > 0 ? `${days} ngày ` : ''}${clock}`;
+  return `${label} ${days > 0 ? translate('{n} ngày ', { n: days }) : ''}${clock}`;
 }

@@ -2,6 +2,7 @@
 // Trình chiếu ảnh sản phẩm: tự đổi ảnh, vuốt (cảm ứng / chuột), mũi tên và chấm chỉ vị trí.
 // Tự dừng khi rê chuột vào hoặc khi người dùng bật "giảm chuyển động" trong hệ điều hành.
 import React, { useState, useEffect, useRef } from 'react';
+import { useI18n } from '../i18n';
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -17,6 +18,7 @@ export default function ImageSlider({
   showArrows = true,
   showDots = true
 }) {
+  const { t } = useI18n();
   const [innerIndex, setInnerIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const dragStartX = useRef(null);
@@ -80,7 +82,7 @@ export default function ImageSlider({
       }}
       role="region"
       aria-roledescription="carousel"
-      aria-label={`${alt} — ảnh ${index + 1}/${count}`}
+      aria-label={`${alt} — ${t('ảnh {i}/{n}', { i: index + 1, n: count })}`}
     >
       <div className="img-slider-track" style={{ transform: `translateX(-${index * 100}%)` }}>
         {images.map((src, i) => (
@@ -92,9 +94,9 @@ export default function ImageSlider({
 
       {showArrows && (
         <>
-          <button type="button" className="img-slider-arrow prev" aria-label="Ảnh trước"
+          <button type="button" className="img-slider-arrow prev" aria-label={t('Ảnh trước')}
             onClick={(e) => { stop(e); setIndex(index - 1); }}>‹</button>
-          <button type="button" className="img-slider-arrow next" aria-label="Ảnh tiếp theo"
+          <button type="button" className="img-slider-arrow next" aria-label={t('Ảnh tiếp theo')}
             onClick={(e) => { stop(e); setIndex(index + 1); }}>›</button>
         </>
       )}
@@ -106,7 +108,7 @@ export default function ImageSlider({
               key={i}
               type="button"
               className={i === index ? 'active' : ''}
-              aria-label={`Xem ảnh ${i + 1}`}
+              aria-label={t('Xem ảnh {n}', { n: i + 1 })}
               aria-current={i === index}
               onClick={(e) => { stop(e); setIndex(i); }}
             />

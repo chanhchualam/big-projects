@@ -1,5 +1,6 @@
 // src/components/SavedModal.jsx
 import React, { useEffect } from 'react';
+import { useI18n } from '../i18n';
 
 export default function SavedModal({
   isOpen,
@@ -9,6 +10,7 @@ export default function SavedModal({
   onAddToCart,
   onRequestJoin
 }) {
+  const { t } = useI18n();
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape' && isOpen) {
@@ -30,7 +32,7 @@ export default function SavedModal({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="My Saved Items">
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={t('My Saved Items')}>
       <div className="drawer-container" onClick={(e) => e.stopPropagation()}>
         <div className="drawer-header">
           <h2 className="drawer-title">
@@ -43,7 +45,7 @@ export default function SavedModal({
             type="button"
             className="drawer-close-btn"
             onClick={onClose}
-            aria-label="Close saved items"
+            aria-label={t('Close saved items')}
           >
             ✕
           </button>
@@ -52,8 +54,8 @@ export default function SavedModal({
         <div className="drawer-body">
           {savedProducts.length === 0 ? (
             <div className="drawer-empty">
-              <h3>No saved items yet</h3>
-              <p>Click the heart icon on any Pokémon card drawing to bookmark items you want to track or reorder.</p>
+              <h3>{t('No saved items yet')}</h3>
+              <p>{t('Click the heart icon on any Pokémon card drawing to bookmark items you want to track or reorder.')}</p>
             </div>
           ) : (
             savedProducts.map((product) => (
@@ -78,7 +80,7 @@ export default function SavedModal({
                           onRequestJoin(product);
                         }}
                       >
-                        Request to join
+                        {t('Request to join')}
                       </button>
                     ) : (
                       <button
@@ -89,7 +91,7 @@ export default function SavedModal({
                           onAddToCart(product);
                         }}
                       >
-                        Add to Cart
+                        {t('Add to Cart')}
                       </button>
                     )}
 
@@ -98,7 +100,7 @@ export default function SavedModal({
                       className="item-remove-btn"
                       onClick={() => onRemoveSaved(product.id)}
                     >
-                      Remove
+                      {t('Remove')}
                     </button>
                   </div>
                 </div>

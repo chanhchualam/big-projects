@@ -6,6 +6,7 @@ import { fetchProductMedia } from '../services/firestoreService';
 import { isStoreFramed } from '../products';
 import { usdToVnd } from '../utils/currency';
 import { ReviewForm } from './AccountPanels';
+import { useI18n, getLocale } from '../i18n';
 
 function stars(n) {
   return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
@@ -52,6 +53,7 @@ export default function ProductDetailPage({
   onReviewSaved,
   onOpenSignIn
 }) {
+  const { t, lang } = useI18n();
   // Đơn "Giao thành công" của khách có chứa sản phẩm này → được đánh giá (khớp firestore.rules)
   const reviewOrder = useMemo(() => {
     if (!user || user.role === 'admin') return null;
@@ -115,8 +117,8 @@ export default function ProductDetailPage({
   }, [product.id, product.hasMedia, product.image]);
 
   const galleryImages = useMemo(
-    () => getProductImages(product, media).map((src, i) => ({ id: i, label: `Ảnh ${i + 1}`, src })),
-    [product.image, product.gallery, product.thumbs, media]
+    () => getProductImages(product, media).map((src, i) => ({ id: i, label: t('Ảnh {n}', { n: i + 1 }), src })),
+    [product.image, product.gallery, product.thumbs, media, lang]
   );
 
   // Tự đổi ảnh chính khi có nhiều ảnh; dừng khi rê chuột vào khung ảnh
@@ -181,14 +183,14 @@ export default function ProductDetailPage({
   return (
     <div className="product-detail-page-wrapper">
       {/* 1. Breadcrumbs */}
-      <nav className="pdp-breadcrumbs" aria-label="Breadcrumb">
+      <nav className="pdp-breadcrumbs" aria-label={t('Breadcrumb')}>
         <div className="pdp-container">
           <button type="button" className="breadcrumb-link" onClick={onBackToStore}>
-            Trang chủ
+            {t('Trang chủ')}
           </button>
           <span className="breadcrumb-separator">/</span>
           <button type="button" className="breadcrumb-link" onClick={onBackToStore}>
-            TCG Products
+            {t('TCG Products')}
           </button>
           <span className="breadcrumb-separator">/</span>
           <span className="breadcrumb-current">{product.title}</span>
@@ -235,7 +237,7 @@ export default function ProductDetailPage({
               >
                 {/* Top Banner Tag */}
                 <div className="pdp-frame-header-banner">
-                  <span>CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</span>
+                  <span>{t('CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG')}</span>
                 </div>
 
                 {/* Top-left Discount Tag */}
@@ -261,7 +263,7 @@ export default function ProductDetailPage({
                   type="button"
                   className="pdp-arrow-btn prev"
                   onClick={handlePrevImg}
-                  aria-label="Previous image"
+                  aria-label={t('Previous image')}
                 >
                   ‹
                 </button>
@@ -269,7 +271,7 @@ export default function ProductDetailPage({
                   type="button"
                   className="pdp-arrow-btn next"
                   onClick={handleNextImg}
-                  aria-label="Next image"
+                  aria-label={t('Next image')}
                 >
                   ›
                 </button>
@@ -282,7 +284,7 @@ export default function ProductDetailPage({
                   <div className="pdp-console-badges">
                     <span className="console-pill playstation">PS</span>
                     <span className="console-pill switch">Nintendo</span>
-                    <span className="console-pill poke">Pokéball Seal</span>
+                    <span className="console-pill poke">{t('Pokéball Seal')}</span>
                   </div>
                   <div className="pdp-store-mark">Point TCG Gamestore</div>
                 </div>
@@ -291,12 +293,12 @@ export default function ProductDetailPage({
 
             {/* Social Share Bar */}
             <div className="pdp-social-share-row">
-              <span className="share-title">Chia sẻ:</span>
+              <span className="share-title">{t('Chia sẻ:')}</span>
               <button
                 type="button"
                 className="social-btn facebook"
                 onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
-                title="Chia sẻ Facebook"
+                title={t('Chia sẻ Facebook')}
               >
                 f
               </button>
@@ -304,8 +306,8 @@ export default function ProductDetailPage({
                 type="button"
                 className="social-btn messenger"
                 onClick={() => window.open(`https://www.messenger.com/t/?link=${encodeURIComponent(window.location.href)}`, '_blank')}
-                title="Gửi Messenger"
-                aria-label="Gửi Messenger"
+                title={t('Gửi Messenger')}
+                aria-label={t('Gửi Messenger')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.91 1.19 5.44 3.14 7.17V22l2.87-1.58c.8.22 1.66.34 2.99.34 5.64 0 10-4.13 10-9.7S17.64 2 12 2zm1.04 12.94-2.55-2.72-4.98 2.72 5.48-5.82 2.61 2.72 4.92-2.72-5.48 5.82z" />
@@ -315,7 +317,7 @@ export default function ProductDetailPage({
                 type="button"
                 className="social-btn twitter"
                 onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(product.title)}&url=${encodeURIComponent(window.location.href)}`, '_blank')}
-                title="Đăng lên X"
+                title={t('Đăng lên X')}
               >
                 𝕏
               </button>
@@ -323,7 +325,7 @@ export default function ProductDetailPage({
                 type="button"
                 className="social-btn pinterest"
                 onClick={() => window.open(`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(window.location.href)}&description=${encodeURIComponent(product.title)}`, '_blank')}
-                title="Ghim Pinterest"
+                title={t('Ghim Pinterest')}
               >
                 P
               </button>
@@ -331,15 +333,15 @@ export default function ProductDetailPage({
                 type="button"
                 className="social-btn copylink"
                 onClick={handleCopyLink}
-                title="Sao chép liên kết"
-                aria-label="Sao chép liên kết"
+                title={t('Sao chép liên kết')}
+                aria-label={t('Sao chép liên kết')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
               </button>
-              {copyNotice && <span className="copy-notice-toast">✓ Đã sao chép liên kết!</span>}
+              {copyNotice && <span className="copy-notice-toast">✓ {t('Đã sao chép liên kết!')}</span>}
             </div>
           </div>
 
@@ -351,26 +353,26 @@ export default function ProductDetailPage({
             {/* Meta row: SKU, Status, Brand */}
             <div className="pdp-meta-row">
               <span className="pdp-meta-item">
-                Mã sản phẩm: <strong className="sku-code">{productIdCode}</strong>
+                {t('Mã sản phẩm:')} <strong className="sku-code">{productIdCode}</strong>
               </span>
               <span className="pdp-meta-divider">|</span>
               <span className="pdp-meta-item">
-                Tình trạng:{' '}
+                {t('Tình trạng:')}{' '}
                 {isOutOfStock ? (
-                  <strong className="status-out">Hết hàng</strong>
+                  <strong className="status-out">{t('Hết hàng')}</strong>
                 ) : (
-                  <strong className="status-in">Còn hàng ({stock} sản phẩm)</strong>
+                  <strong className="status-in">{t('Còn hàng ({n} sản phẩm)', { n: stock })}</strong>
                 )}
               </span>
               <span className="pdp-meta-divider">|</span>
               <span className="pdp-meta-item">
-                Thương hiệu: <strong className="brand-name-tag">Pokémon</strong>
+                {t('Thương hiệu:')} <strong className="brand-name-tag">Pokémon</strong>
               </span>
             </div>
 
             {/* Price Box */}
             <div className="pdp-price-box">
-              <span className="pdp-price-label">Giá:</span>
+              <span className="pdp-price-label">{t('Giá:')}</span>
               <span className="pdp-current-price">{vndPrice}</span>
               {vndWasPrice && (
                 <span className="pdp-was-price">{vndWasPrice}</span>
@@ -384,7 +386,7 @@ export default function ProductDetailPage({
             {/* Quantity Stepper */}
             <div className="pdp-quantity-row">
               <label htmlFor="pdp-qty-input" className="pdp-qty-label">
-                Số lượng:
+                {t('Số lượng:')}
               </label>
               <div className="pdp-qty-stepper">
                 <button
@@ -423,7 +425,7 @@ export default function ProductDetailPage({
 
             {isOutOfStock && onRequestRestock && (
               <div className="pdp-restock-box">
-                <p>Sản phẩm tạm hết hàng. Để lại email, shop sẽ báo ngay khi có hàng lại.</p>
+                <p>{t('Sản phẩm tạm hết hàng. Để lại email, shop sẽ báo ngay khi có hàng lại.')}</p>
                 <RestockNotify product={product} defaultEmail={user?.email} onRequestRestock={onRequestRestock} />
               </div>
             )}
@@ -435,8 +437,8 @@ export default function ProductDetailPage({
               onClick={handleBuyNowClick}
               disabled={isOutOfStock}
             >
-              <div className="big-buy-title">MUA NGAY</div>
-              <div className="big-buy-sub">Giao Tận Nơi Hoặc Nhận Tại Cửa Hàng</div>
+              <div className="big-buy-title">{t('MUA NGAY')}</div>
+              <div className="big-buy-sub">{t('Giao Tận Nơi Hoặc Nhận Tại Cửa Hàng')}</div>
             </button>
 
             {/* Secondary Action Buttons (Add to cart & Buy now) */}
@@ -447,7 +449,7 @@ export default function ProductDetailPage({
                 onClick={handleAddToCartClick}
                 disabled={isOutOfStock}
               >
-                THÊM VÀO GIỎ
+                {t('THÊM VÀO GIỎ')}
               </button>
               <button
                 type="button"
@@ -455,29 +457,29 @@ export default function ProductDetailPage({
                 onClick={handleBuyNowClick}
                 disabled={isOutOfStock}
               >
-                MUA NGAY
+                {t('MUA NGAY')}
               </button>
             </div>
 
             {/* 6 Guarantee & Trust Badges */}
             <div className="pdp-trust-grid">
               <div className="pdp-trust-item">
-                <span className="trust-label">Cam kết 100% chính hãng</span>
+                <span className="trust-label">{t('Cam kết 100% chính hãng')}</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-label">Miễn phí giao hàng</span>
+                <span className="trust-label">{t('Miễn phí giao hàng')}</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-label">Hỗ trợ 24/7</span>
+                <span className="trust-label">{t('Hỗ trợ 24/7')}</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-label">Hoàn tiền 111% nếu hàng giả</span>
+                <span className="trust-label">{t('Hoàn tiền 111% nếu hàng giả')}</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-label">Mở hộp kiểm tra nhận hàng</span>
+                <span className="trust-label">{t('Mở hộp kiểm tra nhận hàng')}</span>
               </div>
               <div className="pdp-trust-item">
-                <span className="trust-label">Đổi trả trong 7 ngày</span>
+                <span className="trust-label">{t('Đổi trả trong 7 ngày')}</span>
               </div>
             </div>
           </div>
@@ -491,14 +493,14 @@ export default function ProductDetailPage({
               className={`pdp-tab-nav-btn ${activeTab === 'desc' ? 'active' : ''}`}
               onClick={() => setActiveTab('desc')}
             >
-              MÔ TẢ SẢN PHẨM
+              {t('MÔ TẢ SẢN PHẨM')}
             </button>
             <button
               type="button"
               className={`pdp-tab-nav-btn ${activeTab === 'reviews' ? 'active' : ''}`}
               onClick={() => setActiveTab('reviews')}
             >
-              ĐÁNH GIÁ SẢN PHẨM ({reviews.length})
+              {t('ĐÁNH GIÁ SẢN PHẨM')} ({reviews.length})
             </button>
           </div>
 
@@ -516,17 +518,16 @@ export default function ProductDetailPage({
                     </div>
                   ) : (
                     <p>
-                      <strong>{product.title}</strong> là bộ sưu tập cao cấp chính hãng từ The Pokémon Company,
-                      được nhập khẩu nguyên seal 100% với tem niêm phong tiêu chuẩn quốc tế.
+                      <strong>{product.title}</strong> {t('là bộ sưu tập cao cấp chính hãng từ The Pokémon Company, được nhập khẩu nguyên seal 100% với tem niêm phong tiêu chuẩn quốc tế.')}
                     </p>
                   )}
 
-                  <h3 className="pdp-subheading">Đặc điểm nổi bật & Cam kết từ Point TCG:</h3>
+                  <h3 className="pdp-subheading">{t('Đặc điểm nổi bật & Cam kết từ Point TCG:')}</h3>
                   <ul className="pdp-features-list">
-                    <li>✓ <strong>Nguyên Seal 100%:</strong> Hộp mới chưa qua khui mở, đảm bảo tỷ lệ kéo bài (pull rate) chuẩn quốc tế.</li>
-                    <li>✓ <strong>Cam Kết Chính Hãng:</strong> Hoàn tiền 111% nếu phát hiện sản phẩm re-seal hoặc hàng giả mạo.</li>
-                    <li>✓ <strong>Đóng Gói Chuyên Nghiệp:</strong> Quấn 3 lớp màng bóng khí chống sốc, bọc góc carton bảo vệ tuyệt đối khi vận chuyển.</li>
-                    <li>✓ <strong>Kiểm Tra Khi Nhận Hàng:</strong> Cho phép mở hộp kiểm tra ngoại quan trước khi thanh toán, đổi trả trong 7 ngày.</li>
+                    <li>✓ <strong>{t('Nguyên Seal 100%:')}</strong> {t('Hộp mới chưa qua khui mở, đảm bảo tỷ lệ kéo bài (pull rate) chuẩn quốc tế.')}</li>
+                    <li>✓ <strong>{t('Cam Kết Chính Hãng:')}</strong> {t('Hoàn tiền 111% nếu phát hiện sản phẩm re-seal hoặc hàng giả mạo.')}</li>
+                    <li>✓ <strong>{t('Đóng Gói Chuyên Nghiệp:')}</strong> {t('Quấn 3 lớp màng bóng khí chống sốc, bọc góc carton bảo vệ tuyệt đối khi vận chuyển.')}</li>
+                    <li>✓ <strong>{t('Kiểm Tra Khi Nhận Hàng:')}</strong> {t('Cho phép mở hộp kiểm tra ngoại quan trước khi thanh toán, đổi trả trong 7 ngày.')}</li>
                   </ul>
                 </div>
 
@@ -536,7 +537,7 @@ export default function ProductDetailPage({
                     className="pdp-toggle-expand-btn"
                     onClick={() => setIsDescExpanded(!isDescExpanded)}
                   >
-                    {isDescExpanded ? '− Thu gọn nội dung' : '+ Xem thêm nội dung'}
+                    {isDescExpanded ? `− ${t('Thu gọn nội dung')}` : `+ ${t('Xem thêm nội dung')}`}
                   </button>
                 </div>
               </div>
@@ -544,16 +545,16 @@ export default function ProductDetailPage({
               <div className="pdp-reviews-body">
                 {/* Ô viết đánh giá */}
                 <div className="pdp-write-review">
-                  <h3 className="pdp-write-review-title">{myReview ? 'Đánh giá của bạn' : 'Viết đánh giá'}</h3>
+                  <h3 className="pdp-write-review-title">{myReview ? t('Đánh giá của bạn') : t('Viết đánh giá')}</h3>
                   {!user ? (
                     <div className="pdp-write-review-note">
-                      <span>Đăng nhập để đánh giá sản phẩm bạn đã mua.</span>
+                      <span>{t('Đăng nhập để đánh giá sản phẩm bạn đã mua.')}</span>
                       <button type="button" className="cop-btn-edit-profile" onClick={() => onOpenSignIn?.('login')}>
-                        Đăng nhập để đánh giá
+                        {t('Đăng nhập để đánh giá')}
                       </button>
                     </div>
                   ) : user.role === 'admin' ? (
-                    <div className="pdp-write-review-note">Tài khoản quản trị không viết đánh giá.</div>
+                    <div className="pdp-write-review-note">{t('Tài khoản quản trị không viết đánh giá.')}</div>
                   ) : reviewOrder ? (
                     <ReviewForm
                       key={`${product.id}-${myReview?.id || 'new'}`}
@@ -566,21 +567,21 @@ export default function ProductDetailPage({
                     />
                   ) : (
                     <div className="pdp-write-review-note">
-                      Chỉ khách đã mua và nhận sản phẩm này (đơn ở trạng thái "Giao thành công") mới đánh giá được, để đảm bảo đánh giá là thật.
+                      {t('Chỉ khách đã mua và nhận sản phẩm này (đơn ở trạng thái "Giao thành công") mới đánh giá được, để đảm bảo đánh giá là thật.')}
                     </div>
                   )}
                 </div>
 
                 {reviews.length === 0 ? (
                   <div className="pdp-reviews-summary">
-                    <div className="pdp-score-total">Chưa có đánh giá nào cho sản phẩm này.</div>
+                    <div className="pdp-score-total">{t('Chưa có đánh giá nào cho sản phẩm này.')}</div>
                   </div>
                 ) : (
                   <>
                     <div className="pdp-reviews-summary">
                       <div className="pdp-score-big">{(product.rating || 0).toFixed(1)}</div>
                       <div className="pdp-score-stars" style={{ color: '#f59e0b' }}>{stars(Math.round(product.rating || 0))}</div>
-                      <div className="pdp-score-total">Dựa trên {reviews.length} đánh giá từ người mua đã xác thực</div>
+                      <div className="pdp-score-total">{t('Dựa trên {n} đánh giá từ người mua đã xác thực', { n: reviews.length })}</div>
                     </div>
 
                     <div className="pdp-reviews-list">
@@ -589,10 +590,10 @@ export default function ProductDetailPage({
                         .map((r) => (
                           <div key={r.id} className="pdp-review-card">
                             <div className="pdp-reviewer-header">
-                              <strong>{r.name || 'Khách hàng'}</strong>
-                              <span className="verified-badge">✓ Đã mua hàng tại Point TCG</span>
+                              <strong>{r.name || t('Khách hàng')}</strong>
+                              <span className="verified-badge">✓ {t('Đã mua hàng tại Point TCG')}</span>
                               <span className="review-date">
-                                {r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi-VN') : ''}
+                                {r.createdAt ? new Date(r.createdAt).toLocaleDateString(getLocale(lang)) : ''}
                               </span>
                             </div>
                             <div className="review-stars" style={{ color: '#f59e0b' }}>{stars(r.rating)}</div>
@@ -611,7 +612,7 @@ export default function ProductDetailPage({
         {relatedProducts.length > 0 && (
           <section className="pdp-related-section">
             <div className="pdp-section-header">
-              <h2 className="pdp-section-heading">Sản phẩm liên quan</h2>
+              <h2 className="pdp-section-heading">{t('Sản phẩm liên quan')}</h2>
               <div className="pdp-carousel-nav-arrows">
                 <button
                   type="button"
@@ -620,7 +621,7 @@ export default function ProductDetailPage({
                     const el = document.getElementById('pdp-related-scroll');
                     if (el) el.scrollBy({ left: -300, behavior: 'smooth' });
                   }}
-                  aria-label="Scroll related left"
+                  aria-label={t('Scroll related left')}
                 >
                   ‹
                 </button>
@@ -631,7 +632,7 @@ export default function ProductDetailPage({
                     const el = document.getElementById('pdp-related-scroll');
                     if (el) el.scrollBy({ left: 300, behavior: 'smooth' });
                   }}
-                  aria-label="Scroll related right"
+                  aria-label={t('Scroll related right')}
                 >
                   ›
                 </button>
@@ -652,7 +653,7 @@ export default function ProductDetailPage({
                   >
                     {/* Image frame */}
                     <div className="card-frame-visual">
-                      <div className="card-top-red-band">CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</div>
+                      <div className="card-top-red-band">{t('CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG')}</div>
                       {itemDisc > 0 && <span className="card-discount-tag">-{itemDisc}%</span>}
                       <img src={item.image} alt={item.title} className="card-product-img" />
                       <div className="card-bottom-cert">
@@ -682,7 +683,7 @@ export default function ProductDetailPage({
                           onAddToCart && onAddToCart(item, 1);
                         }}
                       >
-                        <span>THÊM VÀO GIỎ</span>
+                        <span>{t('THÊM VÀO GIỎ')}</span>
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                           <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z" />
                         </svg>
@@ -699,7 +700,7 @@ export default function ProductDetailPage({
         {recentlyViewedProducts.length > 0 && (
           <section className="pdp-viewed-section">
             <div className="pdp-section-header">
-              <h2 className="pdp-section-heading">Sản phẩm đã xem</h2>
+              <h2 className="pdp-section-heading">{t('Sản phẩm đã xem')}</h2>
             </div>
 
             <div className="pdp-products-carousel">
@@ -715,7 +716,7 @@ export default function ProductDetailPage({
                     onClick={() => onSelectProduct && onSelectProduct(item)}
                   >
                     <div className="card-frame-visual">
-                      <div className="card-top-red-band">CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG</div>
+                      <div className="card-top-red-band">{t('CHÍNH HÃNG - UY TÍN - CHẤT LƯỢNG')}</div>
                       {itemDisc > 0 && <span className="card-discount-tag">-{itemDisc}%</span>}
                       <img src={item.image} alt={item.title} className="card-product-img" />
                     </div>
@@ -739,7 +740,7 @@ export default function ProductDetailPage({
                           onAddToCart && onAddToCart(item, 1);
                         }}
                       >
-                        <span>THÊM VÀO GIỎ</span>
+                        <span>{t('THÊM VÀO GIỎ')}</span>
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                           <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z" />
                         </svg>
@@ -757,7 +758,7 @@ export default function ProductDetailPage({
       <section className="pdp-newsletter-section">
         <div className="pdp-container pdp-newsletter-inner">
           <div className="pdp-newsletter-left">
-            <span className="newsletter-title">Đăng ký nhận tin</span>
+            <span className="newsletter-title">{t('Đăng ký nhận tin')}</span>
             <form
               className="newsletter-form"
               onSubmit={(e) => {
@@ -772,20 +773,20 @@ export default function ProductDetailPage({
                 <input
                   type="email"
                   required
-                  placeholder="Nhập email của bạn"
+                  placeholder={t('Nhập email của bạn')}
                   className="newsletter-input"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                 />
               </div>
               <button type="submit" className="newsletter-submit-btn">
-                {newsletterSubscribed ? 'ĐÃ ĐĂNG KÝ!' : 'ĐĂNG KÝ'}
+                {newsletterSubscribed ? t('ĐÃ ĐĂNG KÝ!') : t('ĐĂNG KÝ')}
               </button>
             </form>
           </div>
 
           <div className="pdp-newsletter-right">
-            <span className="social-connect-title">Kết nối với chúng tôi</span>
+            <span className="social-connect-title">{t('Kết nối với chúng tôi')}</span>
             <div className="social-icons-row">
               <span className="social-circle-icon">f</span>
               <span className="social-circle-icon">𝕏</span>
