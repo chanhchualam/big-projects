@@ -4,7 +4,7 @@
 //  - Sản phẩm yêu thích: có hàng lại hoặc giảm giá (so với lần xem trước, lưu trong trình duyệt)
 //  - Thông báo của shop (announcements)
 // Trạng thái "đã đọc" lưu trong trình duyệt theo từng tài khoản.
-import { translate as t, getLocale } from '../i18n';
+import { translate as t, getLocale, formatMoney } from '../i18n';
 
 const WINDOW_DAYS = 30;
 const MAX_ITEMS = 40;
@@ -110,7 +110,7 @@ export function buildNotifications({ orders = [], wishlistEvents = [], announcem
       id: e.id,
       title: e.kind === 'restock'
         ? t('"{title}" trong danh sách yêu thích đã có hàng lại', { title: e.title })
-        : t('"{title}" giảm giá từ ${from} còn ${to}', { title: e.title, from: Number(e.from).toFixed(2), to: Number(e.to).toFixed(2) }),
+        : t('"{title}" giảm giá từ {from} còn {to}', { title: e.title, from: formatMoney(e.from), to: formatMoney(e.to) }),
       at: e.at,
       action: { type: 'product', productId: e.productId }
     });

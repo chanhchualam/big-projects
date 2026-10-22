@@ -3,7 +3,7 @@
 // của khách gửi lên nên có thể bị sửa — admin xem cảnh báo này trước khi xác nhận đơn.
 // Quy tắc phí ship / mã giảm giá phải khớp với CheckoutModal.
 import { orderVndRate } from './currency';
-import { translate } from '../i18n';
+import { translate, formatMoney } from '../i18n';
 
 const FREE_SHIPPING_THRESHOLD = 75;
 const LEGACY_MAX_DISCOUNT_PERCENT = 10; // đơn cũ trước khi có bảng coupons
@@ -18,7 +18,7 @@ export function getCouponError(coupon, subtotal) {
   if (coupon.active === false) return translate('Mã giảm giá đã bị tắt.');
   if (coupon.expiresAt && new Date(`${coupon.expiresAt}T23:59:59`) < new Date()) return translate('Mã giảm giá đã hết hạn.');
   if (coupon.maxUses > 0 && (coupon.usedCount || 0) >= coupon.maxUses) return translate('Mã giảm giá đã hết lượt sử dụng.');
-  if (coupon.minOrder > 0 && subtotal < coupon.minOrder) return translate('Mã chỉ áp dụng cho đơn từ {amount}.', { amount: money(coupon.minOrder) });
+  if (coupon.minOrder > 0 && subtotal < coupon.minOrder) return translate('Mã chỉ áp dụng cho đơn từ {amount}.', { amount: formatMoney(coupon.minOrder) });
   return null;
 }
 

@@ -1,7 +1,7 @@
 // src/i18n/en.js
 // Bản dịch tiếng Anh cho chuỗi gốc tiếng Việt trong giao diện khách
 export default {
-  "\"{title}\" giảm giá từ ${from} còn ${to}": "\"{title}\" dropped from ${from} to ${to}",
+  "\"{title}\" giảm giá từ {from} còn {to}": "\"{title}\" dropped from {from} to {to}",
   "\"{title}\" trong danh sách yêu thích đã có hàng lại": "\"{title}\" from your saved items is back in stock",
   "+ Chọn thêm sản phẩm khác": "+ Add more products",
   "Báo khi có hàng": "Notify me when available",
@@ -66,6 +66,7 @@ export default {
   "Giao hàng niêm phong an toàn": "Secure sealed delivery",
   "Giao thành công": "Delivered",
   "Giá từ ($)": "Price from ($)",
+  "Giá từ ({sym})": "Price from ({sym})",
   "Giá:": "Price:",
   "Giảm 1 sản phẩm": "Remove 1",
   "Giảm giá": "Discount",
@@ -232,6 +233,7 @@ export default {
   "Tiêu chuẩn (Tamper-Proof Box)": "Standard (Tamper-Proof Box)",
   "Tiến trình đơn hàng": "Order progress",
   "Tiếp Tục Mua Sắm": "Continue Shopping",
+  "Tiền tệ": "Currency",
   "Tra cứu hành trình ↗": "Track shipment ↗",
   "Trang chủ": "Home",
   "Trung tâm thẻ bài Pokémon Chính Hãng": "Authentic Pokémon card center",
@@ -297,6 +299,7 @@ export default {
   "khi có hàng.": "when it is back in stock.",
   "là bộ sưu tập cao cấp chính hãng từ The Pokémon Company, được nhập khẩu nguyên seal 100% với tem niêm phong tiêu chuẩn quốc tế.": "is a premium, authentic collection from The Pokémon Company, imported 100% factory-sealed with international-standard seals.",
   "miễn phí ship tiêu chuẩn": "free standard shipping",
+  "sp": "ea",
   "sản phẩm cho": "products for",
   "sản phẩm phù hợp": "matching products",
   "ví dụ: Nguyễn Văn A": "e.g. John Smith",
@@ -391,6 +394,7 @@ export default {
   "Đổi mật khẩu": "Change password",
   "Đổi trả trong 7 ngày": "7-day returns",
   "đến ($)": "to ($)",
+  "đến ({sym})": "to ({sym})",
   "để nhân viên Point TCG lập tức nhận biết và chuẩn bị hàng cho bạn.": "so Point TCG can match your payment and prepare your order right away.",
   "Ảnh tiếp theo": "Next image",
   "Ảnh trước": "Previous image",

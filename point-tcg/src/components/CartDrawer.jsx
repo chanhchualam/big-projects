@@ -12,7 +12,7 @@ export default function CartDrawer({
   cartTotal = 0,
   onProceedCheckout
 }) {
-  const { t } = useI18n();
+  const { t, money } = useI18n();
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape' && isOpen) {
@@ -65,7 +65,7 @@ export default function CartDrawer({
           <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#166534', marginBottom: '6px' }}>
             {freeShippingMet
               ? t('You qualify for FREE Insured Courier Shipping!')
-              : t('Add ${amount} more for FREE Insured Shipping', { amount: (freeShippingThreshold - cartTotal).toFixed(2) })}
+              : t('Add {amount} more for FREE Insured Shipping', { amount: money(freeShippingThreshold - cartTotal) })}
           </div>
           <div style={{ height: '6px', background: '#dcfce7', borderRadius: '99px', overflow: 'hidden' }}>
             <div
@@ -93,7 +93,7 @@ export default function CartDrawer({
                 <div className="drawer-item-info">
                   <div>
                     <h4 className="drawer-item-title">{item.title}</h4>
-                    <div className="drawer-item-price">${(item.price * item.qty).toFixed(2)}</div>
+                    <div className="drawer-item-price">{money(item.price * item.qty)}</div>
                   </div>
 
                   <div className="drawer-item-controls">
@@ -144,7 +144,7 @@ export default function CartDrawer({
           <div className="drawer-footer">
             <div className="drawer-summary-row">
               <span>{t('Subtotal')}</span>
-              <span>${cartTotal.toFixed(2)}</span>
+              <span>{money(cartTotal)}</span>
             </div>
             <div className="drawer-summary-row">
               <span>{t('Tamper-Proof Packaging')}</span>
@@ -152,12 +152,12 @@ export default function CartDrawer({
             </div>
             <div className="drawer-summary-row">
               <span>{t('Estimated Shipping')}</span>
-              <span>{freeShippingMet ? t('FREE') : '$8.50'}</span>
+              <span>{freeShippingMet ? t('FREE') : money(8.5)}</span>
             </div>
 
             <div className="drawer-total-row">
               <span>{t('Total')}</span>
-              <span>${(cartTotal + (freeShippingMet ? 0 : 8.5)).toFixed(2)}</span>
+              <span>{money(cartTotal + (freeShippingMet ? 0 : 8.5))}</span>
             </div>
 
             <button
