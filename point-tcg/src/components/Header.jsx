@@ -1,6 +1,6 @@
 // src/components/Header.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useI18n, LANGUAGES } from '../i18n';
+import { useI18n, LANGUAGES, CURRENCIES } from '../i18n';
 
 // Helper to normalize search text: lowercase, remove accents/diacritics, trim
 export const normalizeSearchText = (str) => {
@@ -33,7 +33,7 @@ export default function Header({
   onLogoClick,
   notificationBell = null
 }) {
-  const { t, lang, setLang } = useI18n();
+  const { t, lang, setLang, currency, setCurrency, money } = useI18n();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const dropdownRef = useRef(null);
@@ -223,11 +223,11 @@ export default function Header({
                         <div className="suggestion-title">{item.title}</div>
                         <div className="suggestion-meta">
                           <span className="suggestion-price">
-                            ${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}
+                            {money(item.price)}
                           </span>
                           {item.wasPrice && (
                             <span className="suggestion-was-price">
-                              ${typeof item.wasPrice === 'number' ? item.wasPrice.toFixed(2) : item.wasPrice}
+                              {money(item.wasPrice)}
                             </span>
                           )}
                           {item.badge && <span className="suggestion-badge">{item.badge}</span>}
@@ -490,12 +490,28 @@ export default function Header({
             ))}
           </div>
 
+          {/* Chọn tiền tệ hiển thị giá */}
+          <div className="lang-switch currency-switch" role="group" aria-label={t('Tiền tệ')}>
+            {CURRENCIES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                className={currency === c.code ? 'active' : ''}
+                onClick={() => setCurrency(c.code)}
+                aria-pressed={currency === c.code}
+                title={c.name}
+              >
+                {c.code === 'vnd' ? '₫' : '$'}
+              </button>
+            ))}
+          </div>
+
           {/* Cart Icon showing total price */}
           <button
             type="button"
             className="header-btn cart-btn"
             onClick={onOpenCart}
-            aria-label={t('Shopping Cart, total ${total}, {n} items', { total: cartTotal.toFixed(2), n: cartCount })}
+            aria-label={t('Shopping Cart, total {total}, {n} items', { total: money(cartTotal), n: cartCount })}
           >
             <svg
               className="header-btn-icon"
@@ -511,7 +527,7 @@ export default function Header({
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
             </svg>
             {cartCount > 0 && <span className="header-badge">{cartCount}</span>}
-            <span className="cart-price-tag">${cartTotal.toFixed(2)}</span>
+            <span className="cart-price-tag">{money(cartTotal)}</span>
           </button>
         </div>
       </div>

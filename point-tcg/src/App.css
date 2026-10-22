@@ -10064,3 +10064,20 @@ body {
   background: #ffffff;
   color: #0053e2;
 }
+
+/* Điện thoại: hai nút chọn ngôn ngữ / tiền tệ gọn lại; giỏ hàng chỉ hiện biểu tượng + số lượng */
+@media (max-width: 640px) {
+  .lang-switch {
+    padding: 2px;
+  }
+
+  .lang-switch button {
+    min-width: 0;
+    padding: 4px 7px;
+    font-size: 0.72rem;
+  }
+
+  .cart-btn .cart-price-tag {
+    display: none;
+  }
+}

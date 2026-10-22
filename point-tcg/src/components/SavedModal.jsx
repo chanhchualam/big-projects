@@ -10,7 +10,7 @@ export default function SavedModal({
   onAddToCart,
   onRequestJoin
 }) {
-  const { t } = useI18n();
+  const { t, money } = useI18n();
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape' && isOpen) {
@@ -64,9 +64,9 @@ export default function SavedModal({
                 <div className="drawer-item-info">
                   <div>
                     <h4 className="drawer-item-title">{product.title}</h4>
-                    <div className="drawer-item-price">${product.price.toFixed(2)}</div>
+                    <div className="drawer-item-price">{money(product.price)}</div>
                     <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '2px' }}>
-                      {product.status === 'open' ? 'Drawing Open' : 'Drawing Closed'}
+                      {product.status === 'open' ? t('Drawing Open') : t('Drawing Closed')}
                     </div>
                   </div>
 

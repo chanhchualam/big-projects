@@ -53,7 +53,7 @@ export default function ProductDetailPage({
   onReviewSaved,
   onOpenSignIn
 }) {
-  const { t, lang } = useI18n();
+  const { t, lang, money, moneyAlt } = useI18n();
   // Đơn "Giao thành công" của khách có chứa sản phẩm này → được đánh giá (khớp firestore.rules)
   const reviewOrder = useMemo(() => {
     if (!user || user.role === 'admin') return null;
@@ -98,8 +98,9 @@ export default function ProductDetailPage({
   const stock = typeof product.stock === 'number' ? product.stock : 25;
   const isOutOfStock = stock <= 0;
   const discountPercent = getDiscountPercent(product.price, product.wasPrice);
-  const vndPrice = formatVnd(product.price);
-  const vndWasPrice = product.wasPrice ? formatVnd(product.wasPrice) : formatVnd(product.price * 1.19);
+  // Giá theo tiền tệ khách chọn (VNĐ / USD), kèm tiền tệ còn lại trong ngoặc
+  const vndPrice = money(product.price);
+  const vndWasPrice = product.wasPrice ? money(product.wasPrice) : money(product.price * 1.19);
   const productIdCode = `SP${(product.id || '').replace(/\D/g, '').padStart(6, '0') || '001305'}`;
 
   // Ảnh gốc + ảnh phụ chỉ tải khi mở trang chi tiết; trong lúc chờ hiện ảnh thu nhỏ
@@ -380,7 +381,7 @@ export default function ProductDetailPage({
               {discountPercent > 0 && (
                 <span className="pdp-discount-badge">-{discountPercent}%</span>
               )}
-              <span className="pdp-usd-sub">(${product.price.toFixed(2)} USD)</span>
+              <span className="pdp-usd-sub">({moneyAlt(product.price)})</span>
             </div>
 
             {/* Quantity Stepper */}
@@ -642,8 +643,8 @@ export default function ProductDetailPage({
             <div className="pdp-products-carousel" id="pdp-related-scroll">
               {relatedProducts.map((item) => {
                 const itemDisc = getDiscountPercent(item.price, item.wasPrice);
-                const itemVnd = formatVnd(item.price);
-                const itemWasVnd = item.wasPrice ? formatVnd(item.wasPrice) : null;
+                const itemVnd = money(item.price);
+                const itemWasVnd = item.wasPrice ? money(item.wasPrice) : null;
 
                 return (
                   <div
@@ -706,8 +707,8 @@ export default function ProductDetailPage({
             <div className="pdp-products-carousel">
               {recentlyViewedProducts.map((item) => {
                 const itemDisc = getDiscountPercent(item.price, item.wasPrice);
-                const itemVnd = formatVnd(item.price);
-                const itemWasVnd = item.wasPrice ? formatVnd(item.wasPrice) : null;
+                const itemVnd = money(item.price);
+                const itemWasVnd = item.wasPrice ? money(item.wasPrice) : null;
 
                 return (
                   <div

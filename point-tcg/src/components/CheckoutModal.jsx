@@ -23,7 +23,7 @@ export default function CheckoutModal({
   onOrderPlaced,
   onUpdateOrderStatus
 }) {
-  const { t } = useI18n();
+  const { t, money, currency } = useI18n();
   // Step State: 'form' | 'processing' | 'qr_payment' | 'success'
   const [checkoutStep, setCheckoutStep] = useState('form');
   const [completedOrder, setCompletedOrder] = useState(null);
@@ -144,8 +144,12 @@ export default function CheckoutModal({
 
   // Formatting helpers
   const formatVndText = (num) => {
-    return (num || 0).toLocaleString('vi-VN') + ' đ';
+    return (num || 0).toLocaleString('vi-VN') + '₫';
   };
+  // Tổng đơn theo tiền tệ khách chọn, kèm tiền tệ còn lại; VNĐ dùng đúng số tiền chuyển khoản của đơn
+  const totalText = (usd, vnd) => (currency === 'usd'
+    ? `$${Number(usd || 0).toFixed(2)} USD (~ ${formatVndText(vnd)})`
+    : `${formatVndText(vnd)} (~ $${Number(usd || 0).toFixed(2)} USD)`);
 
   const minutesRemaining = Math.floor(secondsLeft / 60);
   const secondsRemaining = secondsLeft % 60;
@@ -667,7 +671,7 @@ export default function CheckoutModal({
               <div className="receipt-row total-highlight">
                 <span className="receipt-label">{t('Tổng Tiền:')}</span>
                 <span className="receipt-val">
-                  ${activeOrder.total.toFixed(2)} USD ({formatVndText(activeOrder.amountVnd)})
+                  {totalText(activeOrder.total, activeOrder.amountVnd)}
                 </span>
               </div>
             </div>
@@ -684,7 +688,7 @@ export default function CheckoutModal({
                     <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{t('Số lượng:')} x{item.qty}</div>
                   </div>
                   <div style={{ fontWeight: 800, color: '#0053e2' }}>
-                    ${(item.price * item.qty).toFixed(2)}
+                    {money(item.price * item.qty)}
                   </div>
                 </div>
               ))}
@@ -828,7 +832,7 @@ export default function CheckoutModal({
                         <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{t('Hộp chống sốc niêm phong (3-5 ngày làm việc)')}</div>
                       </div>
                       <div style={{ fontWeight: 800, color: isFreeStandard ? '#16a34a' : '#0053e2' }}>
-                        {isFreeStandard ? t('MIỄN PHÍ') : '$8.50'}
+                        {isFreeStandard ? t('MIỄN PHÍ') : money(8.5)}
                       </div>
                     </label>
 
@@ -847,7 +851,7 @@ export default function CheckoutModal({
                         <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{t('Bảo hiểm 100% giá trị thẻ hiếm, giao trong 24h')}</div>
                       </div>
                       <div style={{ fontWeight: 800, color: '#0053e2' }}>
-                        $15.00
+                        {money(15)}
                       </div>
                     </label>
                   </div>
@@ -959,11 +963,11 @@ export default function CheckoutModal({
 
                           <div className="checkout-price-block">
                             <div className="checkout-item-price">
-                              ${(item.price * item.qty).toFixed(2)}
+                              {money(item.price * item.qty)}
                             </div>
                             {item.qty > 1 && (
                               <div className="checkout-unit-subprice">
-                                ${item.price.toFixed(2)}/sp
+                                {money(item.price)}/{t('sp')}
                               </div>
                             )}
                           </div>
@@ -1011,7 +1015,7 @@ export default function CheckoutModal({
                   <div className="summary-calculation-lines">
                     <div className="calc-row">
                       <span>{t('Tạm tính (Subtotal)')}</span>
-                      <span>${cartTotal.toFixed(2)}</span>
+                      <span>{money(cartTotal)}</span>
                     </div>
 
                     <div className="calc-row">
@@ -1021,22 +1025,22 @@ export default function CheckoutModal({
 
                     <div className="calc-row">
                       <span>{t('Phí vận chuyển')}</span>
-                      <span>{shippingFee === 0 ? t('MIỄN PHÍ') : `$${shippingFee.toFixed(2)}`}</span>
+                      <span>{shippingFee === 0 ? t('MIỄN PHÍ') : money(shippingFee)}</span>
                     </div>
 
                     {appliedDiscount > 0 && (
                       <div className="calc-row discount-row">
                         <span>{t('Giảm giá')} ({appliedDiscount}%)</span>
-                        <span style={{ color: '#dc2626', fontWeight: 700 }}>-${discountAmount.toFixed(2)}</span>
+                        <span style={{ color: '#dc2626', fontWeight: 700 }}>-{money(discountAmount)}</span>
                       </div>
                     )}
 
                     <div className="calc-total-row">
                       <span>{t('Tổng Thanh Toán:')}</span>
                       <div style={{ textAlign: 'right' }}>
-                        <div className="final-price-tag">${finalTotal.toFixed(2)}</div>
+                        <div className="final-price-tag">{currency === 'usd' ? `$${finalTotal.toFixed(2)}` : formatVndText(amountVnd)}</div>
                         <div style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>
-                          ~ {formatVndText(amountVnd)}
+                          ~ {currency === 'usd' ? formatVndText(amountVnd) : `$${finalTotal.toFixed(2)} USD`}
                         </div>
                       </div>
                     </div>

@@ -20,6 +20,7 @@ import NotificationBell from './components/NotificationBell';
 import AnnouncementBar from './components/AnnouncementBar';
 import HeroBanner from './components/HeroBanner';
 import { useI18n } from './i18n';
+import { VND_RATE } from './utils/currency';
 import { getDrawingText } from './utils/countdown';
 import {
   buildNotifications,
@@ -154,7 +155,7 @@ function loadSavedCart(uid) {
 }
 
 export default function App() {
-  const { t, lang } = useI18n();
+  const { t, lang, currency } = useI18n();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [activeCategory, setActiveCategory] = useState('all');
@@ -996,7 +997,7 @@ export default function App() {
       announcements: liveAnnouncements
     }),
     // lang: tiêu đề thông báo được dịch lúc tạo
-    [orders, isAdmin, wishlistEvents, liveAnnouncements, lang]
+    [orders, isAdmin, wishlistEvents, liveAnnouncements, lang, currency]
   );
 
   const handleMarkNotificationsRead = () => {
@@ -1109,9 +1110,11 @@ export default function App() {
   };
 
   // Lọc theo loại, khoảng giá và tình trạng kho
+  // Ô giá nhập theo tiền tệ đang hiển thị; giá sản phẩm lưu bằng USD
   const filterByAttributes = (items) => {
-    const min = priceMin === '' ? null : Number(priceMin);
-    const max = priceMax === '' ? null : Number(priceMax);
+    const toUsd = (v) => (currency === 'vnd' ? Number(v) / VND_RATE : Number(v));
+    const min = priceMin === '' ? null : toUsd(priceMin);
+    const max = priceMax === '' ? null : toUsd(priceMax);
     return items.filter((item) => {
       if (stockFilter === 'in' && !isInStock(item)) return false;
       if (stockFilter === 'out' && isInStock(item)) return false;
@@ -1121,6 +1124,12 @@ export default function App() {
       return true;
     });
   };
+
+  // Đổi tiền tệ thì khoảng giá đang nhập không còn đúng đơn vị → xoá
+  useEffect(() => {
+    setPriceMin('');
+    setPriceMax('');
+  }, [currency]);
 
   const hasAttributeFilter = productType !== 'all' || priceMin !== '' || priceMax !== '' || stockFilter !== 'in';
   const resetAttributeFilters = () => {
@@ -1134,13 +1143,13 @@ export default function App() {
     if (activeCategory === 'closed') return [];
     const list = filterByCategory(filterBySearch(filterByAttributes(openDrawings)));
     return sortProducts(list.map(withReviewStats));
-  }, [openDrawings, searchQuery, sortBy, activeCategory, productType, priceMin, priceMax, stockFilter, reviewStats]);
+  }, [openDrawings, searchQuery, sortBy, activeCategory, productType, priceMin, priceMax, stockFilter, reviewStats, currency]);
 
   const filteredClosedDrawings = useMemo(() => {
     if (activeCategory === 'open') return [];
     const list = filterByCategory(filterBySearch(filterByAttributes(closedDrawings)));
     return sortProducts(list.map(withReviewStats));
-  }, [closedDrawings, searchQuery, sortBy, activeCategory, productType, priceMin, priceMax, stockFilter, reviewStats]);
+  }, [closedDrawings, searchQuery, sortBy, activeCategory, productType, priceMin, priceMax, stockFilter, reviewStats, currency]);
 
   // Dòng sản phẩm có trong kết quả hiện tại → thanh chọn nhanh; nếu dòng đang chọn biến mất thì coi như "Tất cả"
   const seriesChips = useMemo(
@@ -1391,7 +1400,7 @@ export default function App() {
             </select>
           </label>
           <label className="filter-field">
-            <span>{t('Giá từ ($)')}</span>
+            <span>{t('Giá từ ({sym})', { sym: currency === 'vnd' ? '₫' : '$' })}</span>
             <input
               type="number"
               min="0"
@@ -1402,7 +1411,7 @@ export default function App() {
             />
           </label>
           <label className="filter-field">
-            <span>{t('đến ($)')}</span>
+            <span>{t('đến ({sym})', { sym: currency === 'vnd' ? '₫' : '$' })}</span>
             <input
               type="number"
               min="0"

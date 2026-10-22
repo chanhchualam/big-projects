@@ -67,6 +67,19 @@ function formatPrice(num) {
   return { dollars, cents };
 }
 
+// USD: $34⁰⁰ (cent nhỏ phía trên); VNĐ: 900.000₫
+function PriceAmount({ usd }) {
+  const { currency, money } = useI18n();
+  if (currency !== 'usd') return <span>{money(usd)}</span>;
+  const { dollars, cents } = formatPrice(usd);
+  return (
+    <>
+      <span>${dollars}</span>
+      <sup className="cents-sup">{cents}</sup>
+    </>
+  );
+}
+
 export default function ProductCard({
   product,
   isSaved,
@@ -96,9 +109,7 @@ export default function ProductCard({
     image
   } = product;
 
-  const { t } = useI18n();
-  const currentPriceFormatted = formatPrice(price);
-  const wasPriceFormatted = wasPrice ? Number(wasPrice).toFixed(2) : null;
+  const { t, money } = useI18n();
   const stock = typeof product.stock === 'number' ? product.stock : 20;
   const isOutOfStock = stock <= 0;
 
@@ -176,17 +187,15 @@ export default function ProductCard({
             <>
               <span className="price-sale-tag">
                 <span className="price-prefix">{t('Now')}</span>
-                <span>${currentPriceFormatted.dollars}</span>
-                <sup className="cents-sup">{currentPriceFormatted.cents}</sup>
+                <PriceAmount usd={price} />
               </span>
-              {wasPriceFormatted && (
-                <span className="price-was-tag">${wasPriceFormatted}</span>
+              {wasPrice && (
+                <span className="price-was-tag">{money(wasPrice)}</span>
               )}
             </>
           ) : (
             <span className="price-regular-tag">
-              <span>${currentPriceFormatted.dollars}</span>
-              <sup className="cents-sup">{currentPriceFormatted.cents}</sup>
+              <PriceAmount usd={price} />
             </span>
           )}
 

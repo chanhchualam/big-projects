@@ -35,7 +35,12 @@ export default function CustomerOrdersPage({
   onOpenSignIn,
   onOpenProductDetail
 }) {
-  const { t } = useI18n();
+  const { t, money, moneyAlt, currency } = useI18n();
+  // Tổng đơn: VNĐ lấy đúng số tiền đã lưu trong đơn (amountVnd), USD lấy order.total
+  const orderVnd = (o) => (o.amountVnd ? o.amountVnd.toLocaleString('vi-VN') + '₫' : formatVndPrice(o.total));
+  const orderUsd = (o) => `$${Number(o.total || 0).toFixed(2)}`;
+  const orderMain = (o) => (currency === 'usd' ? orderUsd(o) : orderVnd(o));
+  const orderAlt = (o) => (currency === 'usd' ? orderVnd(o) : orderUsd(o));
   // Navigation sidebar tab: 'orders' | 'profile' | 'addresses' | 'reviews'
   const [activeMenuTab, setActiveMenuTab] = useState(initialTab || 'orders');
   useEffect(() => {
@@ -496,7 +501,7 @@ export default function CustomerOrdersPage({
                                     <div className="cop-item-sub">
                                       <span className="cop-item-qty">{t('Số lượng:')} x{item.qty || 1}</span>
                                       <span className="cop-item-price">
-                                        ${Number(item.price || 0).toFixed(2)} ({formatVndPrice(item.price)})
+                                        {money(item.price || 0)} ({moneyAlt(item.price || 0)})
                                       </span>
                                     </div>
                                   </div>
@@ -523,9 +528,9 @@ export default function CustomerOrdersPage({
                             <div className="cop-footer-pricing">
                               <div className="cop-total-label">{t('Tổng thanh toán:')}</div>
                               <div className="cop-total-amount">
-                                ${Number(order.total || 0).toFixed(2)}
+                                {orderMain(order)}
                                 <span className="cop-total-vnd">
-                                  ({order.amountVnd ? order.amountVnd.toLocaleString('vi-VN') + '₫' : formatVndPrice(order.total)})
+                                  ({orderAlt(order)})
                                 </span>
                               </div>
 
@@ -683,7 +688,7 @@ export default function CustomerOrdersPage({
                   {(viewingOrderDetail.items || []).map((item, idx) => (
                     <div key={idx} className="cop-detail-item-line">
                       <span>{item.title} (x{item.qty || 1})</span>
-                      <strong>${(Number(item.price || 0) * (item.qty || 1)).toFixed(2)}</strong>
+                      <strong>{money(Number(item.price || 0) * (item.qty || 1))}</strong>
                     </div>
                   ))}
                 </div>
@@ -692,11 +697,7 @@ export default function CustomerOrdersPage({
               <div className="cop-detail-total-row">
                 <span>{t('Tổng cộng:')}</span>
                 <strong>
-                  ${Number(viewingOrderDetail.total || 0).toFixed(2)} (
-                  {viewingOrderDetail.amountVnd
-                    ? viewingOrderDetail.amountVnd.toLocaleString('vi-VN') + '₫'
-                    : formatVndPrice(viewingOrderDetail.total)}
-                  )
+                  {orderMain(viewingOrderDetail)} ({orderAlt(viewingOrderDetail)})
                 </strong>
               </div>
             </div>
