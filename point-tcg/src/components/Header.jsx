@@ -1,6 +1,6 @@
 // src/components/Header.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useI18n, LANGUAGES, CURRENCIES } from '../i18n';
+import { useI18n, LANGUAGES } from '../i18n';
 
 // Helper to normalize search text: lowercase, remove accents/diacritics, trim
 export const normalizeSearchText = (str) => {
@@ -33,7 +33,7 @@ export default function Header({
   onLogoClick,
   notificationBell = null
 }) {
-  const { t, lang, setLang, currency, setCurrency, money } = useI18n();
+  const { t, lang, setLang, money } = useI18n();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const dropdownRef = useRef(null);
@@ -486,22 +486,6 @@ export default function Header({
                 title={l.name}
               >
                 {l.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Chọn tiền tệ hiển thị giá */}
-          <div className="lang-switch currency-switch" role="group" aria-label={t('Tiền tệ')}>
-            {CURRENCIES.map((c) => (
-              <button
-                key={c.code}
-                type="button"
-                className={currency === c.code ? 'active' : ''}
-                onClick={() => setCurrency(c.code)}
-                aria-pressed={currency === c.code}
-                title={c.name}
-              >
-                {c.code === 'vnd' ? '₫' : '$'}
               </button>
             ))}
           </div>
