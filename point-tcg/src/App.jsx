@@ -131,6 +131,27 @@ const STORAGE_KEYS = {
   CLOSED_PRODUCTS: 'point-tcg-closed-drawings'
 };
 
+const cartStorageKey = (uid) => `${STORAGE_KEYS.CART}:${uid}`;
+
+// Giỏ đã lưu của tài khoản; giỏ chung kiểu cũ (trước khi tách theo tài khoản) chuyển cho người đăng nhập đầu tiên
+function loadSavedCart(uid) {
+  try {
+    let raw = localStorage.getItem(cartStorageKey(uid));
+    if (raw === null) {
+      raw = localStorage.getItem(STORAGE_KEYS.CART);
+      localStorage.removeItem(STORAGE_KEYS.CART);
+    }
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) => {
+      const catalogImg = getProductCatalogImage(item);
+      return catalogImg ? { ...item, image: catalogImg } : item;
+    });
+  } catch {
+    return [];
+  }
+}
+
 export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
@@ -410,25 +431,21 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [openDrawings, closedDrawings]);
 
-  // Cart state
-  const [cart, setCart] = useState(() => {
-    try {
-      const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
-      if (savedCart) {
-        const parsed = JSON.parse(savedCart);
-        return parsed.map(item => {
-          const catalogImg = getProductCatalogImage(item);
-          if (catalogImg) {
-            return { ...item, image: catalogImg };
-          }
-          return item;
-        });
-      }
-      return [];
-    } catch {
-      return [];
+  // Cart state — giỏ hàng gắn với từng tài khoản; chưa đăng nhập thì giỏ trống
+  const [cart, setCart] = useState([]);
+  const cartOwnerRef = useRef(null);
+  useEffect(() => {
+    const uid = user?.id || null;
+    if (!uid) {
+      cartOwnerRef.current = null;
+      setCart([]);
+      setIsCartOpen(false);
+      return;
     }
-  });
+    if (cartOwnerRef.current === uid) return;
+    cartOwnerRef.current = uid;
+    setCart(loadSavedCart(uid));
+  }, [user]);
 
   // Saved / Favorited product IDs
   const [savedIds, setSavedIds] = useState(() => {
@@ -500,8 +517,9 @@ export default function App() {
   }, [closedDrawings]);
 
   useEffect(() => {
+    if (!cartOwnerRef.current) return;
     try {
-      localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(cart));
+      localStorage.setItem(cartStorageKey(cartOwnerRef.current), JSON.stringify(cart));
     } catch (e) {}
   }, [cart]);
 
@@ -874,6 +892,7 @@ export default function App() {
   };
 
   const handleUpdateCartQty = (id, newQty) => {
+    if (!requireLogin({ type: 'cart-open' })) return;
     if (newQty <= 0) {
       handleRemoveFromCart(id);
       return;
@@ -1008,6 +1027,7 @@ export default function App() {
     else if (type === 'cart') addToCartNow(product, qty);
     else if (type === 'buy') buyNowNow(product, qty);
     else if (type === 'checkout') setIsCheckoutOpen(true);
+    else if (type === 'cart-open') setIsCartOpen(true);
   }, [user]);
 
   // Mở thẳng link sản phẩm khi chưa đăng nhập → về trang chủ và yêu cầu đăng nhập
@@ -1251,7 +1271,7 @@ export default function App() {
         onOpenSaved={() => setIsSavedOpen(true)}
         cartTotal={cartTotal}
         cartCount={cartCount}
-        onOpenCart={() => setIsCartOpen(true)}
+        onOpenCart={() => { if (requireLogin({ type: 'cart-open' })) setIsCartOpen(true); }}
         user={user}
         onOpenSignIn={(mode) => {
           setSignInMode(mode || 'login');
