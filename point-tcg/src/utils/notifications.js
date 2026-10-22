@@ -4,6 +4,7 @@
 //  - Sản phẩm yêu thích: có hàng lại hoặc giảm giá (so với lần xem trước, lưu trong trình duyệt)
 //  - Thông báo của shop (announcements)
 // Trạng thái "đã đọc" lưu trong trình duyệt theo từng tài khoản.
+import { translate as t, getLocale } from '../i18n';
 
 const WINDOW_DAYS = 30;
 const MAX_ITEMS = 40;
@@ -89,7 +90,7 @@ export function buildNotifications({ orders = [], wishlistEvents = [], announcem
       if (!info) return;
       list.push({
         id: `order-${order.id}-${h.status}-${h.at}`,
-        title: `Đơn #${order.id} ${info.text}`,
+        title: t('Đơn #{id} ' + info.text, { id: order.id }),
         at: h.at,
         action: { type: 'orders' }
       });
@@ -97,7 +98,7 @@ export function buildNotifications({ orders = [], wishlistEvents = [], announcem
     if (order.trackingCode && order.trackingAt) {
       list.push({
         id: `tracking-${order.id}-${order.trackingCode}`,
-        title: `Đơn #${order.id} có mã vận đơn ${order.carrier || ''} ${order.trackingCode}`.replace(/\s+/g, ' '),
+        title: t('Đơn #{id} có mã vận đơn {carrier} {code}', { id: order.id, carrier: order.carrier || '', code: order.trackingCode }).replace(/\s+/g, ' '),
         at: order.trackingAt,
         action: { type: 'orders' }
       });
@@ -108,8 +109,8 @@ export function buildNotifications({ orders = [], wishlistEvents = [], announcem
     list.push({
       id: e.id,
       title: e.kind === 'restock'
-        ? `"${e.title}" trong danh sách yêu thích đã có hàng lại`
-        : `"${e.title}" giảm giá từ $${Number(e.from).toFixed(2)} còn $${Number(e.to).toFixed(2)}`,
+        ? t('"{title}" trong danh sách yêu thích đã có hàng lại', { title: e.title })
+        : t('"{title}" giảm giá từ ${from} còn ${to}', { title: e.title, from: Number(e.from).toFixed(2), to: Number(e.to).toFixed(2) }),
       at: e.at,
       action: { type: 'product', productId: e.productId }
     });
@@ -139,9 +140,9 @@ export function isAnnouncementLive(a, now = new Date()) {
 
 export function timeAgo(iso) {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60) return 'vừa xong';
-  if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
-  if (diff < 86400 * 7) return `${Math.floor(diff / 86400)} ngày trước`;
-  return new Date(iso).toLocaleDateString('vi-VN');
+  if (diff < 60) return t('vừa xong');
+  if (diff < 3600) return t('{n} phút trước', { n: Math.floor(diff / 60) });
+  if (diff < 86400) return t('{n} giờ trước', { n: Math.floor(diff / 3600) });
+  if (diff < 86400 * 7) return t('{n} ngày trước', { n: Math.floor(diff / 86400) });
+  return new Date(iso).toLocaleDateString(getLocale());
 }

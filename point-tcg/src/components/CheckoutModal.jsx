@@ -5,6 +5,7 @@ import { getQrConfig, loadQrConfig, generateQrUrl } from '../utils/qrConfig';
 import { fetchCoupon, redeemCoupon } from '../services/firestoreService';
 import { getCouponError } from '../utils/orderCheck';
 import { usdToVnd, VND_RATE } from '../utils/currency';
+import { useI18n } from '../i18n';
 
 // Khách chỉ được báo đã chuyển khoản; admin kiểm tra sao kê rồi mới chuyển sang "Đã thanh toán"
 const CUSTOMER_REPORTED_PAID_STATUS = 'Khách báo đã chuyển khoản (Chờ xác nhận)';
@@ -22,6 +23,7 @@ export default function CheckoutModal({
   onOrderPlaced,
   onUpdateOrderStatus
 }) {
+  const { t } = useI18n();
   // Step State: 'form' | 'processing' | 'qr_payment' | 'success'
   const [checkoutStep, setCheckoutStep] = useState('form');
   const [completedOrder, setCompletedOrder] = useState(null);
@@ -175,19 +177,19 @@ export default function CheckoutModal({
     e.preventDefault();
     const code = couponCode.trim().toUpperCase();
     if (!code) return;
-    setCouponMessage('Đang kiểm tra mã...');
+    setCouponMessage(t('Đang kiểm tra mã...'));
     const coupon = await fetchCoupon(code);
     const error = getCouponError(coupon, cartTotal);
     if (error) {
       setAppliedCoupon(null);
-      setCouponMessage(`${error}`);
+      setCouponMessage(t(error));
       return;
     }
     setAppliedCoupon(coupon);
     const parts = [];
-    if (coupon.percent > 0) parts.push(`giảm ${coupon.percent}% tạm tính`);
-    if (coupon.freeShip) parts.push('miễn phí ship tiêu chuẩn');
-    setCouponMessage(`Áp dụng mã ${coupon.code} thành công: ${parts.join(' + ')}.`);
+    if (coupon.percent > 0) parts.push(t('giảm {n}% tạm tính', { n: coupon.percent }));
+    if (coupon.freeShip) parts.push(t('miễn phí ship tiêu chuẩn'));
+    setCouponMessage(t('Áp dụng mã {code} thành công: {parts}.', { code: coupon.code, parts: parts.join(' + ') }));
   };
 
   // Submit Order Handler
@@ -208,7 +210,7 @@ export default function CheckoutModal({
       try {
         uid = await ensureSignedIn();
       } catch (err) {
-        alert(getAuthErrorMessage(err, 'Không thể khởi tạo phiên đặt hàng. Vui lòng thử lại!'));
+        alert(t(getAuthErrorMessage(err, 'Không thể khởi tạo phiên đặt hàng. Vui lòng thử lại!')));
         setCheckoutStep('form');
         return;
       }
@@ -218,14 +220,14 @@ export default function CheckoutModal({
         const couponError = getCouponError(appliedCoupon, cartTotal);
         if (couponError) {
           setAppliedCoupon(null);
-          setCouponMessage(`${couponError}`);
+          setCouponMessage(t(couponError));
           setCheckoutStep('form');
           return;
         }
         const redeemed = await redeemCoupon(appliedCoupon.code);
         if (!redeemed) {
           setAppliedCoupon(null);
-          setCouponMessage('Mã giảm giá vừa hết lượt sử dụng. Vui lòng đặt lại đơn.');
+          setCouponMessage(t('Mã giảm giá vừa hết lượt sử dụng. Vui lòng đặt lại đơn.'));
           setCheckoutStep('form');
           return;
         }
@@ -337,7 +339,7 @@ export default function CheckoutModal({
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Thanh toán đơn hàng">
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={t('Thanh toán đơn hàng')}>
       <div
         className="checkout-modal-card"
         onClick={(e) => e.stopPropagation()}
@@ -349,7 +351,7 @@ export default function CheckoutModal({
           type="button"
           className="modal-close-icon-btn"
           onClick={onClose}
-          aria-label="Đóng thanh toán"
+          aria-label={t('Đóng thanh toán')}
         >
           ✕
         </button>
@@ -361,10 +363,10 @@ export default function CheckoutModal({
           <div className="checkout-processing-view">
             <div className="checkout-spinner" />
             <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginTop: '20px', color: '#0f172a' }}>
-              Đang Khởi Tạo Đơn Hàng...
+              {t('Đang Khởi Tạo Đơn Hàng...')}
             </h3>
             <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '6px' }}>
-              Hệ thống đang lưu trữ đơn hàng và tạo mã VietQR thanh toán cho bạn. Vui lòng chờ giây lát...
+              {t('Hệ thống đang lưu trữ đơn hàng và tạo mã VietQR thanh toán cho bạn. Vui lòng chờ giây lát...')}
             </p>
           </div>
         )}
@@ -378,9 +380,9 @@ export default function CheckoutModal({
             <div className="qr-screen-header">
               <div className="qr-badge-pill">
                 <span className="live-pulse-dot" />
-                <span>VIETQR 24/7 TỰ ĐỘNG</span>
+                <span>{t('VIETQR 24/7 TỰ ĐỘNG')}</span>
               </div>
-              <h2 className="qr-screen-title">Quét Mã QR Để Thanh Toán</h2>
+              <h2 className="qr-screen-title">{t('Quét Mã QR Để Thanh Toán')}</h2>
               <p className="qr-screen-subtitle">
                 Đơn hàng <strong>#{activeOrder.id}</strong> đã được tạo thành công và đang chờ xác nhận thanh toán.
               </p>
@@ -394,7 +396,7 @@ export default function CheckoutModal({
                     <circle cx="12" cy="12" r="10" />
                     <polyline points="12 6 12 12 16 14" />
                   </svg>
-                  <span>Mã QR sẽ hết hạn sau:</span>
+                  <span>{t('Mã QR sẽ hết hạn sau:')}</span>
                 </div>
                 <div className="qr-timer-clock-digits">
                   {countdownFormatted}
@@ -411,21 +413,21 @@ export default function CheckoutModal({
 
               {secondsLeft === 0 ? (
                 <div className="qr-expired-alert">
-                  <span>Mã QR đã hết hạn! Vui lòng gia hạn thêm thời gian để tiếp tục.</span>
+                  <span>{t('Mã QR đã hết hạn! Vui lòng gia hạn thêm thời gian để tiếp tục.')}</span>
                   <button
                     type="button"
                     className="btn-renew-timer"
                     onClick={() => setSecondsLeft(900)}
                   >
-                    Gia hạn thêm 15 phút
+                    {t('Gia hạn thêm 15 phút')}
                   </button>
                 </div>
               ) : (
                 <div className="qr-timer-instruction">
                   {secondsLeft <= 180 ? (
-                    <strong style={{ color: '#ef4444' }}>Sắp hết thời gian giữ hàng! Vui lòng chuyển khoản nhanh chóng.</strong>
+                    <strong style={{ color: '#ef4444' }}>{t('Sắp hết thời gian giữ hàng! Vui lòng chuyển khoản nhanh chóng.')}</strong>
                   ) : (
-                    <span>Hệ thống tự động kích hoạt đơn hàng ngay khi nhận được chuyển khoản.</span>
+                    <span>{t('Hệ thống tự động kích hoạt đơn hàng ngay khi nhận được chuyển khoản.')}</span>
                   )}
                 </div>
               )}
@@ -502,7 +504,7 @@ export default function CheckoutModal({
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.4">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
-                  <span>Mở ứng dụng ngân hàng hoặc MoMo để quét mã thanh toán</span>
+                  <span>{t('Mở ứng dụng ngân hàng hoặc MoMo để quét mã thanh toán')}</span>
                 </div>
               </div>
 
@@ -511,7 +513,7 @@ export default function CheckoutModal({
                 <div className="bank-info-card">
                   {/* Bank Name */}
                   <div className="bank-data-row">
-                    <div className="bank-data-label">Ngân Hàng:</div>
+                    <div className="bank-data-label">{t('Ngân Hàng:')}</div>
                     <div className="bank-data-val-group">
                       <strong className="bank-name-text">{qrConfig.bankName}</strong>
                       <button
@@ -519,14 +521,14 @@ export default function CheckoutModal({
                         className="copy-btn-action"
                         onClick={() => handleCopyText(qrConfig.bankName, 'bank')}
                       >
-                        {copiedField === 'bank' ? '✓ Đã chép' : 'Sao chép'}
+                        {copiedField === 'bank' ? `✓ ${t('Đã chép')}` : t('Sao chép')}
                       </button>
                     </div>
                   </div>
 
                   {/* Account Number */}
                   <div className="bank-data-row">
-                    <div className="bank-data-label">Số Tài Khoản:</div>
+                    <div className="bank-data-label">{t('Số Tài Khoản:')}</div>
                     <div className="bank-data-val-group">
                       <strong className="bank-acc-number">{qrConfig.accountNumber}</strong>
                       <button
@@ -534,14 +536,14 @@ export default function CheckoutModal({
                         className="copy-btn-action highlight-btn"
                         onClick={() => handleCopyText((qrConfig.accountNumber || '').replace(/\s+/g, ''), 'acc')}
                       >
-                        {copiedField === 'acc' ? '✓ Đã chép' : 'Sao chép STK'}
+                        {copiedField === 'acc' ? `✓ ${t('Đã chép')}` : t('Sao chép STK')}
                       </button>
                     </div>
                   </div>
 
                   {/* Account Owner */}
                   <div className="bank-data-row">
-                    <div className="bank-data-label">Chủ Tài Khoản:</div>
+                    <div className="bank-data-label">{t('Chủ Tài Khoản:')}</div>
                     <div className="bank-data-val-group">
                       <strong className="bank-owner-name">{qrConfig.accountName}</strong>
                     </div>
@@ -549,7 +551,7 @@ export default function CheckoutModal({
 
                   {/* Exact Amount */}
                   <div className="bank-data-row amount-row-highlight">
-                    <div className="bank-data-label">Số Tiền Cần Chuyển:</div>
+                    <div className="bank-data-label">{t('Số Tiền Cần Chuyển:')}</div>
                     <div className="bank-data-val-group">
                       <div>
                         <div className="amount-vnd-text">{formatVndText(currentTotalVnd)}</div>
@@ -560,14 +562,14 @@ export default function CheckoutModal({
                         className="copy-btn-action highlight-btn"
                         onClick={() => handleCopyText(currentTotalVnd, 'amount')}
                       >
-                        {copiedField === 'amount' ? '✓ Đã chép' : 'Sao chép số tiền'}
+                        {copiedField === 'amount' ? `✓ ${t('Đã chép')}` : t('Sao chép số tiền')}
                       </button>
                     </div>
                   </div>
 
                   {/* Transfer Syntax */}
                   <div className="bank-data-row syntax-row-highlight">
-                    <div className="bank-data-label">Nội Dung Chuyển Khoản:</div>
+                    <div className="bank-data-label">{t('Nội Dung Chuyển Khoản:')}</div>
                     <div className="bank-data-val-group">
                       <strong className="transfer-syntax-code">{(qrConfig.notePrefix || 'PTCG')} {activeOrder.id}</strong>
                       <button
@@ -575,14 +577,14 @@ export default function CheckoutModal({
                         className="copy-btn-action highlight-btn"
                         onClick={() => handleCopyText(`${qrConfig.notePrefix || 'PTCG'} ${activeOrder.id}`, 'syntax')}
                       >
-                        {copiedField === 'syntax' ? '✓ Đã chép' : 'Sao chép cú pháp'}
+                        {copiedField === 'syntax' ? `✓ ${t('Đã chép')}` : t('Sao chép cú pháp')}
                       </button>
                     </div>
                   </div>
                 </div>
 
                 <div className="syntax-warning-note">
-                  <strong>Quan trọng:</strong> Vui lòng giữ nguyên nội dung chuyển khoản <code>{(qrConfig.notePrefix || 'PTCG')} {activeOrder.id}</code> để nhân viên Point TCG lập tức nhận biết và chuẩn bị hàng cho bạn.
+                  <strong>{t('Quan trọng:')}</strong> {t('Vui lòng giữ nguyên nội dung chuyển khoản')} <code>{(qrConfig.notePrefix || 'PTCG')} {activeOrder.id}</code> {t('để nhân viên Point TCG lập tức nhận biết và chuẩn bị hàng cho bạn.')}
                 </div>
 
                 {/* Primary CTA Buttons */}
@@ -592,7 +594,7 @@ export default function CheckoutModal({
                     className="btn-confirm-transfer-paid"
                     onClick={handleConfirmTransfer}
                   >
-                    <span>Tôi Đã Chuyển Khoản Thành Công</span>
+                    <span>{t('Tôi Đã Chuyển Khoản Thành Công')}</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M5 12h14" />
                       <path d="M12 5l7 7-7 7" />
@@ -608,14 +610,14 @@ export default function CheckoutModal({
                         if (onOpenOrderHistory) onOpenOrderHistory();
                       }}
                     >
-                      Xem Đơn Trong Lịch Sử
+                      {t('Xem Đơn Trong Lịch Sử')}
                     </button>
                     <button
                       type="button"
                       className="btn-close-simple"
                       onClick={onClose}
                     >
-                      ✕ Đóng
+                      {t('✕ Đóng')}
                     </button>
                   </div>
                 </div>
@@ -630,40 +632,40 @@ export default function CheckoutModal({
         {checkoutStep === 'success' && (
           <div className="checkout-success-view">
             <div className="success-badge-icon">✓</div>
-            <h2 className="success-title">Đặt Hàng Thành Công!</h2>
+            <h2 className="success-title">{t('Đặt Hàng Thành Công!')}</h2>
             <p className="success-sub">
-              Cảm ơn bạn đã mua sắm tại <strong>Point TCG</strong>. Đơn hàng của bạn đã được chuyển tới Admin và bộ phận Shopper để chuẩn bị đóng gói nguyên seal chính hãng.
+              {t('Cảm ơn bạn đã mua sắm tại Point TCG. Đơn hàng của bạn đã được chuyển tới shop để chuẩn bị đóng gói nguyên seal chính hãng.')}
             </p>
 
             <div className="order-receipt-card">
               <div className="receipt-row">
-                <span className="receipt-label">Mã Đơn Hàng:</span>
+                <span className="receipt-label">{t('Mã Đơn Hàng:')}</span>
                 <span className="receipt-val code-highlight">#{activeOrder.id}</span>
               </div>
               <div className="receipt-row">
-                <span className="receipt-label">Thời Gian Tạo:</span>
+                <span className="receipt-label">{t('Thời Gian Tạo:')}</span>
                 <span className="receipt-val">{activeOrder.createdAt}</span>
               </div>
               <div className="receipt-row">
-                <span className="receipt-label">Trạng Thái Đơn:</span>
+                <span className="receipt-label">{t('Trạng Thái Đơn:')}</span>
                 <span className="receipt-val" style={{ color: '#16a34a', fontWeight: 800 }}>
-                  {activeOrder.status}
+                  {t(activeOrder.status)}
                 </span>
               </div>
               <div className="receipt-row">
-                <span className="receipt-label">Người Nhận:</span>
+                <span className="receipt-label">{t('Người Nhận:')}</span>
                 <span className="receipt-val">{activeOrder.customerName} ({activeOrder.customerPhone})</span>
               </div>
               <div className="receipt-row">
-                <span className="receipt-label">Địa Chỉ Nhận Hàng:</span>
+                <span className="receipt-label">{t('Địa Chỉ Nhận Hàng:')}</span>
                 <span className="receipt-val">{activeOrder.shippingAddress}</span>
               </div>
               <div className="receipt-row">
-                <span className="receipt-label">Phương Thức:</span>
-                <span className="receipt-val">{activeOrder.paymentMethod}</span>
+                <span className="receipt-label">{t('Phương Thức:')}</span>
+                <span className="receipt-val">{t(activeOrder.paymentMethod)}</span>
               </div>
               <div className="receipt-row total-highlight">
-                <span className="receipt-label">Tổng Tiền:</span>
+                <span className="receipt-label">{t('Tổng Tiền:')}</span>
                 <span className="receipt-val">
                   ${activeOrder.total.toFixed(2)} USD ({formatVndText(activeOrder.amountVnd)})
                 </span>
@@ -672,14 +674,14 @@ export default function CheckoutModal({
 
             <div className="order-items-receipt">
               <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#475569', marginBottom: '8px' }}>
-                Sản phẩm trong đơn ({activeOrder.items?.length || 0}):
+                {t('Sản phẩm trong đơn ({n}):', { n: activeOrder.items?.length || 0 })}
               </div>
               {(activeOrder.items || []).map((item, idx) => (
                 <div key={idx} className="receipt-item-line">
                   <img src={item.image} alt={item.title} className="receipt-thumb" />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="receipt-item-name">{item.title}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Số lượng: x{item.qty}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{t('Số lượng:')} x{item.qty}</div>
                   </div>
                   <div style={{ fontWeight: 800, color: '#0053e2' }}>
                     ${(item.price * item.qty).toFixed(2)}
@@ -694,7 +696,7 @@ export default function CheckoutModal({
                 className="btn-continue-shopping"
                 onClick={onClose}
               >
-                Tiếp Tục Mua Sắm
+                {t('Tiếp Tục Mua Sắm')}
               </button>
               {onOpenOrderHistory && (
                 <button
@@ -705,7 +707,7 @@ export default function CheckoutModal({
                     onOpenOrderHistory();
                   }}
                 >
-                  Xem Lịch Sử Đơn Hàng
+                  {t('Xem Lịch Sử Đơn Hàng')}
                 </button>
               )}
             </div>
@@ -723,13 +725,13 @@ export default function CheckoutModal({
                   <rect x="2" y="5" width="20" height="14" rx="2" />
                   <line x1="2" y1="10" x2="22" y2="10" />
                 </svg>
-                <h2 className="checkout-title">Point TCG Secure Checkout</h2>
+                <h2 className="checkout-title">{t('Point TCG Secure Checkout')}</h2>
               </div>
               <div className="ssl-badge">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 5a3 3 0 0 1 6 0v3H9V7z" />
                 </svg>
-                <span>SSL 256-Bit Encrypted</span>
+                <span>{t('SSL 256-Bit Encrypted')}</span>
               </div>
             </div>
 
@@ -740,15 +742,15 @@ export default function CheckoutModal({
                 <div className="checkout-section-block">
                   <h3 className="section-block-title">
                     <span className="step-circle">1</span>
-                    <span>Thông Tin Nhận Hàng</span>
+                    <span>{t('Thông Tin Nhận Hàng')}</span>
                   </h3>
 
                   <div className="form-group">
-                    <label className="form-label">Họ và tên người nhận <span style={{ color: '#ef4444' }}>*</span></label>
+                    <label className="form-label">{t('Họ và tên người nhận')} <span style={{ color: '#ef4444' }}>*</span></label>
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="Nhập họ và tên người nhận..."
+                      placeholder={t('Nhập họ và tên người nhận...')}
                       value={shippingInfo.name}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, name: e.target.value })}
                       required
@@ -757,22 +759,22 @@ export default function CheckoutModal({
 
                   <div className="form-row-2">
                     <div className="form-group">
-                      <label className="form-label">Số điện thoại liên hệ <span style={{ color: '#ef4444' }}>*</span></label>
+                      <label className="form-label">{t('Số điện thoại liên hệ')} <span style={{ color: '#ef4444' }}>*</span></label>
                       <input
                         type="tel"
                         className="form-input"
-                        placeholder="Nhập số điện thoại liên hệ (ví dụ: 0912 345 678)..."
+                        placeholder={t('Nhập số điện thoại liên hệ (ví dụ: 0912 345 678)...')}
                         value={shippingInfo.phone}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
                         required
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Email nhận vận đơn</label>
+                      <label className="form-label">{t('Email nhận vận đơn')}</label>
                       <input
                         type="email"
                         className="form-input"
-                        placeholder="Nhập địa chỉ email của bạn..."
+                        placeholder={t('Nhập địa chỉ email của bạn...')}
                         value={shippingInfo.email}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
                       />
@@ -780,11 +782,11 @@ export default function CheckoutModal({
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Địa chỉ giao hàng chi tiết <span style={{ color: '#ef4444' }}>*</span></label>
+                    <label className="form-label">{t('Địa chỉ giao hàng chi tiết')} <span style={{ color: '#ef4444' }}>*</span></label>
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="Nhập địa chỉ nhận hàng (Số nhà, tên đường, Phường/Xã, Quận/Huyện...)"
+                      placeholder={t('Nhập địa chỉ nhận hàng (Số nhà, tên đường, Phường/Xã, Quận/Huyện...)')}
                       value={shippingInfo.address}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, address: e.target.value })}
                       required
@@ -792,11 +794,11 @@ export default function CheckoutModal({
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Ghi chú cho shipper (tuỳ chọn)</label>
+                    <label className="form-label">{t('Ghi chú cho shipper (tuỳ chọn)')}</label>
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="Ví dụ: Gọi trước khi giao, bọc thêm túi chống nước..."
+                      placeholder={t('Ví dụ: Gọi trước khi giao, bọc thêm túi chống nước...')}
                       value={shippingInfo.note}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, note: e.target.value })}
                     />
@@ -807,7 +809,7 @@ export default function CheckoutModal({
                 <div className="checkout-section-block">
                   <h3 className="section-block-title">
                     <span className="step-circle">2</span>
-                    <span>Phương Thức Vận Chuyển</span>
+                    <span>{t('Phương Thức Vận Chuyển')}</span>
                   </h3>
 
                   <div className="shipping-options-list">
@@ -822,11 +824,11 @@ export default function CheckoutModal({
                         onChange={() => setShippingMethod('standard')}
                       />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, color: '#0f172a' }}>Giao Tiêu Chuẩn (Standard Tamper-Proof Box)</div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Hộp chống sốc niêm phong (3-5 ngày làm việc)</div>
+                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{t('Giao Tiêu Chuẩn (Standard Tamper-Proof Box)')}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{t('Hộp chống sốc niêm phong (3-5 ngày làm việc)')}</div>
                       </div>
                       <div style={{ fontWeight: 800, color: isFreeStandard ? '#16a34a' : '#0053e2' }}>
-                        {isFreeStandard ? 'MIỄN PHÍ' : '$8.50'}
+                        {isFreeStandard ? t('MIỄN PHÍ') : '$8.50'}
                       </div>
                     </label>
 
@@ -841,8 +843,8 @@ export default function CheckoutModal({
                         onChange={() => setShippingMethod('express')}
                       />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, color: '#0f172a' }}>Hoả Tốc Bảo Hiểm Vault Express</div>
-                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Bảo hiểm 100% giá trị thẻ hiếm, giao trong 24h</div>
+                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{t('Hoả Tốc Bảo Hiểm Vault Express')}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{t('Bảo hiểm 100% giá trị thẻ hiếm, giao trong 24h')}</div>
                       </div>
                       <div style={{ fontWeight: 800, color: '#0053e2' }}>
                         $15.00
@@ -855,7 +857,7 @@ export default function CheckoutModal({
                 <div className="checkout-section-block">
                   <h3 className="section-block-title">
                     <span className="step-circle">3</span>
-                    <span>Phương Thức Thanh Toán</span>
+                    <span>{t('Phương Thức Thanh Toán')}</span>
                   </h3>
 
                   <div className="payment-method-selector">
@@ -864,14 +866,14 @@ export default function CheckoutModal({
                       className={`pay-tab-btn ${paymentMethod === 'qr' ? 'active' : ''}`}
                       onClick={() => setPaymentMethod('qr')}
                     >
-                      Chuyển Khoản / VietQR
+                      {t('Chuyển Khoản / VietQR')}
                     </button>
                     <button
                       type="button"
                       className={`pay-tab-btn ${paymentMethod === 'cod' ? 'active' : ''}`}
                       onClick={() => setPaymentMethod('cod')}
                     >
-                      Thanh Toán Tiền Mặt Khi Nhận Hàng (COD)
+                      {t('Thanh Toán Tiền Mặt Khi Nhận Hàng (COD)')}
                     </button>
                   </div>
 
@@ -879,10 +881,10 @@ export default function CheckoutModal({
                   {paymentMethod === 'qr' && (
                     <div className="payment-details-box qr-box">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
-                        <span>Quét mã VietQR chuyển khoản (Có đồng hồ đếm ngược 15:00)</span>
+                        <span>{t('Quét mã VietQR chuyển khoản (Có đồng hồ đếm ngược 15:00)')}</span>
                       </div>
                       <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
-                        Khi bấm <strong>"Đặt Hàng & Thanh Toán"</strong> bên dưới, đơn hàng sẽ ngay lập tức được gửi đến <strong>Admin</strong> và màn hình sẽ hiển thị <strong>Mã QR VietQR kèm thời gian đếm ngược 15 phút</strong> để bạn quét thanh toán nhanh chóng.
+                        {t('Khi bấm "Đặt Hàng & Thanh Toán" bên dưới, đơn hàng sẽ ngay lập tức được gửi đến shop và màn hình sẽ hiển thị mã QR VietQR kèm thời gian đếm ngược 15 phút để bạn quét thanh toán nhanh chóng.')}
                       </p>
                     </div>
                   )}
@@ -890,7 +892,7 @@ export default function CheckoutModal({
                   {paymentMethod === 'cod' && (
                     <div className="payment-details-box">
                       <div style={{ fontSize: '0.9rem', color: '#475569', lineHeight: 1.6 }}>
-                        Thanh toán tiền mặt trực tiếp cho shipper khi nhận gói hàng Pokémon TCG. Quý khách được đồng kiểm bao bì niêm phong trước khi thanh toán.
+                        {t('Thanh toán tiền mặt trực tiếp cho shipper khi nhận gói hàng Pokémon TCG. Quý khách được đồng kiểm bao bì niêm phong trước khi thanh toán.')}
                       </div>
                     </div>
                   )}
@@ -900,7 +902,7 @@ export default function CheckoutModal({
               {/* RIGHT COLUMN: ORDER SUMMARY & VOUCHER */}
               <div className="checkout-col-right">
                 <div className="order-summary-card">
-                  <h3 className="order-summary-title">Tóm Tắt Đơn Hàng ({cartItems.length})</h3>
+                  <h3 className="order-summary-title">{t('Tóm Tắt Đơn Hàng')} ({cartItems.length})</h3>
 
                   {/* Mini item list with quantity adjustment controls */}
                   <div className="checkout-items-list">
@@ -914,7 +916,7 @@ export default function CheckoutModal({
                             
                             {/* Quantity buttons & stock notice */}
                             <div className="checkout-qty-container">
-                              <span className="checkout-qty-label">Số lượng:</span>
+                              <span className="checkout-qty-label">{t('Số lượng:')}</span>
                               <div className="checkout-qty-picker">
                                 <button
                                   type="button"
@@ -925,7 +927,7 @@ export default function CheckoutModal({
                                     }
                                   }}
                                   disabled={item.qty <= 1}
-                                  title="Giảm 1 sản phẩm"
+                                  title={t('Giảm 1 sản phẩm')}
                                 >
                                   -
                                 </button>
@@ -936,21 +938,21 @@ export default function CheckoutModal({
                                   onClick={() => {
                                     if (onUpdateQty) {
                                       if (item.qty >= itemStock) {
-                                        alert(`Sản phẩm này chỉ còn tối đa ${itemStock} cái trong kho!`);
+                                        alert(t('Sản phẩm này chỉ còn tối đa {n} cái trong kho!', { n: itemStock }));
                                         return;
                                       }
                                       onUpdateQty(item.id, item.qty + 1);
                                     }
                                   }}
                                   disabled={item.qty >= itemStock}
-                                  title={item.qty >= itemStock ? `Đã đạt giới hạn kho (${itemStock} sp)` : 'Tăng thêm 1 sản phẩm'}
+                                  title={item.qty >= itemStock ? t('Đã đạt giới hạn tồn kho ({n} sp)', { n: itemStock }) : t('Tăng thêm 1 sản phẩm')}
                                 >
                                   +
                                 </button>
                               </div>
 
                               <span className={`checkout-stock-hint ${item.qty >= itemStock ? 'stock-max' : ''}`}>
-                                {item.qty >= itemStock ? `(Tối đa ${itemStock} sp)` : `(Còn ${itemStock} sp)`}
+                                {item.qty >= itemStock ? `(${t('Tối đa {n} sp', { n: itemStock })})` : `(${t('Còn {n} sp', { n: itemStock })})`}
                               </span>
                             </div>
                           </div>
@@ -976,9 +978,9 @@ export default function CheckoutModal({
                       type="button"
                       className="btn-checkout-add-more"
                       onClick={onClose}
-                      title="Chọn thêm sản phẩm khác từ cửa hàng"
+                      title={t('Chọn thêm sản phẩm khác từ cửa hàng')}
                     >
-                      <span>+ Chọn thêm sản phẩm khác</span>
+                      <span>{t('+ Chọn thêm sản phẩm khác')}</span>
                     </button>
                   </div>
 
@@ -987,7 +989,7 @@ export default function CheckoutModal({
                     <input
                       type="text"
                       className="coupon-input"
-                      placeholder="Mã voucher (ví dụ: POINTTCG)"
+                      placeholder={t('Mã voucher (ví dụ: POINTTCG)')}
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
                     />
@@ -996,7 +998,7 @@ export default function CheckoutModal({
                       className="coupon-apply-btn"
                       onClick={handleApplyCoupon}
                     >
-                      Áp dụng
+                      {t('Áp dụng')}
                     </button>
                   </div>
                   {couponMessage && (
@@ -1008,29 +1010,29 @@ export default function CheckoutModal({
                   {/* Calculations breakdown */}
                   <div className="summary-calculation-lines">
                     <div className="calc-row">
-                      <span>Tạm tính (Subtotal)</span>
+                      <span>{t('Tạm tính (Subtotal)')}</span>
                       <span>${cartTotal.toFixed(2)}</span>
                     </div>
 
                     <div className="calc-row">
-                      <span>Đóng gói bảo vệ Pokémon Seal</span>
-                      <span style={{ color: '#16a34a', fontWeight: 700 }}>MIỄN PHÍ</span>
+                      <span>{t('Đóng gói bảo vệ Pokémon Seal')}</span>
+                      <span style={{ color: '#16a34a', fontWeight: 700 }}>{t('MIỄN PHÍ')}</span>
                     </div>
 
                     <div className="calc-row">
-                      <span>Phí vận chuyển</span>
-                      <span>{shippingFee === 0 ? 'MIỄN PHÍ' : `$${shippingFee.toFixed(2)}`}</span>
+                      <span>{t('Phí vận chuyển')}</span>
+                      <span>{shippingFee === 0 ? t('MIỄN PHÍ') : `$${shippingFee.toFixed(2)}`}</span>
                     </div>
 
                     {appliedDiscount > 0 && (
                       <div className="calc-row discount-row">
-                        <span>Giảm giá ({appliedDiscount}%)</span>
+                        <span>{t('Giảm giá')} ({appliedDiscount}%)</span>
                         <span style={{ color: '#dc2626', fontWeight: 700 }}>-${discountAmount.toFixed(2)}</span>
                       </div>
                     )}
 
                     <div className="calc-total-row">
-                      <span>Tổng Thanh Toán:</span>
+                      <span>{t('Tổng Thanh Toán:')}</span>
                       <div style={{ textAlign: 'right' }}>
                         <div className="final-price-tag">${finalTotal.toFixed(2)}</div>
                         <div style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>
@@ -1041,7 +1043,7 @@ export default function CheckoutModal({
                   </div>
 
                   <button type="submit" className="btn-confirm-checkout">
-                    <span>Đặt Hàng & Thanh Toán Ngay</span>
+                    <span>{t('Đặt Hàng & Thanh Toán Ngay')}</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M5 12h14" />
                       <path d="M12 5l7 7-7 7" />
@@ -1049,7 +1051,7 @@ export default function CheckoutModal({
                   </button>
 
                   <div className="checkout-guarantee-note">
-                    Cam kết 100% hàng chính hãng niêm phong factory sealed • Đơn hàng đồng bộ tức thì sang Admin Shopper
+                    {t('Cam kết 100% hàng chính hãng niêm phong factory sealed • Đơn hàng đồng bộ tức thì sang Admin Shopper')}
                   </div>
                 </div>
               </div>

@@ -11,28 +11,30 @@ import {
 import { updateUserProfile, changePassword } from '../utils/auth';
 import { saveReviewToDb } from '../services/firestoreService';
 import { getProductCatalogImage } from '../products';
+import { useI18n, getLocale } from '../i18n';
 
 const formatTime = (d) =>
-  d ? d.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : '';
+  d ? d.toLocaleString(getLocale(), { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : '';
 
 // =============================================================
 // 1. THANH TIẾN TRÌNH ĐƠN HÀNG
 // =============================================================
 export function OrderTimeline({ order }) {
+  const { t } = useI18n();
   if (order.status === CANCELLED_STATUS) {
-    return <div className="otl-cancelled">✕ Đơn hàng đã huỷ</div>;
+    return <div className="otl-cancelled">✕ {t('Đơn hàng đã huỷ')}</div>;
   }
   const current = getTimelineIndex(order.status);
 
   return (
-    <ol className="otl" aria-label="Tiến trình đơn hàng">
+    <ol className="otl" aria-label={t('Tiến trình đơn hàng')}>
       {TIMELINE_STEPS.map((step, i) => {
         const done = i <= current;
         const time = done ? getStepTime(order, step) : null;
         return (
           <li key={step.key} className={`otl-step ${done ? 'done' : ''} ${i === current ? 'current' : ''}`}>
             <span className="otl-dot">{done ? '✓' : i + 1}</span>
-            <span className="otl-label">{step.label}</span>
+            <span className="otl-label">{t(step.label)}</span>
             {time && <span className="otl-time">{formatTime(time)}</span>}
           </li>
         );
@@ -45,13 +47,14 @@ export function OrderTimeline({ order }) {
 // 2. MÃ VẬN ĐƠN
 // =============================================================
 export function TrackingInfo({ order }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   if (!order.trackingCode) return null;
   const url = getTrackingUrl(order.carrier, order.trackingCode);
 
   return (
     <div className="tracking-box">
-      <span>{order.carrier || 'Vận chuyển'}:</span>
+      <span>{order.carrier || t('Vận chuyển')}:</span>
       <strong className="tracking-code">{order.trackingCode}</strong>
       <button
         type="button"
@@ -63,11 +66,11 @@ export function TrackingInfo({ order }) {
           });
         }}
       >
-        {copied ? 'Đã chép' : 'Sao chép'}
+        {copied ? t('Đã chép') : t('Sao chép')}
       </button>
       {url && (
         <a href={url} target="_blank" rel="noreferrer" className="tracking-link">
-          Tra cứu hành trình ↗
+          {t('Tra cứu hành trình ↗')}
         </a>
       )}
     </div>
@@ -78,6 +81,7 @@ export function TrackingInfo({ order }) {
 // 3. SỬA HỒ SƠ & ĐỔI MẬT KHẨU
 // =============================================================
 export function ProfileEditor({ currentUser, onUpdateCurrentUser }) {
+  const { t } = useI18n();
   const [form, setForm] = useState({
     name: currentUser.name || '',
     phone: currentUser.phone || '',
@@ -93,7 +97,7 @@ export function ProfileEditor({ currentUser, onUpdateCurrentUser }) {
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) {
-      setProfileMsg({ ok: false, text: 'Họ tên không được để trống.' });
+      setProfileMsg({ ok: false, text: t('Họ tên không được để trống.') });
       return;
     }
     setSavingProfile(true);
@@ -101,20 +105,20 @@ export function ProfileEditor({ currentUser, onUpdateCurrentUser }) {
     setSavingProfile(false);
     if (res.success) {
       onUpdateCurrentUser?.(res.user);
-      setProfileMsg({ ok: true, text: 'Đã lưu thông tin tài khoản.' });
+      setProfileMsg({ ok: true, text: t('Đã lưu thông tin tài khoản.') });
     } else {
-      setProfileMsg({ ok: false, text: res.error });
+      setProfileMsg({ ok: false, text: t(res.error) });
     }
   };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (pw.next.length < 6) {
-      setPwMsg({ ok: false, text: 'Mật khẩu mới phải có tối thiểu 6 ký tự.' });
+      setPwMsg({ ok: false, text: t('Mật khẩu mới phải có tối thiểu 6 ký tự.') });
       return;
     }
     if (pw.next !== pw.confirm) {
-      setPwMsg({ ok: false, text: 'Mật khẩu xác nhận không khớp.' });
+      setPwMsg({ ok: false, text: t('Mật khẩu xác nhận không khớp.') });
       return;
     }
     setSavingPw(true);
@@ -122,9 +126,9 @@ export function ProfileEditor({ currentUser, onUpdateCurrentUser }) {
     setSavingPw(false);
     if (res.success) {
       setPw({ current: '', next: '', confirm: '' });
-      setPwMsg({ ok: true, text: 'Đã đổi mật khẩu.' });
+      setPwMsg({ ok: true, text: t('Đã đổi mật khẩu.') });
     } else {
-      setPwMsg({ ok: false, text: res.error });
+      setPwMsg({ ok: false, text: t(res.error) });
     }
   };
 
@@ -148,25 +152,25 @@ export function ProfileEditor({ currentUser, onUpdateCurrentUser }) {
   return (
     <>
       <form className="cop-profile-form" onSubmit={handleSaveProfile}>
-        {field('name', 'Họ và tên')}
+        {field('name', t('Họ và tên'))}
         <div className="cop-form-group">
-          <label>Email đăng nhập</label>
+          <label>{t('Email đăng nhập')}</label>
           <input type="email" readOnly value={currentUser.email} className="cop-input-readonly" />
         </div>
-        {field('phone', 'Số điện thoại', 'tel', '0901234567')}
-        {field('address', 'Địa chỉ nhận hàng mặc định', 'text', 'Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành')}
+        {field('phone', t('Số điện thoại'), 'tel', '0901234567')}
+        {field('address', t('Địa chỉ nhận hàng mặc định'), 'text', t('Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành'))}
         {msg(profileMsg)}
         <div className="cop-profile-actions">
           <button type="submit" className="cop-btn-edit-profile" disabled={savingProfile}>
-            {savingProfile ? 'Đang lưu...' : 'Lưu thông tin'}
+            {savingProfile ? t('Đang lưu...') : t('Lưu thông tin')}
           </button>
         </div>
       </form>
 
       <form className="cop-profile-form acc-password-form" onSubmit={handleChangePassword}>
-        <h3 className="acc-subtitle">Đổi mật khẩu</h3>
+        <h3 className="acc-subtitle">{t('Đổi mật khẩu')}</h3>
         <div className="cop-form-group">
-          <label htmlFor="pw-current">Mật khẩu hiện tại</label>
+          <label htmlFor="pw-current">{t('Mật khẩu hiện tại')}</label>
           <input
             id="pw-current"
             type="password"
@@ -178,20 +182,20 @@ export function ProfileEditor({ currentUser, onUpdateCurrentUser }) {
           />
         </div>
         <div className="cop-form-group">
-          <label htmlFor="pw-next">Mật khẩu mới</label>
+          <label htmlFor="pw-next">{t('Mật khẩu mới')}</label>
           <input
             id="pw-next"
             type="password"
             autoComplete="new-password"
             className="cop-input-editable"
-            placeholder="Tối thiểu 6 ký tự"
+            placeholder={t('Tối thiểu 6 ký tự')}
             value={pw.next}
             onChange={(e) => setPw({ ...pw, next: e.target.value })}
             required
           />
         </div>
         <div className="cop-form-group">
-          <label htmlFor="pw-confirm">Nhập lại mật khẩu mới</label>
+          <label htmlFor="pw-confirm">{t('Nhập lại mật khẩu mới')}</label>
           <input
             id="pw-confirm"
             type="password"
@@ -205,7 +209,7 @@ export function ProfileEditor({ currentUser, onUpdateCurrentUser }) {
         {msg(pwMsg)}
         <div className="cop-profile-actions">
           <button type="submit" className="cop-btn-edit-profile" disabled={savingPw}>
-            {savingPw ? 'Đang đổi...' : 'Đổi mật khẩu'}
+            {savingPw ? t('Đang đổi...') : t('Đổi mật khẩu')}
           </button>
         </div>
       </form>
@@ -217,15 +221,16 @@ export function ProfileEditor({ currentUser, onUpdateCurrentUser }) {
 // 4. ĐÁNH GIÁ SẢN PHẨM ĐÃ NHẬN
 // =============================================================
 function StarPicker({ value, onChange }) {
+  const { t } = useI18n();
   return (
-    <div className="star-picker" role="radiogroup" aria-label="Số sao">
+    <div className="star-picker" role="radiogroup" aria-label={t('Số sao')}>
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
           type="button"
           role="radio"
           aria-checked={value === n}
-          aria-label={`${n} sao`}
+          aria-label={t('{n} sao', { n })}
           className={n <= value ? 'on' : ''}
           onClick={() => onChange(n)}
         >
@@ -238,6 +243,7 @@ function StarPicker({ value, onChange }) {
 
 // hideHead: dùng trong trang chi tiết sản phẩm (đã có tên/ảnh sản phẩm ở trên)
 export function ReviewForm({ item, order, existing, currentUser, onSaved, hideHead = false }) {
+  const { t } = useI18n();
   const [rating, setRating] = useState(existing?.rating || 5);
   const [comment, setComment] = useState(existing?.comment || '');
   const [state, setState] = useState(existing ? 'saved' : 'idle'); // idle | saving | saved | error | editing
@@ -273,7 +279,7 @@ export function ReviewForm({ item, order, existing, currentUser, onSaved, hideHe
           {img && <img src={img} alt="" className="review-item-thumb" />}
           <div>
             <div className="review-item-title">{item.title}</div>
-            <div className="review-item-sub">Đơn #{order.id}</div>
+            <div className="review-item-sub">{t('Đơn #{id}', { id: order.id })}</div>
           </div>
         </div>
       )}
@@ -283,7 +289,7 @@ export function ReviewForm({ item, order, existing, currentUser, onSaved, hideHe
           <span style={{ color: '#f59e0b' }}>{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</span>
           {comment && <p>{comment}</p>}
           <button type="button" className="cop-btn-small" onClick={() => setState('editing')}>
-            Sửa đánh giá
+            {t('Sửa đánh giá')}
           </button>
         </div>
       ) : (
@@ -291,14 +297,14 @@ export function ReviewForm({ item, order, existing, currentUser, onSaved, hideHe
           <StarPicker value={rating} onChange={setRating} />
           <textarea
             className="review-textarea"
-            placeholder="Chia sẻ cảm nhận về sản phẩm (tình trạng seal, đóng gói, pull...)"
+            placeholder={t('Chia sẻ cảm nhận về sản phẩm (tình trạng seal, đóng gói, pull...)')}
             maxLength={1000}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
-          {state === 'error' && <div className="acc-msg-err">Không gửi được đánh giá. Vui lòng thử lại.</div>}
+          {state === 'error' && <div className="acc-msg-err">{t('Không gửi được đánh giá. Vui lòng thử lại.')}</div>}
           <button type="submit" className="cop-btn-edit-profile" disabled={state === 'saving'}>
-            {state === 'saving' ? 'Đang gửi...' : 'Gửi đánh giá'}
+            {state === 'saving' ? t('Đang gửi...') : t('Gửi đánh giá')}
           </button>
         </form>
       )}
@@ -307,6 +313,7 @@ export function ReviewForm({ item, order, existing, currentUser, onSaved, hideHe
 }
 
 export function ReviewsPanel({ currentUser, orders, reviews, onReviewSaved, onGoToOrders }) {
+  const { t } = useI18n();
   // Mỗi sản phẩm chỉ đánh giá một lần, lấy từ đơn đã giao gần nhất
   const reviewable = useMemo(() => {
     const seen = new Set();
@@ -325,18 +332,18 @@ export function ReviewsPanel({ currentUser, orders, reviews, onReviewSaved, onGo
   }, [orders]);
 
   if (!currentUser) {
-    return <p className="cop-empty-text">Vui lòng đăng nhập để đánh giá sản phẩm.</p>;
+    return <p className="cop-empty-text">{t('Vui lòng đăng nhập để đánh giá sản phẩm.')}</p>;
   }
 
   if (reviewable.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-        <h3 style={{ fontSize: '1.1rem', color: '#1e293b', fontWeight: 700 }}>Chưa có sản phẩm để đánh giá</h3>
+        <h3 style={{ fontSize: '1.1rem', color: '#1e293b', fontWeight: 700 }}>{t('Chưa có sản phẩm để đánh giá')}</h3>
         <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '460px', margin: '8px auto 20px' }}>
-          Khi đơn hàng chuyển sang "Giao thành công", sản phẩm trong đơn sẽ xuất hiện ở đây để bạn chấm sao và nhận xét.
+          {t('Khi đơn hàng chuyển sang "Giao thành công", sản phẩm trong đơn sẽ xuất hiện ở đây để bạn chấm sao và nhận xét.')}
         </p>
         <button type="button" className="cop-btn-shop-now" onClick={onGoToOrders}>
-          Xem đơn hàng
+          {t('Xem đơn hàng')}
         </button>
       </div>
     );

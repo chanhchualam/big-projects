@@ -1,6 +1,7 @@
 // src/components/Carousel.jsx
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import ProductCard from './ProductCard';
+import { useI18n } from '../i18n';
 
 export default function Carousel({
   products = [],
@@ -13,6 +14,7 @@ export default function Carousel({
   onRequestRestock,
   defaultEmail
 }) {
+  const { t } = useI18n();
   const containerRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -60,7 +62,7 @@ export default function Carousel({
   if (!products.length) {
     return (
       <div style={{ padding: '30px', textAlign: 'center', color: '#64748b' }}>
-        No closed drawings match your search criteria.
+        {t('No closed drawings match your search criteria.')}
       </div>
     );
   }
@@ -72,8 +74,8 @@ export default function Carousel({
         className="carousel-arrow carousel-arrow-prev"
         onClick={() => handleScroll('left')}
         disabled={!canScrollLeft}
-        aria-label="Scroll left"
-        title="Scroll left"
+        aria-label={t('Scroll left')}
+        title={t('Scroll left')}
       >
         <svg
           viewBox="0 0 24 24"
@@ -110,8 +112,8 @@ export default function Carousel({
         className="carousel-arrow carousel-arrow-next"
         onClick={() => handleScroll('right')}
         disabled={!canScrollRight}
-        aria-label="Scroll right"
-        title="Scroll right"
+        aria-label={t('Scroll right')}
+        title={t('Scroll right')}
       >
         <svg
           viewBox="0 0 24 24"

@@ -1,5 +1,6 @@
 // src/components/Header.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useI18n, LANGUAGES } from '../i18n';
 
 // Helper to normalize search text: lowercase, remove accents/diacritics, trim
 export const normalizeSearchText = (str) => {
@@ -32,6 +33,7 @@ export default function Header({
   onLogoClick,
   notificationBell = null
 }) {
+  const { t, lang, setLang } = useI18n();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const dropdownRef = useRef(null);
@@ -127,7 +129,7 @@ export default function Header({
               inputMode="search"
               role="searchbox"
               className="search-input"
-              placeholder="Search everything at Point TCG (Booster, 151, Pikachu...)"
+              placeholder={t('Search everything at Point TCG (Booster, 151, Pikachu...)')}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -139,7 +141,7 @@ export default function Header({
                   setIsSearchFocused(false);
                 }
               }}
-              aria-label="Search everything at Point TCG"
+              aria-label={t('Search everything at Point TCG')}
               autoComplete="off"
               spellCheck="false"
             />
@@ -151,8 +153,8 @@ export default function Header({
                   setSearchQuery('');
                   setIsSearchFocused(false);
                 }}
-                title="Clear search"
-                aria-label="Clear search"
+                title={t('Clear search')}
+                aria-label={t('Clear search')}
               >
                 <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -163,8 +165,8 @@ export default function Header({
             <button
               type="submit"
               className="search-submit-btn"
-              aria-label="Submit search"
-              title="Search"
+              aria-label={t('Search')}
+              title={t('Search')}
             >
               <svg
                 viewBox="0 0 24 24"
@@ -186,12 +188,12 @@ export default function Header({
               <div className="search-suggestions-header">
                 <span className="suggestions-count-text">
                   {searchResults.length > 0 ? (
-                    <>Tìm thấy <strong>{searchResults.length}</strong> sản phẩm phù hợp</>
+                    <>{t('Tìm thấy')} <strong>{searchResults.length}</strong> {t('sản phẩm phù hợp')}</>
                   ) : (
-                    <>Không có sản phẩm phù hợp</>
+                    <>{t('Không có sản phẩm phù hợp')}</>
                   )}
                 </span>
-                <span className="search-esc-hint">Nhấn Enter để xem kết quả</span>
+                <span className="search-esc-hint">{t('Nhấn Enter để xem kết quả')}</span>
               </div>
 
               {searchResults.length > 0 ? (
@@ -230,12 +232,12 @@ export default function Header({
                           )}
                           {item.badge && <span className="suggestion-badge">{item.badge}</span>}
                           <span className="suggestion-stock-tag">
-                            {typeof item.stock === 'number' ? (item.stock > 0 ? `Còn ${item.stock}` : 'Hết hàng') : 'Còn hàng'}
+                            {typeof item.stock === 'number' ? (item.stock > 0 ? t('Còn {n}', { n: item.stock }) : t('Hết hàng')) : t('Còn hàng')}
                           </span>
                         </div>
                       </div>
                       <div className="suggestion-action-hint">
-                        <span>Chi tiết</span>
+                        <span>{t('Chi tiết')}</span>
                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" strokeWidth="2.5">
                           <polyline points="9 18 15 12 9 6" />
                         </svg>
@@ -245,8 +247,8 @@ export default function Header({
                 </div>
               ) : (
                 <div className="search-no-suggestions">
-                  <p className="no-sugg-title">Không tìm thấy sản phẩm nào khớp với <strong>"{searchQuery}"</strong></p>
-                  <p className="no-sugg-sub">Gợi ý từ khóa tìm nhanh:</p>
+                  <p className="no-sugg-title">{t('Không tìm thấy sản phẩm nào khớp với')} <strong>"{searchQuery}"</strong></p>
+                  <p className="no-sugg-sub">{t('Gợi ý từ khóa tìm nhanh:')}</p>
                   <div className="search-quick-tags">
                     {['Booster Box', '151', 'Charizard', 'Pikachu', 'Crown Zenith', 'Elite Trainer'].map((tag) => (
                       <button
@@ -280,7 +282,7 @@ export default function Header({
                   role="button"
                   tabIndex={0}
                 >
-                  <span>Xem tất cả <strong>{searchResults.length}</strong> sản phẩm cho "{searchQuery}"</span>
+                  <span>{t('Xem tất cả')} <strong>{searchResults.length}</strong> {t('sản phẩm cho')} "{searchQuery}"</span>
                   <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" strokeWidth="2.5">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
@@ -296,7 +298,7 @@ export default function Header({
             type="button"
             className="header-btn"
             onClick={onOpenSaved}
-            aria-label={`My Items, ${savedCount} saved items`}
+            aria-label={t('My Items, {n} saved items', { n: savedCount })}
           >
             <svg
               className="header-btn-icon"
@@ -311,8 +313,8 @@ export default function Header({
             </svg>
             {savedCount > 0 && <span className="header-badge">{savedCount}</span>}
             <div className="header-btn-label">
-              <span className="header-btn-sub">Reorder</span>
-              <span>My Items</span>
+              <span className="header-btn-sub">{t('Reorder')}</span>
+              <span>{t('My Items')}</span>
             </div>
           </button>
 
@@ -323,8 +325,8 @@ export default function Header({
             type="button"
             className="header-btn"
             onClick={onOpenOrders}
-            aria-label="Track Orders"
-            title="Track Orders"
+            aria-label={t('Track Orders')}
+            title={t('Track Orders')}
           >
             <svg className="header-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -333,8 +335,8 @@ export default function Header({
             </svg>
             {pendingOrdersCount > 0 && <span className="header-badge">{pendingOrdersCount}</span>}
             <div className="header-btn-label">
-              <span className="header-btn-sub">Track</span>
-              <span>Orders</span>
+              <span className="header-btn-sub">{t('Track')}</span>
+              <span>{t('Orders')}</span>
             </div>
           </button>
 
@@ -346,7 +348,7 @@ export default function Header({
                 className="header-btn"
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 aria-expanded={userDropdownOpen}
-                aria-label={`Account menu for ${user.name}`}
+                aria-label={t('Account menu for {name}', { name: user.name })}
               >
                 <svg
                   className="header-btn-icon"
@@ -361,8 +363,8 @@ export default function Header({
                   <circle cx="12" cy="7" r="4" />
                 </svg>
                 <div className="header-btn-label">
-                  <span className="header-btn-sub">Account</span>
-                  <span>Hi, {user.name}</span>
+                  <span className="header-btn-sub">{t('Account')}</span>
+                  <span>{t('Hi, {name}', { name: user.name })}</span>
                 </div>
               </button>
 
@@ -382,7 +384,7 @@ export default function Header({
                       if (onOpenOrders) onOpenOrders('profile');
                     }}
                   >
-                    Thông tin tài khoản của tôi (Profile)
+                    {t('Thông tin tài khoản của tôi')}
                   </button>
 
                   {user.role === 'admin' && (
@@ -395,7 +397,7 @@ export default function Header({
                         if (onOpenAdmin) onOpenAdmin();
                       }}
                     >
-                      Vào Trang Quản Trị (Admin Page)
+                      {t('Vào trang quản trị')}
                     </button>
                   )}
 
@@ -407,7 +409,7 @@ export default function Header({
                       onOpenSaved();
                     }}
                   >
-                    My Saved Drawings ({savedCount})
+                    {t('My Saved Drawings ({n})', { n: savedCount })}
                   </button>
 
                   <button
@@ -418,7 +420,7 @@ export default function Header({
                       if (onOpenOrders) onOpenOrders();
                     }}
                   >
-                    My Orders & History ({user.role === 'customer' ? 'My Orders' : 'All Orders'})
+                    {user.role === 'customer' ? t('Đơn hàng của tôi') : t('Tất cả đơn hàng')}
                   </button>
 
                   <button
@@ -426,10 +428,10 @@ export default function Header({
                     className="user-dropdown-item"
                     onClick={() => {
                       setUserDropdownOpen(false);
-                      alert('Bạn đang có lượt tham gia rút thăm Pokémon TCG chờ kết quả mở giải!');
+                      alert(t('Bạn đang có lượt tham gia rút thăm Pokémon TCG chờ kết quả mở giải!'));
                     }}
                   >
-                    My Drawing Entries
+                    {t('My Drawing Entries')}
                   </button>
 
                   <button
@@ -441,7 +443,7 @@ export default function Header({
                       onSignOut();
                     }}
                   >
-                    Đăng xuất (Sign Out)
+                    {t('Đăng xuất')}
                   </button>
                 </div>
               )}
@@ -451,7 +453,7 @@ export default function Header({
               type="button"
               className="header-btn"
               onClick={() => onOpenSignIn('login')}
-              aria-label="Sign In or Create Account"
+              aria-label={t('Sign In or Create Account')}
             >
               <svg
                 className="header-btn-icon"
@@ -466,18 +468,34 @@ export default function Header({
                 <circle cx="12" cy="7" r="4" />
               </svg>
               <div className="header-btn-label">
-                <span className="header-btn-sub">Sign In</span>
-                <span>Account</span>
+                <span className="header-btn-sub">{t('Sign In')}</span>
+                <span>{t('Account')}</span>
               </div>
             </button>
           )}
+
+          {/* Chọn ngôn ngữ giao diện */}
+          <div className="lang-switch" role="group" aria-label={t('Ngôn ngữ')}>
+            {LANGUAGES.map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                className={lang === l.code ? 'active' : ''}
+                onClick={() => setLang(l.code)}
+                aria-pressed={lang === l.code}
+                title={l.name}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
 
           {/* Cart Icon showing total price */}
           <button
             type="button"
             className="header-btn cart-btn"
             onClick={onOpenCart}
-            aria-label={`Shopping Cart, total $${cartTotal.toFixed(2)}, ${cartCount} items`}
+            aria-label={t('Shopping Cart, total ${total}, {n} items', { total: cartTotal.toFixed(2), n: cartCount })}
           >
             <svg
               className="header-btn-icon"

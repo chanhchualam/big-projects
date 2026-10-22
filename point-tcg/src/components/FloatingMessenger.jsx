@@ -1,20 +1,22 @@
 // src/components/FloatingMessenger.jsx
 // Nút chat Messenger & Liên hệ cố định góc phải màn hình
 import React from 'react';
+import { useI18n } from '../i18n';
 
 const MESSENGER_URL = 'https://m.me/1429099050281227';
 
 export default function FloatingMessenger() {
+  const { t } = useI18n();
   return (
-    <div className="floating-contact-widget" aria-label="Hỗ trợ qua Messenger">
+    <div className="floating-contact-widget" aria-label={t('Hỗ trợ qua Messenger')}>
       {/* 1. Nút đỏ 'Liên hệ' phía trên kèm hiệu ứng sóng xung quanh */}
       <a
         href={MESSENGER_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="floating-red-btn"
-        title="Liên hệ tư vấn Point TCG"
-        aria-label="Liên hệ tư vấn"
+        title={t('Liên hệ tư vấn Point TCG')}
+        aria-label={t('Liên hệ tư vấn')}
       >
         <span className="floating-pulse-ring" />
         <span className="floating-pulse-ring delay" />
@@ -33,7 +35,7 @@ export default function FloatingMessenger() {
             <circle cx="12" cy="10" r="1.5" fill="#0043b8" />
             <circle cx="16" cy="10" r="1.5" fill="#0043b8" />
           </svg>
-          <span className="floating-red-text">Liên hệ</span>
+          <span className="floating-red-text">{t('Liên hệ')}</span>
         </div>
       </a>
 
@@ -43,7 +45,7 @@ export default function FloatingMessenger() {
         target="_blank"
         rel="noopener noreferrer"
         className="floating-messenger-btn"
-        title="Chat với Point TCG qua Facebook Messenger"
+        title={t('Chat với Point TCG qua Facebook Messenger')}
         aria-label="Chat Messenger"
       >
         <div className="messenger-icon-circle">

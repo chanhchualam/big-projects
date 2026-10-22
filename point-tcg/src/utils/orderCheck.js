@@ -3,6 +3,7 @@
 // của khách gửi lên nên có thể bị sửa — admin xem cảnh báo này trước khi xác nhận đơn.
 // Quy tắc phí ship / mã giảm giá phải khớp với CheckoutModal.
 import { orderVndRate } from './currency';
+import { translate } from '../i18n';
 
 const FREE_SHIPPING_THRESHOLD = 75;
 const LEGACY_MAX_DISCOUNT_PERCENT = 10; // đơn cũ trước khi có bảng coupons
@@ -13,11 +14,11 @@ const differs = (a, b) => Math.abs((Number(a) || 0) - (Number(b) || 0)) > TOLERA
 
 // Lý do mã giảm giá không dùng được (null nếu hợp lệ)
 export function getCouponError(coupon, subtotal) {
-  if (!coupon) return 'Mã giảm giá không tồn tại.';
-  if (coupon.active === false) return 'Mã giảm giá đã bị tắt.';
-  if (coupon.expiresAt && new Date(`${coupon.expiresAt}T23:59:59`) < new Date()) return 'Mã giảm giá đã hết hạn.';
-  if (coupon.maxUses > 0 && (coupon.usedCount || 0) >= coupon.maxUses) return 'Mã giảm giá đã hết lượt sử dụng.';
-  if (coupon.minOrder > 0 && subtotal < coupon.minOrder) return `Mã chỉ áp dụng cho đơn từ ${money(coupon.minOrder)}.`;
+  if (!coupon) return translate('Mã giảm giá không tồn tại.');
+  if (coupon.active === false) return translate('Mã giảm giá đã bị tắt.');
+  if (coupon.expiresAt && new Date(`${coupon.expiresAt}T23:59:59`) < new Date()) return translate('Mã giảm giá đã hết hạn.');
+  if (coupon.maxUses > 0 && (coupon.usedCount || 0) >= coupon.maxUses) return translate('Mã giảm giá đã hết lượt sử dụng.');
+  if (coupon.minOrder > 0 && subtotal < coupon.minOrder) return translate('Mã chỉ áp dụng cho đơn từ {amount}.', { amount: money(coupon.minOrder) });
   return null;
 }
 

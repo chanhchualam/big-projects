@@ -1,6 +1,7 @@
 // src/components/AnnouncementBar.jsx
 // Thanh thông báo của shop trên đầu trang (admin soạn trong trang quản trị). Khách có thể ẩn từng thông báo.
 import React, { useState, useEffect, useMemo } from 'react';
+import { useI18n } from '../i18n';
 
 const DISMISSED_KEY = 'point-tcg-dismissed-announcements';
 
@@ -13,6 +14,7 @@ function readDismissed() {
 }
 
 export default function AnnouncementBar({ announcements = [] }) {
+  const { t } = useI18n();
   const [dismissed, setDismissed] = useState(readDismissed);
   const [index, setIndex] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -59,9 +61,9 @@ export default function AnnouncementBar({ announcements = [] }) {
                 setTimeout(() => setCopied(false), 1500);
               });
             }}
-            title="Sao chép mã giảm giá"
+            title={t('Sao chép mã giảm giá')}
           >
-            {copied ? '✓ Đã chép' : `Mã: ${a.couponCode}`}
+            {copied ? `✓ ${t('Đã chép')}` : t('Mã: {code}', { code: a.couponCode })}
           </button>
         )}
         {a.link && (
@@ -77,7 +79,7 @@ export default function AnnouncementBar({ announcements = [] }) {
           <span className="announce-count">{(index % visible.length) + 1}/{visible.length}</span>
         )}
       </div>
-      <button type="button" className="announce-close" onClick={dismiss} aria-label="Ẩn thông báo này">
+      <button type="button" className="announce-close" onClick={dismiss} aria-label={t('Ẩn thông báo này')}>
         ✕
       </button>
     </div>

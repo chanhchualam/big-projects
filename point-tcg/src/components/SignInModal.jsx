@@ -5,6 +5,7 @@ import {
   authenticateUser,
   sendPasswordReset
 } from '../utils/auth';
+import { useI18n } from '../i18n';
 
 export default function SignInModal({
   isOpen,
@@ -13,6 +14,7 @@ export default function SignInModal({
   initialMode = 'login', // 'login' | 'register'
   notice = '' // lý do cần đăng nhập (VD: xem chi tiết / đặt hàng)
 }) {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
 
   // Form State - Login
@@ -73,7 +75,7 @@ export default function SignInModal({
     setLoginInfo('');
 
     if (!loginEmail.trim() || !loginPassword.trim()) {
-      setLoginError('Vui lòng điền đầy đủ email và mật khẩu!');
+      setLoginError(t('Vui lòng điền đầy đủ email và mật khẩu!'));
       return;
     }
 
@@ -85,10 +87,10 @@ export default function SignInModal({
         setLoginPassword('');
         onClose();
       } else {
-        setLoginError(res.error || 'Email hoặc mật khẩu không chính xác!');
+        setLoginError(t(res.error || 'Email hoặc mật khẩu không chính xác!'));
       }
     } catch (err) {
-      setLoginError('Lỗi kết nối khi đăng nhập. Vui lòng thử lại!');
+      setLoginError(t('Lỗi kết nối khi đăng nhập. Vui lòng thử lại!'));
     } finally {
       setIsSubmitting(false);
     }
@@ -100,7 +102,7 @@ export default function SignInModal({
     setLoginInfo('');
 
     if (!loginEmail.trim()) {
-      setLoginError('Vui lòng nhập email ở trên rồi bấm "Quên mật khẩu?"');
+      setLoginError(t('Vui lòng nhập email ở trên rồi bấm "Quên mật khẩu?"'));
       return;
     }
 
@@ -108,7 +110,7 @@ export default function SignInModal({
     try {
       const res = await sendPasswordReset(loginEmail);
       if (res.success) {
-        setLoginInfo(`Nếu ${loginEmail.trim()} đã đăng ký, bạn sẽ nhận được email đặt lại mật khẩu trong vài phút (kiểm tra cả mục Spam).`);
+        setLoginInfo(t('Nếu {email} đã đăng ký, bạn sẽ nhận được email đặt lại mật khẩu trong vài phút (kiểm tra cả mục Spam).', { email: loginEmail.trim() }));
       } else {
         setLoginError(res.error);
       }
@@ -126,19 +128,19 @@ export default function SignInModal({
     setRegSuccess('');
 
     if (!regName.trim()) {
-      setRegError('Vui lòng nhập họ và tên của bạn!');
+      setRegError(t('Vui lòng nhập họ và tên của bạn!'));
       return;
     }
     if (!regEmail.trim()) {
-      setRegError('Vui lòng nhập địa chỉ email hợp lệ!');
+      setRegError(t('Vui lòng nhập địa chỉ email hợp lệ!'));
       return;
     }
     if (!regPassword.trim() || regPassword.length < 6) {
-      setRegError('Mật khẩu phải có tối thiểu 6 ký tự!');
+      setRegError(t('Mật khẩu phải có tối thiểu 6 ký tự!'));
       return;
     }
     if (regPassword !== regConfirmPassword) {
-      setRegError('Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.');
+      setRegError(t('Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.'));
       return;
     }
 
@@ -153,16 +155,16 @@ export default function SignInModal({
       });
 
       if (regResult.success) {
-        setRegSuccess('Đăng ký tài khoản thành công! Đang tự động lưu lên Firebase và đăng nhập...');
+        setRegSuccess(t('Đăng ký tài khoản thành công! Đang tự động lưu lên Firebase và đăng nhập...'));
         setTimeout(() => {
           onSignInSuccess(regResult.user);
           onClose();
         }, 900);
       } else {
-        setRegError(regResult.error || 'Đăng ký không thành công. Vui lòng thử lại!');
+        setRegError(t(regResult.error || 'Đăng ký không thành công. Vui lòng thử lại!'));
       }
     } catch (err) {
-      setRegError('Lỗi kết nối khi đăng ký. Vui lòng thử lại!');
+      setRegError(t('Lỗi kết nối khi đăng ký. Vui lòng thử lại!'));
     } finally {
       setIsSubmitting(false);
     }
@@ -170,13 +172,13 @@ export default function SignInModal({
 
 
   return (
-    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Tài khoản Point TCG">
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={t('Tài khoản Point TCG')}>
       <div className="signin-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px' }}>
         <button
           type="button"
           className="modal-close-icon-btn"
           onClick={onClose}
-          aria-label="Đóng cửa sổ"
+          aria-label={t('Đóng cửa sổ')}
         >
           ✕
         </button>
@@ -193,7 +195,7 @@ export default function SignInModal({
               setLoginError('');
             }}
           >
-            Đăng Nhập
+            {t('Đăng Nhập')}
           </button>
           <button
             type="button"
@@ -203,7 +205,7 @@ export default function SignInModal({
               setRegError('');
             }}
           >
-            Đăng Ký
+            {t('Đăng Ký')}
           </button>
         </div>
 
@@ -219,8 +221,8 @@ export default function SignInModal({
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
-              <h2 className="signin-title">Đăng Nhập Khách Hàng</h2>
-              <p className="signin-sub">Đăng nhập tài khoản để đặt hàng, tham gia rút thăm Pokémon TCG và quản lý thanh toán.</p>
+              <h2 className="signin-title">{t('Đăng Nhập Khách Hàng')}</h2>
+              <p className="signin-sub">{t('Đăng nhập tài khoản để đặt hàng, tham gia rút thăm Pokémon TCG và quản lý thanh toán.')}</p>
             </div>
 
 
@@ -239,14 +241,14 @@ export default function SignInModal({
             <form className="signin-form" onSubmit={handleUserLogin}>
               <div className="form-group">
                 <label className="form-label" htmlFor="user-login-email">
-                  Email <span style={{ color: '#ef4444' }}>*</span>
+                  {t('Email')} <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
                   id="user-login-email"
                   type="email"
                   autoComplete="username"
                   className="form-input"
-                  placeholder="email@vidu.com"
+                  placeholder={t('email@vidu.com')}
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   required
@@ -256,7 +258,7 @@ export default function SignInModal({
 
               <div className="form-group">
                 <label className="form-label" htmlFor="user-login-pass">
-                  Mật khẩu <span style={{ color: '#ef4444' }}>*</span>
+                  {t('Mật khẩu')} <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
                   id="user-login-pass"
@@ -274,7 +276,7 @@ export default function SignInModal({
                     onClick={handleForgotPassword}
                     disabled={isSubmitting}
                   >
-                    Quên mật khẩu?
+                    {t('Quên mật khẩu?')}
                   </button>
                 </div>
               </div>
@@ -285,18 +287,18 @@ export default function SignInModal({
                 disabled={isSubmitting}
                 style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'wait' : 'pointer' }}
               >
-                {isSubmitting ? 'Đang kiểm tra đăng nhập...' : 'Đăng Nhập Ngay'}
+                {isSubmitting ? t('Đang kiểm tra đăng nhập...') : t('Đăng Nhập Ngay')}
               </button>
 
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '0.82rem' }}>
-                <span style={{ color: '#64748b' }}>Chưa có tài khoản?</span>
+                <span style={{ color: '#64748b' }}>{t('Chưa có tài khoản?')}</span>
                 <button
                   type="button"
                   style={{ color: '#0053e2', fontWeight: 700, cursor: 'pointer' }}
                   onClick={() => setActiveTab('register')}
                 >
-                  Tạo tài khoản mới →
+                  {t('Tạo tài khoản mới →')}
                 </button>
               </div>
             </form>
@@ -317,8 +319,8 @@ export default function SignInModal({
                   <line x1="23" y1="11" x2="17" y2="11" />
                 </svg>
               </div>
-              <h2 className="signin-title">Đăng Ký Thành Viên</h2>
-              <p className="signin-sub">Tạo tài khoản Point TCG miễn phí để nhận ưu đãi, lưu địa chỉ giao hàng và thanh toán nhanh chóng.</p>
+              <h2 className="signin-title">{t('Đăng Ký Thành Viên')}</h2>
+              <p className="signin-sub">{t('Tạo tài khoản Point TCG miễn phí để nhận ưu đãi, lưu địa chỉ giao hàng và thanh toán nhanh chóng.')}</p>
             </div>
 
             {regError && (
@@ -336,13 +338,13 @@ export default function SignInModal({
             <form className="signin-form" onSubmit={handleUserRegister}>
               <div className="form-group">
                 <label className="form-label" htmlFor="reg-name-input">
-                  Họ và tên của bạn <span style={{ color: '#ef4444' }}>*</span>
+                  {t('Họ và tên của bạn')} <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
                   id="reg-name-input"
                   type="text"
                   className="form-input"
-                  placeholder="ví dụ: Nguyễn Văn A"
+                  placeholder={t('ví dụ: Nguyễn Văn A')}
                   value={regName}
                   onChange={(e) => setRegName(e.target.value)}
                   required
@@ -352,13 +354,13 @@ export default function SignInModal({
 
               <div className="form-group">
                 <label className="form-label" htmlFor="reg-email-input">
-                  Địa chỉ Email <span style={{ color: '#ef4444' }}>*</span>
+                  {t('Địa chỉ Email')} <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
                   id="reg-email-input"
                   type="email"
                   className="form-input"
-                  placeholder="ví dụ: customer@gmail.com"
+                  placeholder={t('ví dụ: customer@gmail.com')}
                   value={regEmail}
                   onChange={(e) => setRegEmail(e.target.value)}
                   required
@@ -368,7 +370,7 @@ export default function SignInModal({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div className="form-group">
                   <label className="form-label" htmlFor="reg-phone-input">
-                    Số điện thoại
+                    {t('Số điện thoại')}
                   </label>
                   <input
                     id="reg-phone-input"
@@ -382,13 +384,13 @@ export default function SignInModal({
 
                 <div className="form-group">
                   <label className="form-label" htmlFor="reg-pass-input">
-                    Mật khẩu <span style={{ color: '#ef4444' }}>*</span>
+                    {t('Mật khẩu')} <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <input
                     id="reg-pass-input"
                     type="password"
                     className="form-input"
-                    placeholder="Tối thiểu 6 ký tự"
+                    placeholder={t('Tối thiểu 6 ký tự')}
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     required
@@ -398,13 +400,13 @@ export default function SignInModal({
 
               <div className="form-group">
                 <label className="form-label" htmlFor="reg-confirm-pass">
-                  Xác nhận lại mật khẩu <span style={{ color: '#ef4444' }}>*</span>
+                  {t('Xác nhận lại mật khẩu')} <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <input
                   id="reg-confirm-pass"
                   type="password"
                   className="form-input"
-                  placeholder="Nhập lại mật khẩu..."
+                  placeholder={t('Nhập lại mật khẩu...')}
                   value={regConfirmPassword}
                   onChange={(e) => setRegConfirmPassword(e.target.value)}
                   required
@@ -413,13 +415,13 @@ export default function SignInModal({
 
               <div className="form-group">
                 <label className="form-label" htmlFor="reg-address-input">
-                  Địa chỉ giao hàng mặc định (tiện khi thanh toán)
+                  {t('Địa chỉ giao hàng mặc định (tiện khi thanh toán)')}
                 </label>
                 <input
                   id="reg-address-input"
                   type="text"
                   className="form-input"
-                  placeholder="Số nhà, tên đường, quận/huyện, tỉnh/thành phố..."
+                  placeholder={t('Số nhà, tên đường, quận/huyện, tỉnh/thành phố...')}
                   value={regAddress}
                   onChange={(e) => setRegAddress(e.target.value)}
                 />
@@ -431,17 +433,17 @@ export default function SignInModal({
                 disabled={isSubmitting}
                 style={{ backgroundColor: '#059669', color: '#ffffff', opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'wait' : 'pointer' }}
               >
-                {isSubmitting ? 'Đang lưu tài khoản lên Firebase...' : 'Hoàn Tất Đăng Ký Tài Khoản'}
+                {isSubmitting ? t('Đang lưu tài khoản lên Firebase...') : t('Hoàn Tất Đăng Ký Tài Khoản')}
               </button>
 
               <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.82rem', color: '#64748b' }}>
-                Đã có tài khoản?{' '}
+                {t('Đã có tài khoản?')}{' '}
                 <button
                   type="button"
                   style={{ color: '#0053e2', fontWeight: 700, cursor: 'pointer' }}
                   onClick={() => setActiveTab('login')}
                 >
-                  Đăng nhập tại đây →
+                  {t('Đăng nhập tại đây →')}
                 </button>
               </div>
             </form>
