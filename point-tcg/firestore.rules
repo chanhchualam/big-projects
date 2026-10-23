@@ -16,6 +16,26 @@ service cloud.firestore {
       return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    // LỚP BẢO MẬT 2: admin phải nhập "mã bảo mật admin" trong lần đăng nhập hiện tại.
+    // Phiên mở khoá (admin_sessions/{uid}) gắn với auth_time của lần đăng nhập và hết hạn sau 8 giờ.
+    // Mọi quyền quản trị dùng adminOk(); isAdmin() chỉ dùng để tạo mã / mở khoá.
+    function adminOk() {
+      let sessionPath = /databases/$(database)/documents/admin_sessions/$(request.auth.uid);
+      return isAdmin()
+        && exists(sessionPath)
+        && get(sessionPath).data.authTime == request.auth.token.auth_time
+        && request.time < get(sessionPath).data.createdAt + duration.value(8, 'h');
+    }
+
+    // proof = sha256(mã + ':' + uid) do trình duyệt tính; trong admin_secrets chỉ lưu sha256(proof)
+    function proofMatches(proof) {
+      let secretPath = /databases/$(database)/documents/admin_secrets/$(request.auth.uid);
+      return proof is string
+        && proof.size() == 64
+        && exists(secretPath)
+        && hashing.sha256(proof).toHexString().lower() == get(secretPath).data.codeHash;
+    }
+
     function onlyChanges(keys) {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
     }
@@ -34,27 +54,71 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ---------------- MÃ BẢO MẬT ADMIN (lớp 2) ----------------
+    // Không ai đọc được (kể cả admin) để không lộ mã băm. Tạo lần đầu khi chưa có;
+    // đổi mã phải chứng minh mã cũ. Quên mã: xoá document này trong Firebase Console rồi tạo lại.
+    match /admin_secrets/{uid} {
+      allow read: if false;
+      allow create: if isAdmin()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['codeHash', 'updatedAt'])
+        && request.resource.data.codeHash is string
+        && request.resource.data.codeHash.matches('^[0-9a-f]{64}$')
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isAdmin()
+        && request.auth.uid == uid
+        && proofMatches(request.resource.data.get('oldProof', ''))
+        && request.resource.data.keys().hasOnly(['codeHash', 'updatedAt', 'oldProof'])
+        && request.resource.data.codeHash.matches('^[0-9a-f]{64}$')
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // Phiên mở khoá trang quản trị. Không đọc được (chứa proof); chỉ rules dùng get().
+    match /admin_sessions/{uid} {
+      allow read: if false;
+      allow create, update: if isAdmin()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['proof', 'authTime', 'createdAt'])
+        && proofMatches(request.resource.data.proof)
+        && request.resource.data.authTime == request.auth.token.auth_time
+        && request.resource.data.createdAt == request.time;
+      // Khoá lại / đăng xuất
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Nhật ký bảo mật: chỉ thêm, không sửa / xoá được
+    match /admin_logs/{id} {
+      allow read: if adminOk();
+      allow create: if isAdmin()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.at == request.time
+        && request.resource.data.type in ['unlock', 'unlock_failed', 'lock', 'code_set', 'code_changed', 'auto_lock']
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'type', 'at', 'device']);
+      allow update, delete: if false;
+    }
+
     // ---------------- PRODUCTS ----------------
     match /products/{productId} {
       allow read: if true;
       // Chỉ admin sửa sản phẩm, kể cả tồn kho (trừ khi xác nhận đơn)
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if adminOk();
     }
 
     // ---------------- PRODUCT MEDIA (ảnh gốc + ảnh phụ, tải khi mở trang chi tiết) ----------------
     match /product_media/{productId} {
       // Ảnh gốc / trang chi tiết: chỉ khách đã đăng nhập
-      allow read: if signedInWithAccount() || isAdmin();
-      allow write: if isAdmin();
+      allow read: if signedInWithAccount() || adminOk();
+      allow write: if adminOk();
     }
 
     // ---------------- ORDERS ----------------
     match /orders/{orderId} {
-      allow read: if isAdmin()
+      allow read: if adminOk()
         || (signedIn() && resource.data.uid == request.auth.uid);
 
       // Chỉ tài khoản đã đăng nhập (không phải phiên ẩn danh) mới đặt hàng được
-      allow create: if isAdmin()
+      allow create: if adminOk()
         || (signedInWithAccount()
             && request.resource.data.uid == request.auth.uid
             && request.resource.data.status in newOrderStatuses()
@@ -65,7 +129,7 @@ service cloud.firestore {
 
       // Khách: chỉ đổi trạng thái đơn của chính mình sang "Đã huỷ" hoặc "Khách báo đã chuyển khoản"
       // (kèm thêm đúng một mốc vào statusHistory)
-      allow update: if isAdmin()
+      allow update: if adminOk()
         || (signedIn()
             && resource.data.uid == request.auth.uid
             && onlyChanges(['status', 'updatedAt', 'statusHistory'])
@@ -78,33 +142,33 @@ service cloud.firestore {
                 && request.resource.data.status == 'Khách báo đã chuyển khoản (Chờ xác nhận)')
             ));
 
-      allow delete: if isAdmin();
+      allow delete: if adminOk();
     }
 
     // ---------------- USERS (hồ sơ khách hàng, KHÔNG chứa mật khẩu) ----------------
     match /users/{uid} {
-      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow read: if adminOk() || (signedIn() && request.auth.uid == uid);
       allow create: if signedInWithAccount()
         && request.auth.uid == uid
         && request.resource.data.role == 'customer'
         && !('password' in request.resource.data);
-      allow update: if isAdmin()
+      allow update: if adminOk()
         || (signedInWithAccount()
             && request.auth.uid == uid
             && onlyChanges(['name', 'phone', 'address', 'updatedAt', 'wishlist'])
             && request.resource.data.get('wishlist', []) is list
             && request.resource.data.get('wishlist', []).size() <= 200);
-      allow delete: if isAdmin();
+      allow delete: if adminOk();
     }
 
     // ---------------- COUPONS (mã giảm giá, id = mã) ----------------
     match /coupons/{code} {
       // Khách chỉ tra được đúng mã mình nhập, không liệt kê được danh sách mã
       allow get: if true;
-      allow list: if isAdmin();
-      allow create, delete: if isAdmin();
+      allow list: if adminOk();
+      allow create, delete: if adminOk();
       // Khách đặt hàng: tăng lượt dùng đúng 1, không vượt giới hạn
-      allow update: if isAdmin()
+      allow update: if adminOk()
         || (signedIn()
             && onlyChanges(['usedCount'])
             && request.resource.data.usedCount == resource.data.get('usedCount', 0) + 1
@@ -127,7 +191,7 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.uid == request.auth.uid
         && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.status == 'Giao thành công'
         && get(/databases/$(database)/documents/orders/$(request.resource.data.orderId)).data.productIds.hasAny([request.resource.data.productId]);
-      allow delete: if isAdmin()
+      allow delete: if adminOk()
         || (signedIn() && resource.data.uid == request.auth.uid);
     }
 
@@ -139,19 +203,19 @@ service cloud.firestore {
         && request.resource.data.email is string
         && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
         && exists(/databases/$(database)/documents/products/$(request.resource.data.productId));
-      allow read, delete: if isAdmin();
+      allow read, delete: if adminOk();
     }
 
     // ---------------- ANNOUNCEMENTS (thanh thông báo của shop) ----------------
     match /announcements/{id} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if adminOk();
     }
 
     // ---------------- SETTINGS (QR ngân hàng, thông tin shop) ----------------
     match /settings/{key} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if adminOk();
     }
   }
 }

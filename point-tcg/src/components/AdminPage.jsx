@@ -1,7 +1,9 @@
 // src/components/AdminPage.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminModal from './AdminModal';
+import AdminUnlock from './AdminUnlock';
 import { authenticateAdmin } from '../utils/auth';
+import { checkAdminUnlocked, IDLE_LOCK_MINUTES, lockAdmin } from '../utils/adminSecurity';
 
 export default function AdminPage({
   currentUser = null,
@@ -19,6 +21,8 @@ export default function AdminPage({
   onNavigateToStore,
   onAdminLoginSuccess = null,
   onSignOut = null,
+  adminUnlocked = false,
+  onAdminUnlockChange = () => {},
   initialProductToEdit = null
 }) {
   // Quyền admin chỉ đến từ Firebase Auth + collection 'admins' (xem buildSessionUser).
@@ -64,6 +68,35 @@ export default function AdminPage({
       else window.location.hash = '';
     }
   };
+
+  const lockNow = async (reason = 'lock') => {
+    await lockAdmin(reason);
+    onAdminUnlockChange(false);
+  };
+
+  // Tự khoá khi không thao tác IDLE_LOCK_MINUTES phút; kiểm tra định kỳ phiên còn hạn trên server
+  useEffect(() => {
+    if (!adminUser || !adminUnlocked) return;
+    let lastActive = Date.now();
+    const markActive = () => {
+      lastActive = Date.now();
+    };
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+    events.forEach((ev) => window.addEventListener(ev, markActive, { passive: true }));
+    const idleTimer = setInterval(() => {
+      if (Date.now() - lastActive > IDLE_LOCK_MINUTES * 60 * 1000) lockNow('auto_lock');
+    }, 30 * 1000);
+    const serverCheck = setInterval(() => {
+      checkAdminUnlocked().then((ok) => {
+        if (!ok) onAdminUnlockChange(false);
+      });
+    }, 5 * 60 * 1000);
+    return () => {
+      events.forEach((ev) => window.removeEventListener(ev, markActive));
+      clearInterval(idleTimer);
+      clearInterval(serverCheck);
+    };
+  }, [adminUser?.id, adminUnlocked]);
 
   // Waiting for Firebase Auth to restore the session
   if (!authReady) {
@@ -221,6 +254,19 @@ export default function AdminPage({
   }
 
   // -------------------------------------------------------------
+  // VIEW 1.5: BẢO MẬT LỚP 2 — NHẬP / TẠO MÃ BẢO MẬT ADMIN
+  // -------------------------------------------------------------
+  if (!adminUnlocked) {
+    return (
+      <AdminUnlock
+        adminUser={adminUser}
+        onUnlocked={() => onAdminUnlockChange(true)}
+        onSignOut={() => onSignOut && onSignOut()}
+      />
+    );
+  }
+
+  // -------------------------------------------------------------
   // VIEW 2: DEDICATED ADMIN DASHBOARD FULL PAGE
   // -------------------------------------------------------------
   return (
@@ -315,6 +361,7 @@ export default function AdminPage({
           onDeleteProduct={onDeleteProduct}
           onResetDefaults={onResetDefaults}
           initialProductToEdit={initialProductToEdit}
+          onLockAdmin={() => lockNow('lock')}
         />
       </main>
     </div>
