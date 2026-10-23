@@ -16,6 +16,7 @@ import {
 import { getCountdownMode, getDrawingText, toLocalInputValue, DEFAULT_LABELS } from '../utils/countdown';
 import { StatsTab, CouponsTab, RestockTab, AnnouncementsTab, TrackingEditor } from './AdminExtraTabs';
 import { auth } from '../firebase';
+import AdminSecurityPanel from './AdminSecurityPanel';
 import { detectSeries, getProductSeries, groupProductsBySeries, knownSeriesNames, OTHER_SERIES } from '../utils/productSeries';
 import {
   getQrConfig,
@@ -51,7 +52,8 @@ export default function AdminModal({
   onUpdateProduct,
   onDeleteProduct,
   onResetDefaults,
-  initialProductToEdit = null
+  initialProductToEdit = null,
+  onLockAdmin = null
 }) {
   // activeTab: 'open' | 'closed' | 'orders' | 'customers' | 'account'
   const [activeTab, setActiveTab] = useState('orders'); // Default to orders when opening admin for quick shopper fulfillment
@@ -2474,6 +2476,7 @@ export default function AdminModal({
                ========================================================================= */}
             {activeTab === 'account' && (
               <div className="admin-account-panel">
+                {onLockAdmin && <AdminSecurityPanel onLock={onLockAdmin} />}
                 <div className="admin-account-header">
                   <div>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>

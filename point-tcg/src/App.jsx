@@ -21,6 +21,7 @@ import AnnouncementBar from './components/AnnouncementBar';
 import HeroBanner from './components/HeroBanner';
 import { useI18n } from './i18n';
 import { VND_RATE } from './utils/currency';
+import { checkAdminUnlocked, lockAdmin } from './utils/adminSecurity';
 import { getDrawingText } from './utils/countdown';
 import {
   buildNotifications,
@@ -228,6 +229,21 @@ export default function App() {
   // Orders: admin sees every order, others only their own (enforced by firestore.rules)
   const [orders, setOrders] = useState([]);
 
+  // Bảo mật lớp 2: admin chỉ đọc/ghi dữ liệu quản trị sau khi mở khoá bằng mã bảo mật (firestore.rules)
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  useEffect(() => {
+    if (!isAdmin) {
+      setAdminUnlocked(false);
+      return;
+    }
+    let alive = true;
+    // Tải lại trang trong lúc phiên mở khoá còn hạn thì không phải nhập lại mã
+    checkAdminUnlocked().then((ok) => alive && setAdminUnlocked(ok));
+    return () => {
+      alive = false;
+    };
+  }, [isAdmin, authUid]);
+
   useEffect(() => {
     if (!authReady) return;
     // Khách: theo dõi trực tiếp đơn của mình để thấy ngay khi shop đổi trạng thái
@@ -238,6 +254,10 @@ export default function App() {
       }
       return subscribeOrdersForUser(authUid, setOrders);
     }
+    if (!adminUnlocked) {
+      setOrders([]);
+      return;
+    }
     let isMounted = true;
     fetchOrdersFromDb().then((list) => {
       if (isMounted) setOrders(list || []);
@@ -245,7 +265,7 @@ export default function App() {
     return () => {
       isMounted = false;
     };
-  }, [authReady, authUid, isAdmin]);
+  }, [authReady, authUid, isAdmin, adminUnlocked]);
 
   // Thông báo của shop (thanh trên đầu trang + chuông thông báo)
   const [announcements, setAnnouncements] = useState([]);
@@ -570,7 +590,10 @@ export default function App() {
     setCurrentRoute('admin');
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    // Admin: xoá phiên mở khoá trước khi đăng xuất (cần còn đăng nhập để xoá)
+    if (isAdmin) await lockAdmin('lock');
+    setAdminUnlocked(false);
     setUser(null);
     setOrders([]);
     signOutUser();
@@ -1193,6 +1216,8 @@ export default function App() {
           initialProductToEdit={adminProductToEdit}
           onAdminLoginSuccess={(adminData) => setUser(adminData)}
           onSignOut={handleSignOut}
+          adminUnlocked={adminUnlocked}
+          onAdminUnlockChange={setAdminUnlocked}
           onNavigateToStore={() => {
             setAdminProductToEdit(null);
             try {
