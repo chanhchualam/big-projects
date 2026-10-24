@@ -22,6 +22,7 @@ import HeroBanner from './components/HeroBanner';
 import { useI18n } from './i18n';
 import { VND_RATE } from './utils/currency';
 import { checkAdminUnlocked, lockAdmin } from './utils/adminSecurity';
+import { notifyShopNewOrder } from './utils/shopAlert';
 import { isPreorderProduct, getRemainingAllowance, getMaxPerCustomer, getPreorderSlotsLeft, getOrderedQty, getPreorderReservedFromOrders } from './utils/preorder';
 import { PRE_DEPOSIT_PAID, PRE_ARRIVED, PAID_STATUS, PREORDER_STATUSES, CANCELLED_STATUS } from './utils/orderStatus';
 import { getDrawingText } from './utils/countdown';
@@ -629,6 +630,7 @@ export default function App() {
 
     const saved = await saveOrderToDb(newOrder);
     if (!saved) return false;
+    notifyShopNewOrder(newOrder);
 
     if (newOrder.isPreorder) {
       setOrders(prev => [newOrder, ...prev.filter(o => o.id !== newOrder.id)]);
