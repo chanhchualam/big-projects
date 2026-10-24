@@ -10487,39 +10487,32 @@ body {
   width: 100%;
 }
 
-/* Chờ shop xác nhận chuyển khoản (sau màn hình mã QR) */
-.pay-confirm-banner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* Trang Đơn hàng: mã QR + nội dung chuyển khoản trong chi tiết đơn */
+.order-transfer-info {
   margin: 0 0 16px;
-  padding: 12px 14px;
+  padding: 14px;
+  border: 1px solid #bfdbfe;
   border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-align: left;
+  background: #f8fbff;
 }
-.pay-confirm-banner.waiting { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-.pay-confirm-banner.ok { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-.pay-confirm-banner.bad { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-.pay-confirm-spinner {
-  flex: none;
-  width: 18px;
-  height: 18px;
-  border: 2.5px solid #bfdbfe;
-  border-top-color: #2563eb;
-  border-radius: 50%;
-  animation: pay-confirm-spin 0.9s linear infinite;
+.order-transfer-info h4 { margin: 0 0 4px; color: #1d4ed8; font-size: 1rem; }
+.order-transfer-note { margin: 0 0 12px; color: #475569; font-size: 0.85rem; }
+.order-transfer-grid { display: grid; grid-template-columns: 180px 1fr; gap: 14px; align-items: start; }
+.order-transfer-grid .order-pay-qr { width: 100%; margin: 0; }
+.order-transfer-grid .order-pay-rows { margin: 0; }
+@media (max-width: 560px) {
+  .order-transfer-grid { grid-template-columns: 1fr; }
+  .order-transfer-grid .order-pay-qr { max-width: 220px; margin: 0 auto; }
 }
-@keyframes pay-confirm-spin { to { transform: rotate(360deg); } }
-.order-pay-timer {
-  margin: 4px 0 10px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: #eff6ff;
-  color: #1d4ed8;
-  font-weight: 700;
-  font-size: 0.88rem;
-  text-align: center;
+.cop-card-header-clickable { cursor: pointer; }
+/* Mỗi dòng: nhãn ở trên, giá trị + nút sao chép ở dưới (không vỡ chữ trên điện thoại) */
+.order-transfer-info .order-pay-rows > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "label label" "value btn";
+  align-items: center;
+  gap: 2px 10px;
 }
-.order-pay-timer.urgent { background: #fef2f2; color: #dc2626; }
+.order-transfer-info .order-pay-rows span { grid-area: label; }
+.order-transfer-info .order-pay-rows strong { grid-area: value; text-align: left; word-break: normal; overflow-wrap: anywhere; }
+.order-transfer-info .order-pay-rows button { grid-area: btn; }
