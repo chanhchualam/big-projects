@@ -1,8 +1,8 @@
 // src/components/OrderPaymentModal.jsx
 // Khách thanh toán lại từ trang Đơn hàng: tiền cọc đặt trước, phần còn lại khi hàng về,
 // hoặc đơn QR chưa chuyển. Hiện mã VietQR đúng số tiền + nút "Tôi đã chuyển khoản".
-import React, { useEffect, useState } from 'react';
-import { getQrConfig, loadQrConfig, generateQrUrl } from '../utils/qrConfig';
+import React, { useEffect, useRef, useState } from 'react';
+import { getQrConfig, loadQrConfig, generateQrUrl, QR_SECONDS } from '../utils/qrConfig';
 import { useI18n } from '../i18n';
 import { PRE_AWAIT_DEPOSIT, PRE_ARRIVED, PRE_DEPOSIT_REPORTED, CUSTOMER_REPORTED_PAID } from '../utils/orderStatus';
 
@@ -24,11 +24,24 @@ export default function OrderPaymentModal({ order, onClose, onReported }) {
   const [qrConfig, setQrConfig] = useState(() => getQrConfig());
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState('');
+  const [secondsLeft, setSecondsLeft] = useState(QR_SECONDS);
+  const reportedRef = useRef(false);
   const payment = getPendingPayment(order);
 
   useEffect(() => {
     loadQrConfig().then(setQrConfig).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Hết 1 phút giữ mã QR → chuyển đơn cho shop kiểm tra tiền và xác nhận
+  const reportRef = useRef(null);
+  useEffect(() => {
+    if (secondsLeft === 0) reportRef.current?.();
+  }, [secondsLeft]);
 
   if (!order || !payment) return null;
   const note = `${qrConfig.notePrefix || 'PTCG'} ${order.id}`;
@@ -44,11 +57,15 @@ export default function OrderPaymentModal({ order, onClose, onReported }) {
   };
 
   const report = async () => {
+    if (reportedRef.current) return;
+    reportedRef.current = true;
     setBusy(true);
     const ok = await onReported(order.id, payment.nextStatus);
     setBusy(false);
     if (ok) onClose();
+    else reportedRef.current = false;
   };
+  reportRef.current = report;
 
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={title}>
@@ -56,6 +73,11 @@ export default function OrderPaymentModal({ order, onClose, onReported }) {
         <button type="button" className="modal-close-icon-btn" onClick={onClose} aria-label={t('Đóng')}>✕</button>
         <h3>{title}</h3>
         <p className="order-pay-sub">{t('Đơn #{id}', { id: order.id })}</p>
+        <div className={`order-pay-timer ${secondsLeft <= 15 ? 'urgent' : ''}`}>
+          {secondsLeft > 0
+            ? t('Mã QR hết hạn sau {s} giây', { s: secondsLeft })
+            : t('Mã QR đã hết hạn. Đơn đang được chuyển cho shop kiểm tra và xác nhận...')}
+        </div>
         <img className="order-pay-qr" src={generateQrUrl(qrConfig, payment.amountVnd, order.id)} alt="VietQR" />
         <div className="order-pay-rows">
           <div><span>{t('Ngân Hàng:')}</span><strong>{qrConfig.bankName}</strong></div>

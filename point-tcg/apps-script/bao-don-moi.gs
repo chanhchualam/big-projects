@@ -6,7 +6,9 @@
  * Email được gửi tới chính Gmail đang chạy script (Gmail của shop).
  */
 var PROJECT_ID = 'point-tcg';
-var MAX_ORDER_AGE_MINUTES = 30; // chỉ báo đơn vừa tạo, không báo lại đơn cũ
+var MAX_ORDER_AGE_MINUTES = 30; // chỉ báo đơn vừa tạo / vừa báo chuyển khoản, không báo lại đơn cũ
+// Khách báo đã chuyển khoản (hoặc hết 1 phút giữ mã QR) → shop kiểm tra tài khoản rồi xác nhận
+var REPORTED_STATUSES = ['Khách báo đã chuyển khoản (Chờ xác nhận)', 'Khách báo đã chuyển cọc (Chờ xác nhận)'];
 
 function doPost(e) {
   // SePay báo có tiền vào (link có ?key=...): xử lý trong sepay.gs
@@ -16,9 +18,10 @@ function doPost(e) {
     var orderId = String(body.orderId || '');
     if (!/^PTCG-[0-9]{6,10}$/.test(orderId) || !body.idToken) return reply('bad request');
 
-    // Mỗi đơn chỉ báo một lần
+    // event: 'created' = đơn mới (COD), 'reported' = khách báo đã chuyển khoản
+    var event = body.event === 'reported' ? 'reported' : 'created';
     var props = PropertiesService.getScriptProperties();
-    if (props.getProperty('sent_' + orderId)) return reply('already sent');
+    if (event === 'created' && props.getProperty('sent_' + orderId)) return reply('already sent');
 
     // Đọc đơn bằng phiên đăng nhập của khách: Firestore rules chỉ cho chủ đơn đọc,
     // nên đơn không có thật hoặc không phải của người gửi sẽ bị từ chối ở đây.
@@ -30,19 +33,27 @@ function doPost(e) {
     if (res.getResponseCode() !== 200) return reply('not allowed');
     var order = fromFields(JSON.parse(res.getContentText()).fields || {});
 
-    var first = (order.statusHistory && order.statusHistory[0]) || {};
-    var createdAt = new Date(first.at || 0).getTime();
-    if (!createdAt || Date.now() - createdAt > MAX_ORDER_AGE_MINUTES * 60 * 1000) return reply('too old');
+    var history = order.statusHistory || [];
+    var mark = (event === 'created' ? history[0] : history[history.length - 1]) || {};
+    var at = new Date(mark.at || 0).getTime();
+    if (!at || Date.now() - at > MAX_ORDER_AGE_MINUTES * 60 * 1000) return reply('too old');
 
-    sendMail(order);
-    props.setProperty('sent_' + orderId, String(Date.now()));
+    // Mỗi đơn chỉ báo một lần cho mỗi lần chuyển (đặt trước: lần cọc và lần trả phần còn lại)
+    var sentKey = event === 'created' ? 'sent_' + orderId : 'sent_reported_' + orderId + '_' + order.status;
+    if (event === 'reported') {
+      if (REPORTED_STATUSES.indexOf(order.status) < 0) return reply('not reported');
+      if (props.getProperty(sentKey)) return reply('already sent');
+    }
+
+    sendMail(order, event);
+    props.setProperty(sentKey, String(Date.now()));
     return reply('ok');
   } catch (err) {
     return reply('error');
   }
 }
 
-function sendMail(o) {
+function sendMail(o, event) {
   var vnd = function (n) { return Number(n || 0).toLocaleString('vi-VN') + '₫'; };
   var esc = function (s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -62,9 +73,23 @@ function sendMail(o) {
       vnd(o.depositVnd) + ' (' + esc(o.depositPercent) + '%), phát hành ' + esc(o.releaseDate) + '</p>'
     : '';
 
+  // Số tiền khách cần chuyển ở lần này (đặt trước: tiền cọc hoặc phần còn lại)
+  var reported = event === 'reported';
+  var isDepositReport = reported && o.status === REPORTED_STATUSES[1];
+  var dueVnd = isDepositReport ? o.depositVnd
+    : (reported && o.isPreorder ? Number(o.amountVnd || 0) - Number(o.depositVnd || 0) : o.amountVnd);
+  var payBox = reported
+    ? '<div style="background:#fef9c3;border:1px solid #fde047;padding:12px 14px;border-radius:10px;margin:8px 0 12px">' +
+      '<b>Khách báo đã chuyển ' + vnd(dueVnd) + (isDepositReport ? ' (tiền cọc)' : '') + '</b><br>' +
+      'Nội dung chuyển khoản: <b>PTCG ' + esc(o.id) + '</b><br>' +
+      'Hãy kiểm tra tài khoản ngân hàng. Đã nhận đủ tiền thì vào trang quản trị bấm <b>' +
+      (isDepositReport ? 'Xác Nhận Đã Nhận Cọc' : 'Xác Nhận Đã Nhận Đủ Tiền') +
+      '</b>; không thấy tiền thì liên hệ khách hoặc huỷ đơn.</div>'
+    : '';
+
   var html =
     '<div style="font-family:Arial,sans-serif;max-width:560px;color:#111827">' +
-    '<h2 style="color:#2563eb;margin:0 0 8px">Đơn mới ' + esc(o.id) + '</h2>' + pre +
+    '<h2 style="color:#2563eb;margin:0 0 8px">' + (reported ? 'Kiểm tra chuyển khoản ' : 'Đơn mới ') + esc(o.id) + '</h2>' + payBox + pre +
     '<p><b>Khách:</b> ' + esc(o.customerName) + ' — ' + esc(o.customerPhone) + '<br>' +
     '<b>Email:</b> ' + esc(o.customerEmail) + '<br>' +
     '<b>Địa chỉ:</b> ' + esc(o.shippingAddress) + '<br>' +
@@ -81,7 +106,9 @@ function sendMail(o) {
 
   MailApp.sendEmail({
     to: Session.getEffectiveUser().getEmail(),
-    subject: '🛒 Đơn mới ' + o.id + ' — ' + (o.customerName || '') + ' — ' + vnd(o.amountVnd) + (o.isPreorder ? ' (Đặt trước)' : ''),
+    subject: reported
+      ? '💰 Khách báo đã chuyển ' + vnd(dueVnd) + ' — đơn ' + o.id + ' — kiểm tra tài khoản'
+      : '🛒 Đơn mới ' + o.id + ' — ' + (o.customerName || '') + ' — ' + vnd(o.amountVnd) + (o.isPreorder ? ' (Đặt trước)' : ''),
     htmlBody: html
   });
 }
@@ -108,11 +135,12 @@ function reply(text) {
   return ContentService.createTextOutput(text);
 }
 
-// Chạy hàm này 1 lần trong trình soạn thảo để cấp quyền gửi Gmail và nhận email thử
+// Chạy hàm này trong trình soạn thảo để cấp quyền gửi Gmail và nhận email thử (mẫu "khách báo đã chuyển khoản")
 function guiThu() {
   sendMail({
     id: 'PTCG-THU', customerName: 'Khách thử', customerPhone: '0900000000', customerEmail: 'khach@example.com',
     shippingAddress: 'Địa chỉ thử', paymentMethod: 'Chuyển Khoản Ngân Hàng / VietQR', shippingMethod: 'Tiêu chuẩn',
-    items: [{ title: 'Sản phẩm thử', qty: 1, price: 10 }], amountVnd: 265000, vndRate: 26500
-  });
+    items: [{ title: 'Sản phẩm thử', qty: 1, price: 10 }], amountVnd: 265000, vndRate: 26500,
+    status: 'Khách báo đã chuyển khoản (Chờ xác nhận)'
+  }, 'reported');
 }

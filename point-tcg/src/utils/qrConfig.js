@@ -3,6 +3,9 @@
 
 import { fetchSettingsFromDb, saveSettingsToDb } from '../services/firestoreService';
 
+// Mã QR hiện trong 1 phút; hết giờ đơn tự chuyển cho shop kiểm tra tiền và xác nhận
+export const QR_SECONDS = 60;
+
 export const STORAGE_QR_KEY = 'point-tcg-qr-config';
 const QR_SETTINGS_DOC = 'bank_qr_config';
 
