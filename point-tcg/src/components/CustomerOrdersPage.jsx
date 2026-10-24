@@ -5,7 +5,7 @@ import { getProductCatalogImage } from '../products';
 import { usdToVnd } from '../utils/currency';
 import { OrderTimeline, TrackingInfo, ProfileEditor, ReviewsPanel } from './AccountPanels';
 import { useI18n, getLocale } from '../i18n';
-import OrderPaymentModal, { getPendingPayment } from './OrderPaymentModal';
+import OrderTransferInfo, { getPendingPayment } from './OrderTransferInfo';
 import { formatReleaseDate } from '../utils/preorder';
 
 // Must match customerCancellableStatuses() in firestore.rules
@@ -40,7 +40,6 @@ export default function CustomerOrdersPage({
   onOpenProductDetail
 }) {
   const { t, money, moneyAlt, currency } = useI18n();
-  const [payingOrder, setPayingOrder] = useState(null);
   // Tổng đơn: VNĐ lấy đúng số tiền đã lưu trong đơn (amountVnd), USD lấy order.total
   const orderVnd = (o) => (o.amountVnd ? o.amountVnd.toLocaleString('vi-VN') + '₫' : formatVndPrice(o.total));
   const orderUsd = (o) => `$${Number(o.total || 0).toFixed(2)}`;
@@ -441,7 +440,11 @@ export default function CustomerOrdersPage({
                       return (
                         <div key={order.id} className="cop-order-card">
                           {/* Card Header */}
-                          <div className="cop-card-header">
+                          <div
+                            className="cop-card-header cop-card-header-clickable"
+                            onClick={() => setViewingOrderDetail(order)}
+                            title={t('Xem chi tiết')}
+                          >
                             <div className="cop-card-header-left">
                               <span className="cop-order-id-label">{t('Mã đơn:')}</span>
                               <strong className="cop-order-id-val">#{order.id}</strong>
@@ -553,11 +556,9 @@ export default function CustomerOrdersPage({
                                   <button
                                     type="button"
                                     className="cop-btn-pay-now"
-                                    onClick={() => setPayingOrder(order)}
+                                    onClick={() => setViewingOrderDetail(order)}
                                   >
-                                    {getPendingPayment(order).kind === 'deposit'
-                                      ? t('Thanh toán cọc')
-                                      : getPendingPayment(order).kind === 'remaining' ? t('Thanh toán phần còn lại') : t('Thanh toán QR')}
+                                    {t('Xem mã QR & nội dung chuyển khoản')}
                                   </button>
                                 )}
                                 {CUSTOMER_CANCELLABLE_STATUSES.includes(order.status)
@@ -672,13 +673,6 @@ export default function CustomerOrdersPage({
         </main>
       </div>
 
-      {payingOrder && (
-        <OrderPaymentModal
-          order={payingOrder}
-          onClose={() => setPayingOrder(null)}
-          onReported={onUpdateOrderStatus}
-        />
-      )}
 
       {/* Detail Modal when customer clicks "Xem chi tiết" */}
       {viewingOrderDetail && (
@@ -700,6 +694,7 @@ export default function CustomerOrdersPage({
                 <span>{t('Trạng thái hiện tại:')}</span>
                 <strong style={{ color: '#2563eb' }}>{t(viewingOrderDetail.status)}</strong>
               </div>
+              <OrderTransferInfo order={viewingOrderDetail} />
               <OrderTimeline order={viewingOrderDetail} />
               <TrackingInfo order={viewingOrderDetail} />
 

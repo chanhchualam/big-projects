@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
 import { saveNewOrder, ensureSignedIn, getAuthErrorMessage } from '../utils/auth';
 import { getProductCatalogImage } from '../products';
 import { getQrConfig, loadQrConfig, generateQrUrl, QR_SECONDS } from '../utils/qrConfig';
@@ -9,7 +7,7 @@ import { getCouponError } from '../utils/orderCheck';
 import { usdToVnd, VND_RATE } from '../utils/currency';
 import { useI18n, getLocale } from '../i18n';
 import { getDepositPercent, depositUsdFor, formatReleaseDate } from '../utils/preorder';
-import { PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED, PRE_DEPOSIT_PAID, PAID_STATUS, CANCELLED_STATUS } from '../utils/orderStatus';
+import { PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED } from '../utils/orderStatus';
 
 // Khách chỉ được báo đã chuyển khoản; admin kiểm tra sao kê rồi mới chuyển sang "Đã thanh toán"
 const CUSTOMER_REPORTED_PAID_STATUS = 'Khách báo đã chuyển khoản (Chờ xác nhận)';
@@ -118,33 +116,18 @@ export default function CheckoutModal({
     return () => clearInterval(timer);
   }, [checkoutStep]);
 
-  // Hết giờ QR → tự chuyển đơn cho shop xác nhận (như khi khách bấm "Tôi đã chuyển khoản")
-  const confirmTransferRef = useRef(null);
+  // Hết 1 phút giữ mã QR → chuyển sang trang Đơn hàng, đơn chờ shop xác nhận
+  const leaveQrRef = useRef(null);
   useEffect(() => {
-    if (isOpen && checkoutStep === 'qr_payment' && secondsLeft === 0) confirmTransferRef.current?.();
+    if (isOpen && checkoutStep === 'qr_payment' && secondsLeft === 0) leaveQrRef.current?.(true);
   }, [isOpen, checkoutStep, secondsLeft]);
-
-  // Đang chờ shop xác nhận: theo dõi đơn để khách thấy ngay khi admin bấm xác nhận
-  const watchedOrderId = checkoutStep === 'success' && completedOrder?.paymentMethod !== 'Thanh Toán Khi Nhận Hàng (COD)'
-    ? completedOrder?.id
-    : null;
-  useEffect(() => {
-    if (!isOpen || !watchedOrderId) return undefined;
-    return onSnapshot(
-      doc(db, 'orders', watchedOrderId),
-      (snap) => {
-        const status = snap.data()?.status;
-        if (status) setCompletedOrder((prev) => (prev && prev.status !== status ? { ...prev, status } : prev));
-      },
-      () => {}
-    );
-  }, [isOpen, watchedOrderId]);
 
   // Keyboard navigation & lock body scroll
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape' && isOpen && checkoutStep !== 'processing') {
-        onClose();
+        if (checkoutStep === 'qr_payment') leaveQrRef.current?.(false);
+        else onClose();
       }
     }
     if (isOpen) {
@@ -369,25 +352,19 @@ export default function CheckoutModal({
     }, 600);
   };
 
-  // Customer clicks "I have transferred successfully"
-  // (hoặc mã QR hết 1 phút): đơn chuyển sang "Chờ xác nhận", shop nhận email để kiểm tra tài khoản
-  const handleConfirmTransfer = async () => {
+  // Rời màn hình mã QR (hết 1 phút, xem đơn hoặc đóng): đơn chuyển sang "Chờ xác nhận" để shop kiểm tra
+  // tài khoản (shop nhận email). Khách xem lại mã QR + nội dung chuyển khoản trong trang Đơn hàng.
+  const leaveQrScreen = (goToOrders) => {
     const target = completedOrder;
+    onClose();
+    if (goToOrders && onOpenOrderHistory) onOpenOrderHistory();
     if (!target || reportingRef.current) return;
     reportingRef.current = true;
     const newStatus = target.isPreorder ? PRE_DEPOSIT_REPORTED : CUSTOMER_REPORTED_PAID_STATUS;
-    const ok = onUpdateOrderStatus ? await onUpdateOrderStatus(target.id, newStatus) : false;
-    if (!ok) {
-      reportingRef.current = false;
-      return;
-    }
-    setCompletedOrder({
-      ...target,
-      status: newStatus
-    });
-    setCheckoutStep('success');
+    if (onUpdateOrderStatus) onUpdateOrderStatus(target.id, newStatus);
   };
-  confirmTransferRef.current = handleConfirmTransfer;
+  leaveQrRef.current = leaveQrScreen;
+  const handleClose = () => (checkoutStep === 'qr_payment' ? leaveQrScreen(false) : onClose());
 
   // VietQR / Bank Transfer Dynamic URL
   const currentOrderId = completedOrder?.id || `PTCG-${Date.now().toString().slice(-6)}`;
@@ -415,7 +392,7 @@ export default function CheckoutModal({
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={t('Thanh toán đơn hàng')}>
+    <div className="modal-overlay" onClick={handleClose} role="dialog" aria-modal="true" aria-label={t('Thanh toán đơn hàng')}>
       <div
         className="checkout-modal-card"
         onClick={(e) => e.stopPropagation()}
@@ -426,7 +403,7 @@ export default function CheckoutModal({
         <button
           type="button"
           className="modal-close-icon-btn"
-          onClick={onClose}
+          onClick={handleClose}
           aria-label={t('Đóng thanh toán')}
         >
           ✕
@@ -496,7 +473,7 @@ export default function CheckoutModal({
                   {secondsLeft <= 15 ? (
                     <strong style={{ color: '#ef4444' }}>{t('Sắp hết thời gian! Vui lòng chuyển khoản nhanh chóng.')}</strong>
                   ) : (
-                    <span>{t('Hết 1 phút, đơn sẽ được chuyển cho shop kiểm tra tiền và xác nhận.')}</span>
+                    <span>{t('Hết 1 phút sẽ chuyển sang trang Đơn hàng để theo dõi. Mã QR và nội dung chuyển khoản vẫn xem lại được ở đó.')}</span>
                   )}
                 </div>
               )}
@@ -658,33 +635,18 @@ export default function CheckoutModal({
 
                 {/* Primary CTA Buttons */}
                 <div className="qr-actions-wrap">
-                  <button
-                    type="button"
-                    className="btn-confirm-transfer-paid"
-                    onClick={handleConfirmTransfer}
-                  >
-                    <span>{t('Tôi Đã Chuyển Khoản Thành Công')}</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M5 12h14" />
-                      <path d="M12 5l7 7-7 7" />
-                    </svg>
-                  </button>
-
                   <div className="qr-secondary-btns">
                     <button
                       type="button"
                       className="btn-pay-later"
-                      onClick={() => {
-                        onClose();
-                        if (onOpenOrderHistory) onOpenOrderHistory();
-                      }}
+                      onClick={() => leaveQrScreen(true)}
                     >
                       {t('Xem Đơn Trong Lịch Sử')}
                     </button>
                     <button
                       type="button"
                       className="btn-close-simple"
-                      onClick={onClose}
+                      onClick={() => leaveQrScreen(false)}
                     >
                       {t('✕ Đóng')}
                     </button>
@@ -707,24 +669,6 @@ export default function CheckoutModal({
                 ? t('Cảm ơn bạn đã đặt trước tại Point TCG. Shop sẽ xác nhận tiền cọc và báo cho bạn khi hàng về để thanh toán phần còn lại.')
                 : t('Cảm ơn bạn đã mua sắm tại Point TCG. Đơn hàng của bạn đã được chuyển tới shop để chuẩn bị đóng gói nguyên seal chính hãng.')}
             </p>
-
-            {[CUSTOMER_REPORTED_PAID_STATUS, PRE_DEPOSIT_REPORTED].includes(activeOrder.status) && (
-              <div className="pay-confirm-banner waiting" role="status">
-                <span className="pay-confirm-spinner" aria-hidden="true" />
-                <span>{t('Shop đang kiểm tra tài khoản và sẽ xác nhận thanh toán. Bạn có thể đóng cửa sổ này, trạng thái sẽ cập nhật trong mục Đơn hàng.')}</span>
-              </div>
-            )}
-            {[PAID_STATUS, PRE_DEPOSIT_PAID].includes(activeOrder.status) && (
-              <div className="pay-confirm-banner ok" role="status">
-                <span aria-hidden="true">✓</span>
-                <span>{t('Shop đã xác nhận nhận được tiền. Đơn hàng của bạn đang được xử lý!')}</span>
-              </div>
-            )}
-            {activeOrder.status === CANCELLED_STATUS && (
-              <div className="pay-confirm-banner bad" role="status">
-                <span>{t('Shop chưa nhận được tiền nên đơn đã bị huỷ. Nếu bạn đã chuyển khoản, vui lòng liên hệ shop.')}</span>
-              </div>
-            )}
 
             <div className="order-receipt-card">
               <div className="receipt-row">
