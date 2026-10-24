@@ -10486,3 +10486,40 @@ body {
 .order-pay-confirm {
   width: 100%;
 }
+
+/* Chờ shop xác nhận chuyển khoản (sau màn hình mã QR) */
+.pay-confirm-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+}
+.pay-confirm-banner.waiting { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.pay-confirm-banner.ok { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.pay-confirm-banner.bad { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.pay-confirm-spinner {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid #bfdbfe;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: pay-confirm-spin 0.9s linear infinite;
+}
+@keyframes pay-confirm-spin { to { transform: rotate(360deg); } }
+.order-pay-timer {
+  margin: 4px 0 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-align: center;
+}
+.order-pay-timer.urgent { background: #fef2f2; color: #dc2626; }

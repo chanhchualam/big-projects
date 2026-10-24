@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 import { saveNewOrder, ensureSignedIn, getAuthErrorMessage } from '../utils/auth';
 import { getProductCatalogImage } from '../products';
-import { getQrConfig, loadQrConfig, generateQrUrl } from '../utils/qrConfig';
+import { getQrConfig, loadQrConfig, generateQrUrl, QR_SECONDS } from '../utils/qrConfig';
 import { fetchCoupon, redeemCoupon, reservePreorderSlots } from '../services/firestoreService';
 import { getCouponError } from '../utils/orderCheck';
 import { usdToVnd, VND_RATE } from '../utils/currency';
 import { useI18n, getLocale } from '../i18n';
 import { getDepositPercent, depositUsdFor, formatReleaseDate } from '../utils/preorder';
-import { PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED } from '../utils/orderStatus';
+import { PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED, PRE_DEPOSIT_PAID, PAID_STATUS, CANCELLED_STATUS } from '../utils/orderStatus';
 
 // Khách chỉ được báo đã chuyển khoản; admin kiểm tra sao kê rồi mới chuyển sang "Đã thanh toán"
 const CUSTOMER_REPORTED_PAID_STATUS = 'Khách báo đã chuyển khoản (Chờ xác nhận)';
@@ -32,8 +34,8 @@ export default function CheckoutModal({
   const [checkoutStep, setCheckoutStep] = useState('form');
   const [completedOrder, setCompletedOrder] = useState(null);
 
-  // QR Countdown Timer (15 minutes = 900 seconds)
-  const [secondsLeft, setSecondsLeft] = useState(900);
+  const [secondsLeft, setSecondsLeft] = useState(QR_SECONDS);
+  const reportingRef = useRef(false);
   const [copiedField, setCopiedField] = useState(null);
   const [useFallbackQr, setUseFallbackQr] = useState(false);
   const [qrConfig, setQrConfig] = useState(() => getQrConfig());
@@ -82,7 +84,8 @@ export default function CheckoutModal({
       setCompletedOrder(null);
       setCouponMessage('');
       setAppliedCoupon(null);
-      setSecondsLeft(900);
+      setSecondsLeft(QR_SECONDS);
+      reportingRef.current = false;
       setCopiedField(null);
       setUseFallbackQr(false);
       // Đặt trước chỉ nhận chuyển khoản tiền cọc
@@ -98,7 +101,7 @@ export default function CheckoutModal({
     }
   }, [isOpen]);
 
-  // Live 15-minute countdown timer for QR Payment step
+  // Đếm ngược mã QR
   useEffect(() => {
     if (checkoutStep !== 'qr_payment') return;
 
@@ -114,6 +117,28 @@ export default function CheckoutModal({
 
     return () => clearInterval(timer);
   }, [checkoutStep]);
+
+  // Hết giờ QR → tự chuyển đơn cho shop xác nhận (như khi khách bấm "Tôi đã chuyển khoản")
+  const confirmTransferRef = useRef(null);
+  useEffect(() => {
+    if (isOpen && checkoutStep === 'qr_payment' && secondsLeft === 0) confirmTransferRef.current?.();
+  }, [isOpen, checkoutStep, secondsLeft]);
+
+  // Đang chờ shop xác nhận: theo dõi đơn để khách thấy ngay khi admin bấm xác nhận
+  const watchedOrderId = checkoutStep === 'success' && completedOrder?.paymentMethod !== 'Thanh Toán Khi Nhận Hàng (COD)'
+    ? completedOrder?.id
+    : null;
+  useEffect(() => {
+    if (!isOpen || !watchedOrderId) return undefined;
+    return onSnapshot(
+      doc(db, 'orders', watchedOrderId),
+      (snap) => {
+        const status = snap.data()?.status;
+        if (status) setCompletedOrder((prev) => (prev && prev.status !== status ? { ...prev, status } : prev));
+      },
+      () => {}
+    );
+  }, [isOpen, watchedOrderId]);
 
   // Keyboard navigation & lock body scroll
   useEffect(() => {
@@ -166,7 +191,7 @@ export default function CheckoutModal({
   const minutesRemaining = Math.floor(secondsLeft / 60);
   const secondsRemaining = secondsLeft % 60;
   const countdownFormatted = `${String(minutesRemaining).padStart(2, '0')}:${String(secondsRemaining).padStart(2, '0')}`;
-  const progressPercent = Math.max(0, Math.min(100, (secondsLeft / 900) * 100));
+  const progressPercent = Math.max(0, Math.min(100, (secondsLeft / QR_SECONDS) * 100));
 
   // Copy to clipboard helper
   const handleCopyText = (text, fieldName) => {
@@ -338,25 +363,31 @@ export default function CheckoutModal({
         setCheckoutStep('success');
       } else {
         // VietQR / Bank Transfer (or card) shows dynamic QR code with countdown timer
-        setSecondsLeft(900); // 15 minutes
+        setSecondsLeft(QR_SECONDS);
         setCheckoutStep('qr_payment');
       }
     }, 600);
   };
 
   // Customer clicks "I have transferred successfully"
+  // (hoặc mã QR hết 1 phút): đơn chuyển sang "Chờ xác nhận", shop nhận email để kiểm tra tài khoản
   const handleConfirmTransfer = async () => {
     const target = completedOrder;
-    if (!target) return;
+    if (!target || reportingRef.current) return;
+    reportingRef.current = true;
     const newStatus = target.isPreorder ? PRE_DEPOSIT_REPORTED : CUSTOMER_REPORTED_PAID_STATUS;
     const ok = onUpdateOrderStatus ? await onUpdateOrderStatus(target.id, newStatus) : false;
-    if (!ok) return;
+    if (!ok) {
+      reportingRef.current = false;
+      return;
+    }
     setCompletedOrder({
       ...target,
       status: newStatus
     });
     setCheckoutStep('success');
   };
+  confirmTransferRef.current = handleConfirmTransfer;
 
   // VietQR / Bank Transfer Dynamic URL
   const currentOrderId = completedOrder?.id || `PTCG-${Date.now().toString().slice(-6)}`;
@@ -434,7 +465,7 @@ export default function CheckoutModal({
             </div>
 
             {/* Countdown Timer Widget */}
-            <div className={`qr-countdown-container ${secondsLeft <= 180 ? 'timer-urgent' : ''}`}>
+            <div className={`qr-countdown-container ${secondsLeft <= 15 ? 'timer-urgent' : ''}`}>
               <div className="qr-timer-top">
                 <div className="qr-timer-icon-wrap">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
@@ -458,21 +489,14 @@ export default function CheckoutModal({
 
               {secondsLeft === 0 ? (
                 <div className="qr-expired-alert">
-                  <span>{t('Mã QR đã hết hạn! Vui lòng gia hạn thêm thời gian để tiếp tục.')}</span>
-                  <button
-                    type="button"
-                    className="btn-renew-timer"
-                    onClick={() => setSecondsLeft(900)}
-                  >
-                    {t('Gia hạn thêm 15 phút')}
-                  </button>
+                  <span>{t('Mã QR đã hết hạn. Đơn đang được chuyển cho shop kiểm tra và xác nhận...')}</span>
                 </div>
               ) : (
                 <div className="qr-timer-instruction">
-                  {secondsLeft <= 180 ? (
-                    <strong style={{ color: '#ef4444' }}>{t('Sắp hết thời gian giữ hàng! Vui lòng chuyển khoản nhanh chóng.')}</strong>
+                  {secondsLeft <= 15 ? (
+                    <strong style={{ color: '#ef4444' }}>{t('Sắp hết thời gian! Vui lòng chuyển khoản nhanh chóng.')}</strong>
                   ) : (
-                    <span>{t('Hệ thống tự động kích hoạt đơn hàng ngay khi nhận được chuyển khoản.')}</span>
+                    <span>{t('Hết 1 phút, đơn sẽ được chuyển cho shop kiểm tra tiền và xác nhận.')}</span>
                   )}
                 </div>
               )}
@@ -683,6 +707,24 @@ export default function CheckoutModal({
                 ? t('Cảm ơn bạn đã đặt trước tại Point TCG. Shop sẽ xác nhận tiền cọc và báo cho bạn khi hàng về để thanh toán phần còn lại.')
                 : t('Cảm ơn bạn đã mua sắm tại Point TCG. Đơn hàng của bạn đã được chuyển tới shop để chuẩn bị đóng gói nguyên seal chính hãng.')}
             </p>
+
+            {[CUSTOMER_REPORTED_PAID_STATUS, PRE_DEPOSIT_REPORTED].includes(activeOrder.status) && (
+              <div className="pay-confirm-banner waiting" role="status">
+                <span className="pay-confirm-spinner" aria-hidden="true" />
+                <span>{t('Shop đang kiểm tra tài khoản và sẽ xác nhận thanh toán. Bạn có thể đóng cửa sổ này, trạng thái sẽ cập nhật trong mục Đơn hàng.')}</span>
+              </div>
+            )}
+            {[PAID_STATUS, PRE_DEPOSIT_PAID].includes(activeOrder.status) && (
+              <div className="pay-confirm-banner ok" role="status">
+                <span aria-hidden="true">✓</span>
+                <span>{t('Shop đã xác nhận nhận được tiền. Đơn hàng của bạn đang được xử lý!')}</span>
+              </div>
+            )}
+            {activeOrder.status === CANCELLED_STATUS && (
+              <div className="pay-confirm-banner bad" role="status">
+                <span>{t('Shop chưa nhận được tiền nên đơn đã bị huỷ. Nếu bạn đã chuyển khoản, vui lòng liên hệ shop.')}</span>
+              </div>
+            )}
 
             <div className="order-receipt-card">
               <div className="receipt-row">

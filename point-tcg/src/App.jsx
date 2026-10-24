@@ -24,7 +24,7 @@ import { VND_RATE } from './utils/currency';
 import { checkAdminUnlocked, lockAdmin } from './utils/adminSecurity';
 import { notifyShopNewOrder } from './utils/shopAlert';
 import { isPreorderProduct, getRemainingAllowance, getMaxPerCustomer, getPreorderSlotsLeft, getOrderedQty, getPreorderReservedFromOrders } from './utils/preorder';
-import { PRE_DEPOSIT_PAID, PRE_ARRIVED, PAID_STATUS, PREORDER_STATUSES, CANCELLED_STATUS } from './utils/orderStatus';
+import { PRE_DEPOSIT_PAID, PRE_ARRIVED, PAID_STATUS, PREORDER_STATUSES, CANCELLED_STATUS, CUSTOMER_REPORTED_PAID, PRE_DEPOSIT_REPORTED } from './utils/orderStatus';
 import { getDrawingText } from './utils/countdown';
 import {
   buildNotifications,
@@ -630,7 +630,8 @@ export default function App() {
 
     const saved = await saveOrderToDb(newOrder);
     if (!saved) return false;
-    notifyShopNewOrder(newOrder);
+    // Đơn COD báo shop ngay; đơn chuyển khoản báo khi khách đã chuyển (hoặc hết 1 phút giữ mã QR)
+    if (newOrder.status === 'Chờ xác nhận (Đơn mới)') notifyShopNewOrder(newOrder, 'created');
 
     if (newOrder.isPreorder) {
       setOrders(prev => [newOrder, ...prev.filter(o => o.id !== newOrder.id)]);
@@ -739,6 +740,9 @@ export default function App() {
     if (!ok) {
       alert('Không thể cập nhật trạng thái đơn hàng (không có quyền hoặc lỗi kết nối).');
       return false;
+    }
+    if (user?.role !== 'admin' && [CUSTOMER_REPORTED_PAID, PRE_DEPOSIT_REPORTED].includes(newStatus)) {
+      notifyShopNewOrder({ id: orderId }, 'reported');
     }
 
     // Admin xác nhận đơn → trừ tồn kho; huỷ đơn đã trừ → hoàn tồn kho
