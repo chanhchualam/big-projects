@@ -9,6 +9,8 @@ var PROJECT_ID = 'point-tcg';
 var MAX_ORDER_AGE_MINUTES = 30; // chỉ báo đơn vừa tạo, không báo lại đơn cũ
 
 function doPost(e) {
+  // SePay báo có tiền vào (link có ?key=...): xử lý trong sepay.gs
+  if (e && e.parameter && e.parameter.key) return handleSepay(e);
   try {
     var body = JSON.parse(e.postData.contents || '{}');
     var orderId = String(body.orderId || '');
