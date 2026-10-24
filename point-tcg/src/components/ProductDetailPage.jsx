@@ -7,6 +7,7 @@ import { isStoreFramed } from '../products';
 import { usdToVnd } from '../utils/currency';
 import { ReviewForm } from './AccountPanels';
 import { useI18n, getLocale } from '../i18n';
+import { isPreorderProduct, getPreorderSlotsLeft, getDepositPercent, getMaxPerCustomer, depositUsdFor, formatReleaseDate } from '../utils/preorder';
 
 function stars(n) {
   return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
@@ -43,6 +44,7 @@ export default function ProductDetailPage({
   onSelectProduct,
   onAddToCart,
   onBuyNow,
+  onPreorder,
   isSaved,
   onToggleSave,
   user,
@@ -95,8 +97,16 @@ export default function ProductDetailPage({
 
   if (!product) return null;
 
-  const stock = typeof product.stock === 'number' ? product.stock : 25;
-  const isOutOfStock = stock <= 0;
+  const isPreorder = isPreorderProduct(product);
+  const slotsLeft = isPreorder ? getPreorderSlotsLeft(product) : 0;
+  const maxPerCustomer = getMaxPerCustomer(product);
+  const depositPct = getDepositPercent(product);
+  // Đặt trước: số lượng tối đa theo suất còn lại / giới hạn mỗi khách; hàng thường theo tồn kho
+  const rawStock = typeof product.stock === 'number' ? product.stock : 25;
+  const stock = isPreorder
+    ? Math.min(slotsLeft === Infinity ? 99 : slotsLeft, maxPerCustomer || 99)
+    : Math.min(rawStock, maxPerCustomer || Infinity);
+  const isOutOfStock = isPreorder ? slotsLeft <= 0 : rawStock <= 0;
   const discountPercent = getDiscountPercent(product.price, product.wasPrice);
   // Giá theo tiền tệ khách chọn (VNĐ / USD), kèm tiền tệ còn lại trong ngoặc
   const vndPrice = money(product.price);
@@ -179,6 +189,11 @@ export default function ProductDetailPage({
   const handleBuyNowClick = () => {
     if (isOutOfStock) return;
     onBuyNow && onBuyNow(product, qty);
+  };
+
+  const handlePreorderClick = () => {
+    if (isOutOfStock) return;
+    (onPreorder || onBuyNow)?.(product, qty);
   };
 
   return (
@@ -359,10 +374,14 @@ export default function ProductDetailPage({
               <span className="pdp-meta-divider">|</span>
               <span className="pdp-meta-item">
                 {t('Tình trạng:')}{' '}
-                {isOutOfStock ? (
+                {isPreorder ? (
+                  <strong className={isOutOfStock ? 'status-out' : 'status-in'}>
+                    {isOutOfStock ? t('Hết suất đặt trước') : t('Đang nhận đặt trước')}
+                  </strong>
+                ) : isOutOfStock ? (
                   <strong className="status-out">{t('Hết hàng')}</strong>
                 ) : (
-                  <strong className="status-in">{t('Còn hàng ({n} sản phẩm)', { n: stock })}</strong>
+                  <strong className="status-in">{t('Còn hàng ({n} sản phẩm)', { n: rawStock })}</strong>
                 )}
               </span>
               <span className="pdp-meta-divider">|</span>
@@ -424,13 +443,44 @@ export default function ProductDetailPage({
               </div>
             </div>
 
-            {isOutOfStock && onRequestRestock && (
+            {isPreorder && (
+              <div className="pdp-preorder-box">
+                <div className="pdp-preorder-title">{t('Sản phẩm đặt trước')}</div>
+                <ul>
+                  <li>{t('Phát hành dự kiến:')} <strong>{formatReleaseDate(product.releaseDate, getLocale(lang)) || t('Sắp có')}</strong></li>
+                  <li>
+                    {t('Đặt cọc {pct}% bây giờ:', { pct: depositPct })} <strong>{money(depositUsdFor(product.price * qty, depositPct))}</strong>
+                    {depositPct < 100 && <> · {t('phần còn lại thanh toán khi hàng về')}</>}
+                  </li>
+                  {slotsLeft !== Infinity && <li>{t('Còn {n} suất đặt trước', { n: Math.max(0, slotsLeft) })}</li>}
+                  {maxPerCustomer > 0 && <li>{t('Tối đa {n} sản phẩm / khách', { n: maxPerCustomer })}</li>}
+                </ul>
+              </div>
+            )}
+
+            {!isPreorder && maxPerCustomer > 0 && (
+              <div className="pdp-limit-note">{t('Tối đa {n} sản phẩm / khách', { n: maxPerCustomer })}</div>
+            )}
+
+            {!isPreorder && isOutOfStock && onRequestRestock && (
               <div className="pdp-restock-box">
                 <p>{t('Sản phẩm tạm hết hàng. Để lại email, shop sẽ báo ngay khi có hàng lại.')}</p>
                 <RestockNotify product={product} defaultEmail={user?.email} onRequestRestock={onRequestRestock} />
               </div>
             )}
 
+            {isPreorder ? (
+              <button
+                type="button"
+                className="pdp-big-buy-now-btn"
+                onClick={handlePreorderClick}
+                disabled={isOutOfStock}
+              >
+                <div className="big-buy-title">{isOutOfStock ? t('HẾT SUẤT ĐẶT TRƯỚC') : t('ĐẶT TRƯỚC NGAY')}</div>
+                <div className="big-buy-sub">{t('Cọc {pct}% qua chuyển khoản, giữ suất chắc chắn', { pct: depositPct })}</div>
+              </button>
+            ) : (
+            <>
             {/* Large Primary Red CTA: MUA NGAY */}
             <button
               type="button"
@@ -461,6 +511,8 @@ export default function ProductDetailPage({
                 {t('MUA NGAY')}
               </button>
             </div>
+            </>
+            )}
 
             {/* 6 Guarantee & Trust Badges */}
             <div className="pdp-trust-grid">

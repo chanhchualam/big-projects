@@ -22,6 +22,8 @@ import HeroBanner from './components/HeroBanner';
 import { useI18n } from './i18n';
 import { VND_RATE } from './utils/currency';
 import { checkAdminUnlocked, lockAdmin } from './utils/adminSecurity';
+import { isPreorderProduct, getRemainingAllowance, getMaxPerCustomer, getPreorderSlotsLeft, getOrderedQty, getPreorderReservedFromOrders } from './utils/preorder';
+import { PRE_DEPOSIT_PAID, PRE_ARRIVED, PAID_STATUS, PREORDER_STATUSES, CANCELLED_STATUS } from './utils/orderStatus';
 import { getDrawingText } from './utils/countdown';
 import {
   buildNotifications,
@@ -56,7 +58,9 @@ import {
   fetchReviewsFromDb,
   saveRestockRequest,
   subscribeOrdersForUser,
-  fetchAnnouncementsFromDb
+  fetchAnnouncementsFromDb,
+  fetchPreorderCounts,
+  setPreorderCount
 } from './services/firestoreService';
 import { ensureSignedIn } from './utils/auth';
 
@@ -80,7 +84,8 @@ export function getProductCategory(product) {
   return 'Khác';
 }
 
-const isInStock = (item) => typeof item.stock !== 'number' || item.stock > 0;
+// Hàng đặt trước luôn hiện (còn suất hay không hiện trên thẻ sản phẩm)
+const isInStock = (item) => isPreorderProduct(item) || typeof item.stock !== 'number' || item.stock > 0;
 
 // Xoá dữ liệu cũ (mật khẩu, danh sách user, đơn hàng của người khác) còn sót trong localStorage
 purgeLegacyLocalData();
@@ -221,9 +226,17 @@ export default function App() {
     Object.values(map).forEach((s) => { s.avg = s.sum / s.count; });
     return map;
   }, [reviews]);
+  // Số suất đặt trước đã có người giữ (preorder_counts), theo id sản phẩm
+  const [preorderReserved, setPreorderReserved] = useState({});
+
   const withReviewStats = (p) => {
     const s = reviewStats[String(p.id)];
-    return { ...p, rating: s ? s.avg : 0, reviewsCount: s ? s.count : 0 };
+    return {
+      ...p,
+      rating: s ? s.avg : 0,
+      reviewsCount: s ? s.count : 0,
+      ...(isPreorderProduct(p) && { preorderReserved: preorderReserved[String(p.id)] || 0 })
+    };
   };
 
   // Orders: admin sees every order, others only their own (enforced by firestore.rules)
@@ -329,6 +342,14 @@ export default function App() {
       return initialClosedDrawings;
     }
   });
+
+  // Suất đặt trước đã giữ: tải lại khi danh sách sản phẩm đặt trước thay đổi
+  const preorderIdsKey = [...openDrawings, ...closedDrawings]
+    .filter(isPreorderProduct).map((p) => String(p.id)).sort().join(',');
+  useEffect(() => {
+    if (!preorderIdsKey) return;
+    fetchPreorderCounts(preorderIdsKey.split(',')).then((counts) => setPreorderReserved((prev) => ({ ...prev, ...counts })));
+  }, [preorderIdsKey]);
 
   // Dedicated state for initial tab when opening CustomerOrdersPage ('orders' | 'profile')
   const [ordersInitialTab, setOrdersInitialTab] = useState('orders');
@@ -609,6 +630,13 @@ export default function App() {
     const saved = await saveOrderToDb(newOrder);
     if (!saved) return false;
 
+    if (newOrder.isPreorder) {
+      setOrders(prev => [newOrder, ...prev.filter(o => o.id !== newOrder.id)]);
+      const pid = String(newOrder.preorderProductId);
+      setPreorderReserved((prev) => ({ ...prev, [pid]: (prev[pid] || 0) + (Number(newOrder.items?.[0]?.qty) || 1) }));
+      return true;
+    }
+
     const alreadyDeducted = deductedOrderIdsRef.current.has(newOrder.id);
     deductedOrderIdsRef.current.add(newOrder.id);
     setOrders(prev => [newOrder, ...prev.filter(o => o.id !== newOrder.id)]);
@@ -739,6 +767,54 @@ export default function App() {
     return true;
   };
 
+  // Hàng đặt trước đã về: tắt đặt trước, đặt tồn kho = số hàng về, trừ kho cho các đơn đã cọc
+  // và chuyển chúng sang "chờ thanh toán phần còn lại" (cọc 100% thì thành "đã thanh toán")
+  const handlePreorderArrived = async (product) => {
+    const ofProduct = orders.filter((o) => o.isPreorder && String(o.preorderProductId) === String(product.id));
+    const depositPaid = ofProduct.filter((o) => o.status === PRE_DEPOSIT_PAID);
+    const unpaid = ofProduct.filter((o) => PREORDER_STATUSES.includes(o.status) && o.status !== PRE_DEPOSIT_PAID && o.status !== PRE_ARRIVED);
+    const needed = depositPaid.reduce((s, o) => s + (o.items || []).reduce((a, i) => a + (Number(i.qty) || 0), 0), 0);
+
+    const input = window.prompt(
+      `Hàng "${product.title}" đã về.\n\n${depositPaid.length} đơn đã cọc cần ${needed} sản phẩm`
+      + (unpaid.length ? `; ${unpaid.length} đơn chưa xác nhận cọc sẽ giữ nguyên để bạn xử lý.` : '.')
+      + '\n\nNhập TỔNG số lượng hàng về:',
+      String(needed)
+    );
+    if (input === null) return;
+    const arrived = parseInt(input, 10);
+    if (Number.isNaN(arrived) || arrived < 0) {
+      alert('Số lượng không hợp lệ.');
+      return;
+    }
+    if (arrived < needed && !window.confirm(`Số hàng về (${arrived}) ít hơn số đã cọc (${needed}). Vẫn tiếp tục? Tồn kho sẽ bị âm.`)) return;
+
+    handleUpdateProduct({ ...product, preorder: false, stock: arrived }, product.status === 'open' ? 'open' : 'closed');
+
+    let moved = 0;
+    for (const order of depositPaid) {
+      const next = Number(order.depositPercent) >= 100 ? PAID_STATUS : PRE_ARRIVED;
+      if (!(await updateOrderStatusInDb(order.id, next))) continue;
+      const deducted = order.stockDeducted !== false || await applyOrderStock(order, -1);
+      moved += 1;
+      setOrders((prev) => prev.map((o) => (o.id === order.id
+        ? { ...o, status: next, stockDeducted: deducted === true || o.stockDeducted, statusHistory: [...(o.statusHistory || []), makeStatusEntry(next)] }
+        : o)));
+    }
+    alert(`Đã cập nhật: tồn kho "${product.title}" = ${arrived}, ${moved}/${depositPaid.length} đơn đã cọc được báo hàng về.`);
+  };
+
+  // Admin: đồng bộ số suất đặt trước theo đơn thật (đơn huỷ trả lại suất)
+  useEffect(() => {
+    if (!isAdmin || !adminUnlocked || orders.length === 0) return;
+    [...openDrawings, ...closedDrawings].filter(isPreorderProduct).forEach((p) => {
+      const actual = getPreorderReservedFromOrders(orders, p.id);
+      if ((preorderReserved[String(p.id)] || 0) !== actual) {
+        setPreorderCount(p.id, actual).then((ok) => ok && setPreorderReserved((prev) => ({ ...prev, [String(p.id)]: actual })));
+      }
+    });
+  }, [isAdmin, adminUnlocked, orders, preorderIdsKey]);
+
   const handleDeleteOrder = async (orderId) => {
     const ok = await deleteOrderFromDb(orderId);
     if (!ok) {
@@ -837,14 +913,32 @@ export default function App() {
     addToCartNow(product, qtyToAdd);
   };
 
+  // Giới hạn mỗi khách: trả về số lượng được thêm (0 = không được thêm nữa) và báo cho khách
+  const myOrders = user && user.role !== 'admin' ? orders : [];
+  const capToAllowance = (product, wanted, inCartQty = 0) => {
+    const allowance = getRemainingAllowance(product, myOrders, inCartQty);
+    if (wanted <= allowance) return wanted;
+    const max = getMaxPerCustomer(product);
+    alert(allowance > 0
+      ? t('Mỗi khách chỉ được mua tối đa {max} sản phẩm "{title}". Bạn chỉ có thể thêm {n} nữa.', { max, title: product.title, n: allowance })
+      : t('Mỗi khách chỉ được mua tối đa {max} sản phẩm "{title}". Bạn đã đạt giới hạn.', { max, title: product.title }));
+    return allowance;
+  };
+
   const addToCartNow = (product, qtyToAdd = 1) => {
+    if (isPreorderProduct(product)) {
+      preorderNow(product, qtyToAdd);
+      return;
+    }
     const currentStock = typeof product.stock === 'number' ? product.stock : 20;
     if (currentStock <= 0) {
       alert(t('Sản phẩm "{title}" hiện tại đã hết hàng!', { title: product.title }));
       return;
     }
 
-    const addCount = Math.max(1, Number(qtyToAdd) || 1);
+    const inCartQty = cart.find((item) => item.id === product.id)?.qty || 0;
+    const addCount = capToAllowance(product, Math.max(1, Number(qtyToAdd) || 1), inCartQty);
+    if (addCount <= 0) return;
     const resolvedImage = getProductCatalogImage(product) || product.image;
     let reachedLimit = false;
 
@@ -886,13 +980,22 @@ export default function App() {
   };
 
   const buyNowNow = (product, qtyToAdd = 1) => {
+    if (isPreorderProduct(product)) {
+      preorderNow(product, qtyToAdd);
+      return;
+    }
     const currentStock = typeof product.stock === 'number' ? product.stock : 20;
     if (currentStock <= 0) {
       alert(t('Sản phẩm "{title}" hiện tại đã hết hàng!', { title: product.title }));
       return;
     }
 
-    const addCount = Math.max(1, Number(qtyToAdd) || 1);
+    const inCartQty = cart.find((item) => item.id === product.id)?.qty || 0;
+    const addCount = capToAllowance(product, Math.max(1, Number(qtyToAdd) || 1), inCartQty);
+    if (addCount <= 0) {
+      if (inCartQty > 0) setIsCheckoutOpen(true);
+      return;
+    }
     const resolvedImage = getProductCatalogImage(product) || product.image;
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
@@ -933,10 +1036,67 @@ export default function App() {
       alert(t('Số lượng yêu cầu vượt quá tồn kho hiện tại (chỉ còn {n} sản phẩm)!', { n: maxStock }));
       finalQty = Math.max(1, maxStock);
     }
+    const currentQty = cart.find((item) => item.id === id)?.qty || 0;
+    if (product && finalQty > currentQty) {
+      finalQty = currentQty + capToAllowance(product, finalQty - currentQty, currentQty);
+      if (finalQty === currentQty) return;
+    }
 
     setCart((prev) =>
       prev.map((item) => (item.id === id ? { ...item, qty: finalQty, stock: maxStock } : item))
     );
+  };
+
+  // -------------------------------------------------------------
+  // ĐẶT TRƯỚC: thanh toán riêng từng sản phẩm (không qua giỏ), chỉ trả tiền cọc
+  // -------------------------------------------------------------
+  const [preorderCheckout, setPreorderCheckout] = useState(null); // { product, qty }
+  const handlePreorder = (product, qty = 1) => {
+    if (!requireLogin({ type: 'preorder', product, qty })) return;
+    preorderNow(product, qty);
+  };
+  const preorderNow = (product, qty = 1) => {
+    const live = withReviewStats(allProductsCombined.find((p) => String(p.id) === String(product.id)) || product);
+    const slotsLeft = getPreorderSlotsLeft(live);
+    if (slotsLeft <= 0) {
+      alert(t('Sản phẩm "{title}" đã hết suất đặt trước.', { title: live.title }));
+      return;
+    }
+    let wanted = Math.min(Math.max(1, Number(qty) || 1), slotsLeft);
+    wanted = capToAllowance(live, wanted, 0);
+    if (wanted <= 0) return;
+    setPreorderCheckout({ product: live, qty: wanted });
+    setIsCheckoutOpen(true);
+  };
+  const updatePreorderQty = (id, newQty) => {
+    setPreorderCheckout((prev) => {
+      if (!prev) return prev;
+      if (newQty <= 0) return prev;
+      const max = Math.min(getPreorderSlotsLeft(prev.product), getRemainingAllowance(prev.product, myOrders, 0));
+      if (newQty > max) {
+        alert(t('Bạn chỉ có thể đặt trước tối đa {n} sản phẩm này.', { n: max }));
+        return prev;
+      }
+      return { ...prev, qty: newQty };
+    });
+  };
+  // Kiểm tra lần cuối trước khi đặt: đơn này có làm khách vượt giới hạn mỗi khách không
+  const checkOrderLimits = (items) => {
+    for (const item of items || []) {
+      const product = allProductsCombined.find((p) => String(p.id) === String(item.id));
+      const max = getMaxPerCustomer(product);
+      if (!max) continue;
+      const already = getOrderedQty(myOrders, item.id);
+      if (already + (Number(item.qty) || 0) > max) {
+        return t('Mỗi khách chỉ được mua tối đa {max} sản phẩm "{title}". Bạn đã đặt {n} trong các đơn trước.', { max, title: item.title, n: already });
+      }
+    }
+    return '';
+  };
+
+  const closeCheckout = () => {
+    setIsCheckoutOpen(false);
+    setPreorderCheckout(null);
   };
 
   const handleRemoveFromCart = (id) => {
@@ -1053,6 +1213,7 @@ export default function App() {
     if (type === 'detail') openProductDetailNow(product);
     else if (type === 'cart') addToCartNow(product, qty);
     else if (type === 'buy') buyNowNow(product, qty);
+    else if (type === 'preorder') preorderNow(product, qty);
     else if (type === 'checkout') setIsCheckoutOpen(true);
     else if (type === 'cart-open') setIsCartOpen(true);
   }, [user]);
@@ -1217,6 +1378,7 @@ export default function App() {
           onAdminLoginSuccess={(adminData) => setUser(adminData)}
           onSignOut={handleSignOut}
           adminUnlocked={adminUnlocked}
+          onPreorderArrived={handlePreorderArrived}
           onAdminUnlockChange={setAdminUnlocked}
           onNavigateToStore={() => {
             setAdminProductToEdit(null);
@@ -1341,6 +1503,7 @@ export default function App() {
           onSelectProduct={handleOpenProductDetail}
           onAddToCart={handleAddToCart}
           onBuyNow={handleBuyNow}
+          onPreorder={handlePreorder}
           isSaved={savedIds.includes(selectedProduct.id)}
           onToggleSave={handleToggleSave}
         />
@@ -1518,6 +1681,7 @@ export default function App() {
                   onAddToCart={handleAddToCart}
                   onRequestJoin={handleRequestJoin}
                   onBuyNow={handleBuyNow}
+                  onPreorder={handlePreorder}
                   onOpenDetails={handleOpenProductDetail}
                   onRequestRestock={handleRequestRestock}
                   defaultEmail={user?.email}
@@ -1570,6 +1734,7 @@ export default function App() {
               onAddToCart={handleAddToCart}
               onRequestJoin={handleRequestJoin}
               onBuyNow={handleBuyNow}
+              onPreorder={handlePreorder}
               onOpenDetails={handleOpenProductDetail}
               onRequestRestock={handleRequestRestock}
               defaultEmail={user?.email}
@@ -1654,13 +1819,29 @@ export default function App() {
         <Suspense fallback={null}>
           <CheckoutModal
             isOpen={isCheckoutOpen}
-            onClose={() => setIsCheckoutOpen(false)}
-            cartItems={cart}
-            cartTotal={cartTotal}
+            onClose={closeCheckout}
+            cartItems={preorderCheckout
+              ? [{
+                  id: preorderCheckout.product.id,
+                  title: preorderCheckout.product.title,
+                  price: preorderCheckout.product.price,
+                  image: getProductCatalogImage(preorderCheckout.product) || preorderCheckout.product.image,
+                  qty: preorderCheckout.qty,
+                  // Số còn được đặt: theo suất còn lại và giới hạn mỗi khách
+                  stock: Math.min(
+                    getPreorderSlotsLeft(preorderCheckout.product),
+                    getRemainingAllowance(preorderCheckout.product, myOrders, 0),
+                    99
+                  )
+                }]
+              : cart}
+            cartTotal={preorderCheckout ? preorderCheckout.product.price * preorderCheckout.qty : cartTotal}
+            preorderProduct={preorderCheckout?.product || null}
+            checkLimits={checkOrderLimits}
             user={user}
-            onUpdateQty={handleUpdateCartQty}
-            onRemoveItem={handleRemoveFromCart}
-            onClearCart={() => setCart([])}
+            onUpdateQty={preorderCheckout ? updatePreorderQty : handleUpdateCartQty}
+            onRemoveItem={preorderCheckout ? closeCheckout : handleRemoveFromCart}
+            onClearCart={preorderCheckout ? () => {} : () => setCart([])}
             onOrderPlaced={handleOrderPlaced}
             onUpdateOrderStatus={handleUpdateOrderStatus}
             onOpenOrderHistory={handleOpenOrdersPage}

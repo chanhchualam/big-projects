@@ -17,6 +17,8 @@ import { getCountdownMode, getDrawingText, toLocalInputValue, DEFAULT_LABELS } f
 import { StatsTab, CouponsTab, RestockTab, AnnouncementsTab, TrackingEditor } from './AdminExtraTabs';
 import { auth } from '../firebase';
 import AdminSecurityPanel from './AdminSecurityPanel';
+import { isPreorderProduct, getMaxPerCustomer, getPreorderReservedFromOrders, checkPurchaseLimits } from '../utils/preorder';
+import { PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED, PRE_DEPOSIT_PAID, PRE_ARRIVED, PAID_STATUS, CUSTOMER_REPORTED_PAID } from '../utils/orderStatus';
 import { detectSeries, getProductSeries, groupProductsBySeries, knownSeriesNames, OTHER_SERIES } from '../utils/productSeries';
 import {
   getQrConfig,
@@ -53,7 +55,8 @@ export default function AdminModal({
   onDeleteProduct,
   onResetDefaults,
   initialProductToEdit = null,
-  onLockAdmin = null
+  onLockAdmin = null,
+  onPreorderArrived = null
 }) {
   // activeTab: 'open' | 'closed' | 'orders' | 'customers' | 'account'
   const [activeTab, setActiveTab] = useState('orders'); // Default to orders when opening admin for quick shopper fulfillment
@@ -269,6 +272,11 @@ export default function AdminModal({
     stock: 20,
     badge: '',
     series: '',
+    maxPerCustomer: '',
+    preorder: false,
+    releaseDate: '',
+    depositPercent: 30,
+    preorderSlots: '',
     optionsText: '',
     unitPrice: '',
     rating: 4.8,
@@ -344,13 +352,18 @@ export default function AdminModal({
   const preparingCount = orders.filter(o => o.status === 'Đang chuẩn bị hàng').length;
   const shippingCount = orders.filter(o => o.status === 'Đang giao hàng').length;
   const completedCount = orders.filter(o => o.status === 'Giao thành công').length;
+  // Đơn đặt trước đang ở các bước cọc / chờ hàng / chờ trả phần còn lại
+  const isOpenPreorder = (o) => o.isPreorder && [PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED, PRE_DEPOSIT_PAID, PRE_ARRIVED, CUSTOMER_REPORTED_PAID].includes(o.status);
+  const preorderCount = orders.filter(isOpenPreorder).length;
   const totalRevenue = orders.reduce((sum, o) => (o.status !== 'Đã huỷ' ? sum + (o.total || 0) : sum), 0);
 
   // Filtered Orders
   const filteredOrders = orders.filter((order) => {
     // Status filter
     if (orderFilter !== 'all') {
-      if (orderFilter === 'Chờ thanh toán QR') {
+      if (orderFilter === 'preorder') {
+        if (!isOpenPreorder(order)) return false;
+      } else if (orderFilter === 'Chờ thanh toán QR') {
         if (!order.status?.includes('Chờ thanh toán QR')) return false;
       } else if (orderFilter === 'Chờ xác nhận') {
         if (!order.status?.includes('Chờ') && !order.status?.includes('Đã xác nhận') && !order.status?.includes('Đã thanh toán')) {
@@ -635,6 +648,11 @@ export default function AdminModal({
       stock: 20,
       badge: '',
       series: '',
+      maxPerCustomer: '',
+      preorder: false,
+      releaseDate: '',
+      depositPercent: 30,
+      preorderSlots: '',
       optionsText: '',
       unitPrice: '',
       rating: 4.9,
@@ -670,6 +688,11 @@ export default function AdminModal({
       stock: typeof product.stock === 'number' ? product.stock : 20,
       badge: product.badge || '',
       series: product.series || '',
+      maxPerCustomer: product.maxPerCustomer || '',
+      preorder: product.preorder === true,
+      releaseDate: product.releaseDate || '',
+      depositPercent: product.depositPercent || 30,
+      preorderSlots: product.preorderSlots || '',
       optionsText: product.optionsText || '',
       unitPrice: product.unitPrice || '',
       rating: product.rating || 5,
@@ -946,6 +969,12 @@ export default function AdminModal({
       isSale,
       badge: formData.badge.trim() || null,
       series: (formData.series || '').trim() || null,
+      // Giới hạn mỗi khách (0 = không giới hạn) và đặt trước
+      maxPerCustomer: Math.max(0, parseInt(formData.maxPerCustomer, 10) || 0),
+      preorder: !!formData.preorder,
+      releaseDate: formData.preorder ? (formData.releaseDate || '') : '',
+      depositPercent: Math.min(100, Math.max(10, parseInt(formData.depositPercent, 10) || 30)),
+      preorderSlots: Math.max(0, parseInt(formData.preorderSlots, 10) || 0),
       optionsText: formData.optionsText.trim() || null,
       unitPrice: formData.unitPrice.trim() || null,
       rating: parseFloat(formData.rating) || 5.0,
@@ -1276,6 +1305,68 @@ export default function AdminModal({
                   <datalist id="admin-series-suggestions">
                     {seriesSuggestions.map((name) => <option key={name} value={name} />)}
                   </datalist>
+                </div>
+
+                <div className="admin-limit-preorder-box">
+                  <div className="form-row-2">
+                    <div className="form-group">
+                      <label className="form-label">Giới hạn mỗi khách (0 = không giới hạn)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="form-input"
+                        placeholder="ví dụ: 2"
+                        value={formData.maxPerCustomer}
+                        onChange={(e) => setFormData({ ...formData, maxPerCustomer: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Bán đặt trước (Pre-order)</label>
+                      <label className="admin-toggle-line">
+                        <input
+                          type="checkbox"
+                          checked={formData.preorder}
+                          onChange={(e) => setFormData({ ...formData, preorder: e.target.checked })}
+                        />
+                        <span>Sản phẩm chưa về hàng, cho khách đặt cọc trước</span>
+                      </label>
+                    </div>
+                  </div>
+                  {formData.preorder && (
+                    <div className="form-row-3">
+                      <div className="form-group">
+                        <label className="form-label">Ngày phát hành dự kiến</label>
+                        <input
+                          type="date"
+                          className="form-input"
+                          value={formData.releaseDate}
+                          onChange={(e) => setFormData({ ...formData, releaseDate: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Tiền cọc (% giá trị đơn, 10–100)</label>
+                        <input
+                          type="number"
+                          min="10"
+                          max="100"
+                          className="form-input"
+                          value={formData.depositPercent}
+                          onChange={(e) => setFormData({ ...formData, depositPercent: e.target.value })}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Tổng số suất (0 = không giới hạn)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          className="form-input"
+                          placeholder="ví dụ: 20"
+                          value={formData.preorderSlots}
+                          onChange={(e) => setFormData({ ...formData, preorderSlots: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-row-2">
@@ -1928,6 +2019,7 @@ export default function AdminModal({
                       { key: 'all', label: `Tất cả (${orders.length})` },
                       { key: 'Chờ thanh toán QR', label: `Chờ quét QR (${qrWaitingCount})` },
                       { key: 'Chờ xác nhận', label: `Chờ chuẩn bị (${pendingCount})` },
+                      { key: 'preorder', label: `Đặt trước (${preorderCount})` },
                       { key: 'Đang chuẩn bị hàng', label: `Đang chuẩn bị (${preparingCount})` },
                       { key: 'Đang giao hàng', label: `Đang giao (${shippingCount})` },
                       { key: 'Giao thành công', label: `Hoàn thành (${completedCount})` },
@@ -1983,8 +2075,13 @@ export default function AdminModal({
                 ) : (
                   <div className="shopper-orders-list">
                     {filteredOrders.map((order) => {
-                      const isQrWaiting = order.status?.includes('Chờ thanh toán QR');
-                      const isPending = order.status?.includes('Chờ') || order.status?.includes('Đã xác nhận') || order.status?.includes('Đã thanh toán');
+                      // Đơn đặt trước có các bước riêng (cọc → hàng về → thanh toán đủ) trước khi vào luồng thường
+                      const preorderStep = order.isPreorder
+                        && [PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED, PRE_DEPOSIT_PAID, PRE_ARRIVED, CUSTOMER_REPORTED_PAID].includes(order.status)
+                        ? order.status : null;
+                      const isQrWaiting = !preorderStep && order.status?.includes('Chờ thanh toán QR');
+                      const isPending = !preorderStep && (order.status?.includes('Chờ') || order.status?.includes('Đã xác nhận') || order.status?.includes('Đã thanh toán'));
+                      const limitCheck = checkPurchaseLimits(order, orders, [...openDrawings, ...closedDrawings]);
                       const isPreparing = order.status === 'Đang chuẩn bị hàng';
                       const isShipping = order.status === 'Đang giao hàng';
                       const isCompleted = order.status === 'Giao thành công';
@@ -2065,6 +2162,24 @@ export default function AdminModal({
                           )}
 
                           {/* Cảnh báo giá: giá trong đơn do khách gửi lên, có thể đã bị sửa */}
+                          {order.isPreorder && (
+                            <div className="admin-order-preorder-info">
+                              <strong>ĐƠN ĐẶT TRƯỚC</strong>
+                              {order.releaseDate && <> · Phát hành {order.releaseDate.split('-').reverse().join('/')}</>}
+                              {' · '}Cọc {order.depositPercent}%: <strong>{(Number(order.depositVnd) || 0).toLocaleString('vi-VN')} đ</strong>
+                              {' · '}Còn lại: <strong>{Math.max(0, (Number(order.amountVnd) || 0) - (Number(order.depositVnd) || 0)).toLocaleString('vi-VN')} đ</strong>
+                            </div>
+                          )}
+
+                          {limitCheck.warnings.length > 0 && (
+                            <div className="admin-order-limit-warning">
+                              <div style={{ fontWeight: 800, marginBottom: '4px' }}>Vượt giới hạn mỗi khách — có thể là người gom hàng</div>
+                              <ul>
+                                {limitCheck.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                              </ul>
+                            </div>
+                          )}
+
                           {pricing.warnings.length > 0 && (
                             <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', padding: '10px 14px', borderRadius: '8px', fontSize: '0.84rem', margin: '10px 0' }}>
                               <div style={{ fontWeight: 800, marginBottom: '4px' }}>
@@ -2124,6 +2239,14 @@ export default function AdminModal({
                                   handleUpdateStatus(order.id, next);
                                 }}
                               >
+                                {order.isPreorder && (
+                                  <>
+                                    <option value={PRE_AWAIT_DEPOSIT}>{PRE_AWAIT_DEPOSIT}</option>
+                                    <option value={PRE_DEPOSIT_REPORTED}>{PRE_DEPOSIT_REPORTED}</option>
+                                    <option value={PRE_DEPOSIT_PAID}>{PRE_DEPOSIT_PAID}</option>
+                                    <option value={PRE_ARRIVED}>{PRE_ARRIVED}</option>
+                                  </>
+                                )}
                                 <option value="Chờ thanh toán QR (Đơn mới)">Chờ thanh toán QR (Đơn mới)</option>
                                 <option value="Khách báo đã chuyển khoản (Chờ xác nhận)">Khách báo đã chuyển khoản (kiểm tra sao kê)</option>
                                 <option value="Đã thanh toán (Chờ chuẩn bị hàng)">Đã thanh toán (Chờ chuẩn bị hàng)</option>
@@ -2136,6 +2259,29 @@ export default function AdminModal({
                             </div>
 
                             <div className="workflow-quick-buttons">
+                              {(preorderStep === PRE_AWAIT_DEPOSIT || preorderStep === PRE_DEPOSIT_REPORTED) && (
+                                <button
+                                  type="button"
+                                  className="btn-flow-action btn-flow-confirm-qr"
+                                  onClick={() => handleUpdateStatus(order.id, PRE_DEPOSIT_PAID)}
+                                  title="Đã nhận đủ tiền cọc trong tài khoản"
+                                >
+                                  Xác Nhận Đã Nhận Cọc
+                                </button>
+                              )}
+                              {preorderStep === PRE_DEPOSIT_PAID && (
+                                <span className="admin-preorder-wait-note">Chờ hàng về — bấm "Hàng đã về" ở tab Sản Phẩm</span>
+                              )}
+                              {(preorderStep === PRE_ARRIVED || preorderStep === CUSTOMER_REPORTED_PAID) && (
+                                <button
+                                  type="button"
+                                  className="btn-flow-action btn-flow-confirm-qr"
+                                  onClick={() => handleUpdateStatus(order.id, PAID_STATUS)}
+                                  title="Đã nhận đủ phần tiền còn lại"
+                                >
+                                  Xác Nhận Đã Nhận Đủ Tiền
+                                </button>
+                              )}
                               {isQrWaiting && (
                                 <button
                                   type="button"
@@ -2370,9 +2516,18 @@ export default function AdminModal({
                             <span className={section === 'open' ? 'admin-section-pill open' : 'admin-section-pill closed'}>
                               {section === 'open' ? 'Open Drawing' : 'Closed Drawing'}
                             </span>
+                            {isPreorderProduct(product) && (
+                              <span className="admin-preorder-pill">
+                                Đặt trước · {getPreorderReservedFromOrders(orders, product.id)}/{product.preorderSlots || '∞'} suất
+                                {product.releaseDate && ` · PH ${product.releaseDate.split('-').reverse().join('/')}`}
+                              </span>
+                            )}
+                            {getMaxPerCustomer(product) > 0 && (
+                              <span className="admin-limit-pill">Tối đa {getMaxPerCustomer(product)}/khách</span>
+                            )}
                             <span className={`admin-stock-badge ${Number(product.stock ?? 20) <= 0 ? 'out' : Number(product.stock ?? 20) <= 5 ? 'low' : 'ok'}`}>
                               Kho: <strong>{typeof product.stock === 'number' ? product.stock : 20}</strong>
-                              {Number(product.stock ?? 20) <= 0 && (
+                              {Number(product.stock ?? 20) <= 0 && !isPreorderProduct(product) && (
                                 <span style={{ marginLeft: '4px', fontStyle: 'italic', color: '#b91c1c' }}>
                                   (Hết hàng — Đang ẩn khỏi khách)
                                 </span>
@@ -2414,6 +2569,16 @@ export default function AdminModal({
                               +10
                             </button>
                           </div>
+                          {isPreorderProduct(product) && onPreorderArrived && (
+                            <button
+                              type="button"
+                              className="btn-action-arrived"
+                              onClick={() => onPreorderArrived(product)}
+                              title="Hàng đặt trước đã về: nhập số lượng, báo khách thanh toán phần còn lại"
+                            >
+                              Hàng đã về
+                            </button>
+                          )}
                           <button
                             type="button"
                             className="btn-action-timer"

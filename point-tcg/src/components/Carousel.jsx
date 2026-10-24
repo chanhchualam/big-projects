@@ -10,6 +10,7 @@ export default function Carousel({
   onAddToCart,
   onRequestJoin,
   onBuyNow,
+  onPreorder,
   onOpenDetails,
   onRequestRestock,
   defaultEmail
@@ -99,6 +100,7 @@ export default function Carousel({
             onAddToCart={onAddToCart}
             onRequestJoin={onRequestJoin}
             onBuyNow={onBuyNow}
+            onPreorder={onPreorder}
             onOpenDetails={onOpenDetails}
             onRequestRestock={onRequestRestock}
             defaultEmail={defaultEmail}

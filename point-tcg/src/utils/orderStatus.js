@@ -11,9 +11,30 @@ export const TIMELINE_STEPS = [
 
 export const CANCELLED_STATUS = 'Đã huỷ';
 
+// Đơn đặt trước (pre-order): cọc trước → hàng về → thanh toán phần còn lại → luồng bình thường
+export const PRE_AWAIT_DEPOSIT = 'Chờ đặt cọc (Đặt trước)';
+export const PRE_DEPOSIT_REPORTED = 'Khách báo đã chuyển cọc (Chờ xác nhận)';
+export const PRE_DEPOSIT_PAID = 'Đã cọc (Chờ hàng về)';
+export const PRE_ARRIVED = 'Hàng đã về (Chờ thanh toán phần còn lại)';
+export const PAID_STATUS = 'Đã thanh toán (Chờ chuẩn bị hàng)';
+export const CUSTOMER_REPORTED_PAID = 'Khách báo đã chuyển khoản (Chờ xác nhận)';
+export const PREORDER_STATUSES = [PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED, PRE_DEPOSIT_PAID, PRE_ARRIVED];
+
+const PREORDER_TIMELINE = [
+  { key: 'preorder', label: 'Đặt trước', statuses: [PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED] },
+  { key: 'deposit', label: 'Đã cọc', statuses: [PRE_DEPOSIT_PAID] },
+  { key: 'arrived', label: 'Hàng về', statuses: [PRE_ARRIVED, CUSTOMER_REPORTED_PAID] },
+  { key: 'paid', label: 'Đã thanh toán đủ', statuses: [PAID_STATUS] },
+  { key: 'packing', label: 'Đóng gói', statuses: ['Đang chuẩn bị hàng'] },
+  { key: 'shipping', label: 'Đang giao', statuses: ['Đang giao hàng'] },
+  { key: 'delivered', label: 'Đã giao', statuses: ['Giao thành công', 'Đã giao'] }
+];
+
+export const getTimelineSteps = (order) => (order?.isPreorder ? PREORDER_TIMELINE : TIMELINE_STEPS);
+
 // Vị trí hiện tại của đơn trên thanh tiến trình (-1 nếu không nhận ra trạng thái)
-export function getTimelineIndex(status) {
-  return TIMELINE_STEPS.findIndex((step) => step.statuses.includes(status));
+export function getTimelineIndex(status, order = null) {
+  return getTimelineSteps(order).findIndex((step) => step.statuses.includes(status));
 }
 
 // Thời điểm gần nhất đơn chuyển sang một mốc (lấy từ statusHistory)
