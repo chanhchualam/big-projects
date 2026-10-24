@@ -2,7 +2,7 @@
 // Các khối giao diện của trang Tài khoản: tiến trình đơn, mã vận đơn, sửa hồ sơ / đổi mật khẩu, đánh giá sản phẩm
 import React, { useState, useMemo } from 'react';
 import {
-  TIMELINE_STEPS,
+  getTimelineSteps,
   CANCELLED_STATUS,
   getTimelineIndex,
   getStepTime,
@@ -24,11 +24,12 @@ export function OrderTimeline({ order }) {
   if (order.status === CANCELLED_STATUS) {
     return <div className="otl-cancelled">✕ {t('Đơn hàng đã huỷ')}</div>;
   }
-  const current = getTimelineIndex(order.status);
+  const steps = getTimelineSteps(order);
+  const current = getTimelineIndex(order.status, order);
 
   return (
     <ol className="otl" aria-label={t('Tiến trình đơn hàng')}>
-      {TIMELINE_STEPS.map((step, i) => {
+      {steps.map((step, i) => {
         const done = i <= current;
         const time = done ? getStepTime(order, step) : null;
         return (

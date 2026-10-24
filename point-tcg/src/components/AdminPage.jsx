@@ -22,6 +22,7 @@ export default function AdminPage({
   onAdminLoginSuccess = null,
   onSignOut = null,
   adminUnlocked = false,
+  onPreorderArrived = null,
   onAdminUnlockChange = () => {},
   initialProductToEdit = null
 }) {
@@ -362,6 +363,7 @@ export default function AdminPage({
           onResetDefaults={onResetDefaults}
           initialProductToEdit={initialProductToEdit}
           onLockAdmin={() => lockNow('lock')}
+          onPreorderArrived={onPreorderArrived}
         />
       </main>
     </div>

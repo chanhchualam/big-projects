@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { saveNewOrder, ensureSignedIn, getAuthErrorMessage } from '../utils/auth';
 import { getProductCatalogImage } from '../products';
 import { getQrConfig, loadQrConfig, generateQrUrl } from '../utils/qrConfig';
-import { fetchCoupon, redeemCoupon } from '../services/firestoreService';
+import { fetchCoupon, redeemCoupon, reservePreorderSlots } from '../services/firestoreService';
 import { getCouponError } from '../utils/orderCheck';
 import { usdToVnd, VND_RATE } from '../utils/currency';
-import { useI18n } from '../i18n';
+import { useI18n, getLocale } from '../i18n';
+import { getDepositPercent, depositUsdFor, formatReleaseDate } from '../utils/preorder';
+import { PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED } from '../utils/orderStatus';
 
 // Khách chỉ được báo đã chuyển khoản; admin kiểm tra sao kê rồi mới chuyển sang "Đã thanh toán"
 const CUSTOMER_REPORTED_PAID_STATUS = 'Khách báo đã chuyển khoản (Chờ xác nhận)';
@@ -21,7 +23,9 @@ export default function CheckoutModal({
   onClearCart,
   onOpenOrderHistory,
   onOrderPlaced,
-  onUpdateOrderStatus
+  onUpdateOrderStatus,
+  preorderProduct = null, // có giá trị khi đang đặt trước 1 sản phẩm (chỉ thanh toán tiền cọc)
+  checkLimits = null // (items) => thông báo lỗi nếu vượt giới hạn mỗi khách
 }) {
   const { t, money, currency } = useI18n();
   // Step State: 'form' | 'processing' | 'qr_payment' | 'success'
@@ -81,6 +85,8 @@ export default function CheckoutModal({
       setSecondsLeft(900);
       setCopiedField(null);
       setUseFallbackQr(false);
+      // Đặt trước chỉ nhận chuyển khoản tiền cọc
+      if (preorderProduct) setPaymentMethod('qr');
       // Điền sẵn thông tin đã lưu trong tài khoản
       setShippingInfo({
         name: user?.name || '',
@@ -141,6 +147,12 @@ export default function CheckoutModal({
   const discountAmount = appliedDiscount > 0 ? (cartTotal * (appliedDiscount / 100)) : 0;
   const finalTotal = Math.max(0, cartTotal - discountAmount + shippingFee);
   const amountVnd = usdToVnd(finalTotal);
+
+  // Đặt trước: khách chuyển trước depositPercent% tổng đơn, phần còn lại trả khi hàng về
+  const isPreorder = !!preorderProduct;
+  const depositPct = isPreorder ? getDepositPercent(preorderProduct) : 100;
+  const depositUsd = isPreorder ? depositUsdFor(finalTotal, depositPct) : finalTotal;
+  const depositVnd = isPreorder ? Math.min(amountVnd, usdToVnd(depositUsd)) : amountVnd;
 
   // Formatting helpers
   const formatVndText = (num) => {
@@ -205,6 +217,12 @@ export default function CheckoutModal({
       return;
     }
 
+    const limitError = checkLimits ? checkLimits(cartItems) : '';
+    if (limitError) {
+      alert(limitError);
+      return;
+    }
+
     // Step 2: Processing visual state briefly
     setCheckoutStep('processing');
 
@@ -232,6 +250,16 @@ export default function CheckoutModal({
         if (!redeemed) {
           setAppliedCoupon(null);
           setCouponMessage(t('Mã giảm giá vừa hết lượt sử dụng. Vui lòng đặt lại đơn.'));
+          setCheckoutStep('form');
+          return;
+        }
+      }
+
+      // Đặt trước: giữ suất trên server trước khi tạo đơn (rules không cho vượt tổng suất)
+      if (isPreorder) {
+        const reserved = await reservePreorderSlots(preorderProduct.id, cartItems[0]?.qty || 1);
+        if (!reserved) {
+          alert(t('Sản phẩm "{title}" đã hết suất đặt trước.', { title: preorderProduct.title }));
           setCheckoutStep('form');
           return;
         }
@@ -266,8 +294,18 @@ export default function CheckoutModal({
         total: finalTotal,
         amountVnd,
         vndRate: VND_RATE,
-        status: paymentMethod === 'cod' ? 'Chờ xác nhận (Đơn mới)' : 'Chờ thanh toán QR (Đơn mới)',
-        createdAt: new Date().toLocaleString('vi-VN')
+        status: isPreorder
+          ? PRE_AWAIT_DEPOSIT
+          : paymentMethod === 'cod' ? 'Chờ xác nhận (Đơn mới)' : 'Chờ thanh toán QR (Đơn mới)',
+        createdAt: new Date().toLocaleString('vi-VN'),
+        ...(isPreorder && {
+          isPreorder: true,
+          preorderProductId: String(preorderProduct.id),
+          releaseDate: preorderProduct.releaseDate || '',
+          depositPercent: depositPct,
+          depositUsd,
+          depositVnd
+        })
       };
 
       // 1. Normalize the order record
@@ -310,7 +348,7 @@ export default function CheckoutModal({
   const handleConfirmTransfer = async () => {
     const target = completedOrder;
     if (!target) return;
-    const newStatus = CUSTOMER_REPORTED_PAID_STATUS;
+    const newStatus = target.isPreorder ? PRE_DEPOSIT_REPORTED : CUSTOMER_REPORTED_PAID_STATUS;
     const ok = onUpdateOrderStatus ? await onUpdateOrderStatus(target.id, newStatus) : false;
     if (!ok) return;
     setCompletedOrder({
@@ -322,7 +360,10 @@ export default function CheckoutModal({
 
   // VietQR / Bank Transfer Dynamic URL
   const currentOrderId = completedOrder?.id || `PTCG-${Date.now().toString().slice(-6)}`;
-  const currentTotalVnd = completedOrder?.amountVnd || amountVnd;
+  // Đơn đặt trước: mã QR là số tiền cọc
+  const currentTotalVnd = completedOrder
+    ? (completedOrder.isPreorder ? completedOrder.depositVnd : completedOrder.amountVnd)
+    : (isPreorder ? depositVnd : amountVnd);
   const vietQrUrl = generateQrUrl(qrConfig, currentTotalVnd, currentOrderId);
 
   // Bulletproof Active Order object: guarantees the UI never renders an empty modal card
@@ -555,7 +596,7 @@ export default function CheckoutModal({
 
                   {/* Exact Amount */}
                   <div className="bank-data-row amount-row-highlight">
-                    <div className="bank-data-label">{t('Số Tiền Cần Chuyển:')}</div>
+                    <div className="bank-data-label">{activeOrder.isPreorder ? t('Tiền Cọc Cần Chuyển:') : t('Số Tiền Cần Chuyển:')}</div>
                     <div className="bank-data-val-group">
                       <div>
                         <div className="amount-vnd-text">{formatVndText(currentTotalVnd)}</div>
@@ -638,7 +679,9 @@ export default function CheckoutModal({
             <div className="success-badge-icon">✓</div>
             <h2 className="success-title">{t('Đặt Hàng Thành Công!')}</h2>
             <p className="success-sub">
-              {t('Cảm ơn bạn đã mua sắm tại Point TCG. Đơn hàng của bạn đã được chuyển tới shop để chuẩn bị đóng gói nguyên seal chính hãng.')}
+              {activeOrder.isPreorder
+                ? t('Cảm ơn bạn đã đặt trước tại Point TCG. Shop sẽ xác nhận tiền cọc và báo cho bạn khi hàng về để thanh toán phần còn lại.')
+                : t('Cảm ơn bạn đã mua sắm tại Point TCG. Đơn hàng của bạn đã được chuyển tới shop để chuẩn bị đóng gói nguyên seal chính hãng.')}
             </p>
 
             <div className="order-receipt-card">
@@ -872,6 +915,7 @@ export default function CheckoutModal({
                     >
                       {t('Chuyển Khoản / VietQR')}
                     </button>
+                    {!isPreorder && (
                     <button
                       type="button"
                       className={`pay-tab-btn ${paymentMethod === 'cod' ? 'active' : ''}`}
@@ -879,6 +923,7 @@ export default function CheckoutModal({
                     >
                       {t('Thanh Toán Tiền Mặt Khi Nhận Hàng (COD)')}
                     </button>
+                    )}
                   </div>
 
                   {/* Payment Details Sub-forms */}
@@ -988,7 +1033,8 @@ export default function CheckoutModal({
                     </button>
                   </div>
 
-                  {/* Coupon section */}
+                  {/* Coupon section (đặt trước không dùng mã giảm giá) */}
+                  {!isPreorder && (
                   <div className="coupon-input-wrap">
                     <input
                       type="text"
@@ -1005,6 +1051,7 @@ export default function CheckoutModal({
                       {t('Áp dụng')}
                     </button>
                   </div>
+                  )}
                   {couponMessage && (
                     <div className="coupon-feedback-msg">
                       {couponMessage}
@@ -1035,6 +1082,22 @@ export default function CheckoutModal({
                       </div>
                     )}
 
+                    {isPreorder && (
+                      <div className="preorder-summary-box">
+                        <div>{t('Phát hành dự kiến:')} <strong>{formatReleaseDate(preorderProduct.releaseDate, getLocale()) || t('Sắp có')}</strong></div>
+                        <div className="calc-row">
+                          <span>{t('Đặt cọc bây giờ ({pct}%)', { pct: depositPct })}</span>
+                          <strong>{currency === 'usd' ? `$${depositUsd.toFixed(2)}` : formatVndText(depositVnd)}</strong>
+                        </div>
+                        {depositPct < 100 && (
+                          <div className="calc-row">
+                            <span>{t('Thanh toán khi hàng về')}</span>
+                            <span>{currency === 'usd' ? `$${(finalTotal - depositUsd).toFixed(2)}` : formatVndText(amountVnd - depositVnd)}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="calc-total-row">
                       <span>{t('Tổng Thanh Toán:')}</span>
                       <div style={{ textAlign: 'right' }}>
@@ -1047,7 +1110,7 @@ export default function CheckoutModal({
                   </div>
 
                   <button type="submit" className="btn-confirm-checkout">
-                    <span>{t('Đặt Hàng & Thanh Toán Ngay')}</span>
+                    <span>{isPreorder ? t('Đặt Trước & Chuyển Cọc') : t('Đặt Hàng & Thanh Toán Ngay')}</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M5 12h14" />
                       <path d="M12 5l7 7-7 7" />

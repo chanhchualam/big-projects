@@ -18,7 +18,9 @@ const ORDER_STATUS_TEXT = {
   'Đang chuẩn bị hàng': { text: 'đang được đóng gói' },
   'Đang giao hàng': { text: 'đã được giao cho đơn vị vận chuyển' },
   'Giao thành công': { text: 'đã giao thành công — hãy đánh giá sản phẩm nhé!' },
-  'Đã huỷ': { text: 'đã bị huỷ' }
+  'Đã huỷ': { text: 'đã bị huỷ' },
+  'Đã cọc (Chờ hàng về)': { text: 'đã được xác nhận tiền cọc — shop sẽ báo khi hàng về' },
+  'Hàng đã về (Chờ thanh toán phần còn lại)': { text: 'đã có hàng — vui lòng thanh toán phần còn lại' }
 };
 
 function readJson(key, fallback) {

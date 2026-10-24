@@ -396,6 +396,48 @@ export async function redeemCoupon(code) {
 }
 
 // -------------------------------------------------------------
+// 7b. SUẤT ĐẶT TRƯỚC (preorder_counts/{productId}.reserved)
+// -------------------------------------------------------------
+export async function fetchPreorderCounts(productIds) {
+  const entries = await Promise.all((productIds || []).map(async (id) => {
+    try {
+      const snap = await getDoc(doc(db, 'preorder_counts', String(id)));
+      return [String(id), snap.exists() ? Number(snap.data().reserved) || 0 : 0];
+    } catch {
+      return [String(id), 0];
+    }
+  }));
+  return Object.fromEntries(entries);
+}
+
+// Giữ qty suất trước khi tạo đơn đặt trước. Rules từ chối nếu vượt tổng suất / giới hạn mỗi khách.
+export async function reservePreorderSlots(productId, qty) {
+  try {
+    return await runTransaction(db, async (tx) => {
+      const ref = doc(db, 'preorder_counts', String(productId));
+      const snap = await tx.get(ref);
+      const reserved = snap.exists() ? Number(snap.data().reserved) || 0 : 0;
+      tx.set(ref, { reserved: reserved + qty });
+      return true;
+    });
+  } catch (err) {
+    console.warn('Firestore reservePreorderSlots error:', err.message);
+    return false;
+  }
+}
+
+// Admin: đặt lại số suất đã giữ theo đơn thật
+export async function setPreorderCount(productId, reserved) {
+  try {
+    await setDoc(doc(db, 'preorder_counts', String(productId)), { reserved: Math.max(0, Math.round(reserved)) });
+    return true;
+  } catch (err) {
+    console.warn('Firestore setPreorderCount error:', err.message);
+    return false;
+  }
+}
+
+// -------------------------------------------------------------
 // 8. BẢNG REVIEWS (ĐÁNH GIÁ SẢN PHẨM, id = productId_uid)
 // -------------------------------------------------------------
 export async function fetchReviewsFromDb() {

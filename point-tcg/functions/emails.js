@@ -13,8 +13,14 @@ const STATUS_MESSAGES = {
   'Đang chuẩn bị hàng': 'Đơn hàng đang được đóng gói cẩn thận.',
   'Đang giao hàng': 'Đơn hàng đã được giao cho đơn vị vận chuyển.',
   'Giao thành công': 'Đơn hàng đã giao thành công. Cảm ơn bạn đã mua hàng! Bạn có thể đánh giá sản phẩm trong mục Tài khoản.',
-  'Đã huỷ': 'Đơn hàng đã bị huỷ. Nếu bạn đã chuyển khoản, shop sẽ liên hệ để hoàn tiền.'
+  'Đã huỷ': 'Đơn hàng đã bị huỷ. Nếu bạn đã chuyển khoản, shop sẽ liên hệ để hoàn tiền.',
+  'Khách báo đã chuyển cọc (Chờ xác nhận)': 'Shop đã nhận được thông báo chuyển tiền cọc của bạn và đang kiểm tra sao kê.',
+  'Đã cọc (Chờ hàng về)': 'Shop đã xác nhận tiền cọc. Suất đặt trước của bạn đã được giữ — shop sẽ báo ngay khi hàng về.',
+  'Hàng đã về (Chờ thanh toán phần còn lại)': 'Hàng đặt trước của bạn đã về! Vui lòng thanh toán phần còn lại để shop đóng gói và gửi hàng.'
 };
+
+const remainingVnd = (order) => Math.max(0, (order.serverAmountVnd || order.amountVnd || 0) - (order.serverDepositVnd ?? order.depositVnd ?? 0));
+const transferNote = (order) => `<strong style="background:#eff6ff;padding:2px 6px;border-radius:4px">PTCG ${escapeHtml(order.id)}</strong>`;
 
 function layout(title, body) {
   return `<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,sans-serif;color:#0f172a">
@@ -38,6 +44,18 @@ function itemsTable(order) {
 }
 
 export function orderPlacedEmail(order) {
+  if (order.isPreorder) {
+    const deposit = order.serverDepositVnd ?? order.depositVnd;
+    return {
+      subject: `[Point TCG] Đã nhận đơn đặt trước #${order.id}`,
+      html: layout(`Cảm ơn ${order.customerName || 'bạn'} đã đặt trước!`, `
+        <p>Mã đơn: <strong>#${escapeHtml(order.id)}</strong>${order.releaseDate ? ` · Phát hành dự kiến: <strong>${escapeHtml(order.releaseDate.split('-').reverse().join('/'))}</strong>` : ''}</p>
+        ${itemsTable(order)}
+        <p>Để giữ suất, vui lòng chuyển <strong>tiền cọc ${vnd(deposit)}</strong> (${Number(order.depositPercent) || ''}%) với nội dung ${transferNote(order)}.
+           Phần còn lại <strong>${vnd(remainingVnd(order))}</strong> thanh toán khi hàng về — shop sẽ báo cho bạn.</p>
+        <p style="font-size:14px">Giao tới: ${escapeHtml(order.shippingAddress)}</p>`)
+    };
+  }
   const isQr = (order.paymentMethod || '').includes('QR') || (order.paymentMethod || '').includes('Chuyển Khoản');
   const payment = isQr
     ? `<p>Vui lòng chuyển khoản <strong>${vnd(order.serverAmountVnd || order.amountVnd)}</strong> với nội dung
@@ -58,11 +76,32 @@ export function statusChangedEmail(order) {
   const tracking = order.trackingCode
     ? `<p>Mã vận đơn: <strong>${escapeHtml(order.carrier || '')} ${escapeHtml(order.trackingCode)}</strong></p>`
     : '';
+  const payRest = order.status === 'Hàng đã về (Chờ thanh toán phần còn lại)'
+    ? `<p>Số tiền còn lại cần chuyển: <strong>${vnd(remainingVnd(order))}</strong>, nội dung ${transferNote(order)}.
+       Bạn cũng có thể bấm "Thanh toán phần còn lại" trong mục Đơn hàng để lấy mã QR.</p>`
+    : '';
   return {
     subject: `[Point TCG] Đơn #${order.id}: ${order.status}`,
     html: layout(`Đơn hàng #${order.id}: ${order.status}`, `
       <p>${escapeHtml(STATUS_MESSAGES[order.status] || 'Trạng thái đơn hàng của bạn vừa được cập nhật.')}</p>
+      ${payRest}
       ${tracking}
+      ${itemsTable(order)}`)
+  };
+}
+
+// Gửi shop: khách vừa báo đã chuyển tiền (cọc / phần còn lại / toàn bộ) — cần kiểm tra sao kê
+export function paymentReportedEmail(order) {
+  const isDeposit = order.status === 'Khách báo đã chuyển cọc (Chờ xác nhận)';
+  const expected = isDeposit
+    ? (order.serverDepositVnd ?? order.depositVnd)
+    : order.isPreorder ? remainingVnd(order) : (order.serverAmountVnd || order.amountVnd);
+  return {
+    subject: `💸 Khách báo đã chuyển ${isDeposit ? 'tiền cọc' : 'tiền'} — đơn #${order.id}`,
+    html: layout(`Kiểm tra chuyển khoản đơn #${order.id}`, `
+      <p>Khách <strong>${escapeHtml(order.customerName)}</strong> (${escapeHtml(order.customerPhone)}) báo đã chuyển
+         <strong>${vnd(expected)}</strong> với nội dung ${transferNote(order)}.</p>
+      <p>Kiểm tra sao kê rồi xác nhận trong trang quản trị: <a href="${SITE_URL}/#admin">${SITE_URL}/#admin</a></p>
       ${itemsTable(order)}`)
   };
 }

@@ -4,13 +4,17 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { getProductCatalogImage } from '../products';
 import { usdToVnd } from '../utils/currency';
 import { OrderTimeline, TrackingInfo, ProfileEditor, ReviewsPanel } from './AccountPanels';
-import { useI18n } from '../i18n';
+import { useI18n, getLocale } from '../i18n';
+import OrderPaymentModal, { getPendingPayment } from './OrderPaymentModal';
+import { formatReleaseDate } from '../utils/preorder';
 
 // Must match customerCancellableStatuses() in firestore.rules
 const CUSTOMER_CANCELLABLE_STATUSES = [
   'Chờ thanh toán QR (Đơn mới)',
   'Chờ xác nhận (Đơn mới)',
-  'Khách báo đã chuyển khoản (Chờ xác nhận)'
+  'Khách báo đã chuyển khoản (Chờ xác nhận)',
+  'Chờ đặt cọc (Đặt trước)',
+  'Khách báo đã chuyển cọc (Chờ xác nhận)'
 ];
 
 // Helper format VND
@@ -36,6 +40,7 @@ export default function CustomerOrdersPage({
   onOpenProductDetail
 }) {
   const { t, money, moneyAlt, currency } = useI18n();
+  const [payingOrder, setPayingOrder] = useState(null);
   // Tổng đơn: VNĐ lấy đúng số tiền đã lưu trong đơn (amountVnd), USD lấy order.total
   const orderVnd = (o) => (o.amountVnd ? o.amountVnd.toLocaleString('vi-VN') + '₫' : formatVndPrice(o.total));
   const orderUsd = (o) => `$${Number(o.total || 0).toFixed(2)}`;
@@ -534,8 +539,29 @@ export default function CustomerOrdersPage({
                                 </span>
                               </div>
 
+                              {order.isPreorder && (
+                                <div className="cop-preorder-info">
+                                  <strong>{t('Đặt trước')}</strong>
+                                  {order.releaseDate && <> · {t('Phát hành dự kiến:')} {formatReleaseDate(order.releaseDate, getLocale())}</>}
+                                  {' · '}{t('Cọc {pct}%: {amount}', { pct: order.depositPercent, amount: `${(Number(order.depositVnd) || 0).toLocaleString('vi-VN')}₫` })}
+                                  {' · '}{t('Còn lại: {amount}', { amount: `${Math.max(0, (Number(order.amountVnd) || 0) - (Number(order.depositVnd) || 0)).toLocaleString('vi-VN')}₫` })}
+                                </div>
+                              )}
+
                               <div className="cop-action-buttons">
-                                {CUSTOMER_CANCELLABLE_STATUSES.includes(order.status) && (
+                                {getPendingPayment(order) && (
+                                  <button
+                                    type="button"
+                                    className="cop-btn-pay-now"
+                                    onClick={() => setPayingOrder(order)}
+                                  >
+                                    {getPendingPayment(order).kind === 'deposit'
+                                      ? t('Thanh toán cọc')
+                                      : getPendingPayment(order).kind === 'remaining' ? t('Thanh toán phần còn lại') : t('Thanh toán QR')}
+                                  </button>
+                                )}
+                                {CUSTOMER_CANCELLABLE_STATUSES.includes(order.status)
+                                  && !(order.isPreorder && order.status === 'Khách báo đã chuyển khoản (Chờ xác nhận)') && (
                                   <button
                                     type="button"
                                     className="cop-btn-cancel-order"
@@ -645,6 +671,14 @@ export default function CustomerOrdersPage({
           )}
         </main>
       </div>
+
+      {payingOrder && (
+        <OrderPaymentModal
+          order={payingOrder}
+          onClose={() => setPayingOrder(null)}
+          onReported={onUpdateOrderStatus}
+        />
+      )}
 
       {/* Detail Modal when customer clicks "Xem chi tiết" */}
       {viewingOrderDetail && (

@@ -3,7 +3,8 @@ import React from 'react';
 import RestockNotify from './RestockNotify';
 import ImageSlider from './ImageSlider';
 import { getProductImages } from '../utils/productImages';
-import { useI18n } from '../i18n';
+import { useI18n, getLocale } from '../i18n';
+import { isPreorderProduct, getPreorderSlotsLeft, getDepositPercent, getMaxPerCustomer, formatReleaseDate } from '../utils/preorder';
 
 // Star rating component with partial fill support
 function StarRating({ rating = 0, count = 0 }) {
@@ -87,6 +88,7 @@ export default function ProductCard({
   onAddToCart,
   onRequestJoin,
   onBuyNow,
+  onPreorder,
   onOpenDetails,
   onRequestRestock,
   defaultEmail,
@@ -111,7 +113,11 @@ export default function ProductCard({
 
   const { t, money } = useI18n();
   const stock = typeof product.stock === 'number' ? product.stock : 20;
-  const isOutOfStock = stock <= 0;
+  const isPreorder = isPreorderProduct(product);
+  const slotsLeft = isPreorder ? getPreorderSlotsLeft(product) : 0;
+  const maxPerCustomer = getMaxPerCustomer(product);
+  // Hàng đặt trước không tính là hết hàng (chưa có hàng là bình thường)
+  const isOutOfStock = !isPreorder && stock <= 0;
 
   const handleCardClick = (e) => {
     if (e.target.closest('button')) return;
@@ -141,6 +147,8 @@ export default function ProductCard({
     >
       {/* 1. Large Product Image on top */}
       <div className="card-image-box">
+        {isPreorder && <div className="card-preorder-ribbon">{t('ĐẶT TRƯỚC')}</div>}
+
         {/* Heart icon button */}
         <button
           type="button"
@@ -224,7 +232,11 @@ export default function ProductCard({
         {/* Status Line & Stock Indicator */}
         <div className="card-meta-indicators">
           <div className="card-status-line">
-            {status === 'open' ? (
+            {isPreorder ? (
+              <span>
+                {t('Phát hành dự kiến:')} <strong>{formatReleaseDate(product.releaseDate, getLocale()) || t('Sắp có')}</strong>
+              </span>
+            ) : status === 'open' ? (
               // Sản phẩm "Không hẹn giờ" → không hiện dòng thời gian
               countdownString && (
               <div className="countdown-status-badge">
@@ -251,7 +263,15 @@ export default function ProductCard({
           </div>
 
           <div className="card-stock-row">
-            {isOutOfStock ? (
+            {isPreorder ? (
+              <span className={`card-stock-tag ${slotsLeft > 0 ? 'preorder' : 'out-of-stock'}`}>
+                {slotsLeft <= 0
+                  ? t('Hết suất đặt trước')
+                  : slotsLeft === Infinity
+                    ? t('Cọc {pct}%', { pct: getDepositPercent(product) })
+                    : t('Còn {n} suất · cọc {pct}%', { n: slotsLeft, pct: getDepositPercent(product) })}
+              </span>
+            ) : isOutOfStock ? (
               <span className="card-stock-tag out-of-stock">
                 {t('Hết hàng')}
               </span>
@@ -267,8 +287,26 @@ export default function ProductCard({
           </div>
         </div>
 
-        {/* Action Buttons: Mua Ngay (QR) & Thêm Giỏ */}
-        {isOutOfStock ? (
+        {maxPerCustomer > 0 && (
+          <div className="card-limit-note">{t('Tối đa {n} sản phẩm / khách', { n: maxPerCustomer })}</div>
+        )}
+
+        {/* Action Buttons: Mua Ngay (QR) & Thêm Giỏ — hàng đặt trước chỉ có nút Đặt trước */}
+        {isPreorder ? (
+          <div className="card-actions-grid single-col">
+            <button
+              type="button"
+              className="card-action-btn btn-buynow btn-preorder"
+              disabled={slotsLeft <= 0}
+              onClick={(e) => {
+                e.stopPropagation();
+                (onPreorder || onBuyNow)?.(product);
+              }}
+            >
+              <span>{slotsLeft <= 0 ? t('Hết suất') : t('Đặt trước')}</span>
+            </button>
+          </div>
+        ) : isOutOfStock ? (
           <div className="card-actions-grid single-col">
             {onRequestRestock ? (
               <RestockNotify

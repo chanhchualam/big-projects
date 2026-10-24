@@ -1,7 +1,8 @@
 // functions/index.js
 // Cloud Functions cho Point TCG (cần gói Blaze):
-//  1. checkNewOrder   — đơn mới: server tính lại giá, gửi email xác nhận cho khách và báo đơn mới cho shop
-//  2. notifyOrderStatus — đơn đổi trạng thái: gửi email cho khách
+//  1. checkNewOrder   — đơn mới: server tính lại giá + tiền cọc, kiểm tra giới hạn mỗi khách,
+//                       gửi email xác nhận cho khách và báo đơn mới cho shop
+//  2. notifyOrderStatus — đơn đổi trạng thái: gửi email cho khách; khách báo đã chuyển tiền thì báo shop
 //  3. sepayWebhook    — SePay báo có tiền vào tài khoản: tự xác nhận đơn đã thanh toán + trừ tồn kho
 // Secrets (đặt bằng `firebase functions:secrets:set <TÊN>`): GMAIL_USER, GMAIL_APP_PASSWORD, SEPAY_API_KEY
 import { initializeApp } from 'firebase-admin/app';
@@ -11,8 +12,8 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { logger } from 'firebase-functions';
 import nodemailer from 'nodemailer';
-import { computeOrderPrice, parseOrderIdFromContent } from './pricing.js';
-import { orderPlacedEmail, statusChangedEmail, canEmail } from './emails.js';
+import { computeOrderPrice, computeLimitIssues, parseOrderIdFromContent } from './pricing.js';
+import { orderPlacedEmail, statusChangedEmail, paymentReportedEmail, canEmail } from './emails.js';
 
 initializeApp();
 const db = getFirestore();
@@ -22,9 +23,18 @@ const GMAIL_APP_PASSWORD = defineSecret('GMAIL_APP_PASSWORD');
 const SEPAY_API_KEY = defineSecret('SEPAY_API_KEY');
 
 const PAID_STATUS = 'Đã thanh toán (Chờ chuẩn bị hàng)';
-const AWAITING_PAYMENT_STATUSES = ['Chờ thanh toán QR (Đơn mới)', 'Khách báo đã chuyển khoản (Chờ xác nhận)'];
+const CUSTOMER_REPORTED_PAID = 'Khách báo đã chuyển khoản (Chờ xác nhận)';
+const AWAITING_PAYMENT_STATUSES = ['Chờ thanh toán QR (Đơn mới)', CUSTOMER_REPORTED_PAID];
+// Đặt trước (phải khớp src/utils/orderStatus.js)
+const PRE_AWAIT_DEPOSIT = 'Chờ đặt cọc (Đặt trước)';
+const PRE_DEPOSIT_REPORTED = 'Khách báo đã chuyển cọc (Chờ xác nhận)';
+const PRE_DEPOSIT_PAID = 'Đã cọc (Chờ hàng về)';
+const PRE_ARRIVED = 'Hàng đã về (Chờ thanh toán phần còn lại)';
 const EMAIL_STATUSES = [
-  'Khách báo đã chuyển khoản (Chờ xác nhận)',
+  CUSTOMER_REPORTED_PAID,
+  PRE_DEPOSIT_REPORTED,
+  PRE_DEPOSIT_PAID,
+  PRE_ARRIVED,
   PAID_STATUS,
   'Đang chuẩn bị hàng',
   'Đang giao hàng',
@@ -58,15 +68,33 @@ export const checkNewOrder = onDocumentCreated(
       : null;
 
     const price = computeOrderPrice(order, productsById, coupon);
+
+    // Giới hạn mỗi khách: gộp các đơn cùng tài khoản và cùng SĐT (chống lập nhiều tài khoản để gom hàng)
+    let limitIssues = [];
+    if (productIds.some((id) => Number(productsById.get(id)?.maxPerCustomer) > 0)) {
+      const [byUid, byPhone] = await Promise.all([
+        order.uid ? db.collection('orders').where('uid', '==', order.uid).get() : null,
+        order.customerPhone ? db.collection('orders').where('customerPhone', '==', order.customerPhone).get() : null
+      ]);
+      const related = new Map();
+      [byUid, byPhone].forEach((snap) => snap?.forEach((d) => related.set(d.id, { ...d.data(), id: d.id })));
+      limitIssues = computeLimitIssues(order, [...related.values()], productsById);
+    }
+
     const verified = {
       serverTotal: price.total,
       serverAmountVnd: price.amountVnd,
+      ...(price.depositVnd !== null && { serverDepositVnd: price.depositVnd }),
       priceVerified: price.issues.length === 0,
-      priceIssues: price.issues
+      priceIssues: price.issues,
+      limitIssues
     };
     await event.data.ref.update(verified);
     if (price.issues.length) {
       logger.warn(`Đơn ${order.id} có giá không khớp`, price.issues);
+    }
+    if (limitIssues.length) {
+      logger.warn(`Đơn ${order.id} vượt giới hạn mỗi khách`, limitIssues);
     }
 
     const full = { ...order, ...verified };
@@ -76,7 +104,8 @@ export const checkNewOrder = onDocumentCreated(
       }
       const shopCopy = orderPlacedEmail(full);
       await sendMail(GMAIL_USER.value(), {
-        subject: `🔔 Đơn mới #${order.id} — ${order.customerName}${price.issues.length ? ' ⚠️ GIÁ KHÔNG KHỚP' : ''}`,
+        subject: `🔔 ${order.isPreorder ? 'Đặt trước' : 'Đơn mới'} #${order.id} — ${order.customerName}`
+          + `${price.issues.length ? ' ⚠️ GIÁ KHÔNG KHỚP' : ''}${limitIssues.length ? ' ⚠️ VƯỢT GIỚI HẠN' : ''}`,
         html: shopCopy.html
       });
     } catch (err) {
@@ -94,9 +123,14 @@ export const notifyOrderStatus = onDocumentUpdated(
     const before = event.data.before.data();
     const after = { ...event.data.after.data(), id: event.params.orderId };
     if (before.status === after.status || !EMAIL_STATUSES.includes(after.status)) return;
-    if (!canEmail(after.customerEmail)) return;
     try {
-      await sendMail(after.customerEmail, statusChangedEmail(after));
+      // Khách báo đã chuyển tiền → báo shop kiểm tra sao kê
+      if (after.status === CUSTOMER_REPORTED_PAID || after.status === PRE_DEPOSIT_REPORTED) {
+        await sendMail(GMAIL_USER.value(), paymentReportedEmail(after));
+      }
+      if (canEmail(after.customerEmail)) {
+        await sendMail(after.customerEmail, statusChangedEmail(after));
+      }
     } catch (err) {
       logger.error(`Không gửi được email trạng thái đơn ${after.id}`, err);
     }
@@ -156,9 +190,16 @@ export const sepayWebhook = onRequest({ secrets: [SEPAY_API_KEY], cors: false },
       }
 
       const order = orderSnap.data();
-      const required = order.serverAmountVnd ?? order.amountVnd;
+      const fullVnd = order.serverAmountVnd ?? order.amountVnd;
+      const depositVnd = order.serverDepositVnd ?? order.depositVnd ?? 0;
+      // Đặt trước: lần 1 trả cọc, lần 2 (khi hàng về) trả phần còn lại
+      const isDepositPayment = order.isPreorder && [PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED].includes(order.status);
+      const isRemainingPayment = order.isPreorder && [PRE_ARRIVED, CUSTOMER_REPORTED_PAID].includes(order.status);
+      const required = isDepositPayment ? depositVnd : isRemainingPayment ? fullVnd - depositVnd : fullVnd;
       let outcome;
-      if (!AWAITING_PAYMENT_STATUSES.includes(order.status)) {
+      if (isDepositPayment) {
+        outcome = order.priceVerified === false ? 'price_mismatch' : record.amount < required ? 'underpaid' : 'deposit_paid';
+      } else if (!isRemainingPayment && !AWAITING_PAYMENT_STATUSES.includes(order.status)) {
         outcome = 'not_awaiting';
       } else if (order.priceVerified === false) {
         outcome = 'price_mismatch'; // để admin tự kiểm tra
@@ -168,11 +209,20 @@ export const sepayWebhook = onRequest({ secrets: [SEPAY_API_KEY], cors: false },
         outcome = 'paid';
       }
 
-      if (outcome === 'paid') {
+      if (outcome === 'deposit_paid') {
+        t.update(orderSnap.ref, {
+          status: PRE_DEPOSIT_PAID,
+          statusHistory: FieldValue.arrayUnion({ status: PRE_DEPOSIT_PAID, at: new Date().toISOString() }),
+          paidAmount: record.amount,
+          paymentRef: paymentRef.id,
+          updatedAt: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+        });
+      } else if (outcome === 'paid') {
         const update = {
           status: PAID_STATUS,
           statusHistory: FieldValue.arrayUnion({ status: PAID_STATUS, at: new Date().toISOString() }),
-          paidAmount: record.amount,
+          // Đặt trước: cộng dồn tiền cọc + phần còn lại
+          paidAmount: order.isPreorder ? (Number(order.paidAmount) || 0) + record.amount : record.amount,
           paymentRef: paymentRef.id,
           updatedAt: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
         };

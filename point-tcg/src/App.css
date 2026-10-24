@@ -10244,3 +10244,245 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Đặt trước + giới hạn mỗi khách */
+.card-preorder-ribbon {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #7c3aed;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.35);
+}
+
+.card-stock-tag.preorder {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border-color: #ddd6fe;
+}
+
+.card-limit-note,
+.pdp-limit-note {
+  margin: 0 0 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.pdp-limit-note {
+  margin: 4px 0 12px;
+  font-size: 0.86rem;
+}
+
+.btn-preorder {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.btn-preorder:hover:not(:disabled) {
+  background: #6d28d9;
+}
+
+.pdp-preorder-box,
+.preorder-summary-box,
+.cop-preorder-info,
+.admin-order-preorder-info {
+  border: 1px solid #ddd6fe;
+  background: #f5f3ff;
+  color: #4c1d95;
+  border-radius: 10px;
+}
+
+.pdp-preorder-box {
+  margin: 4px 0 14px;
+  padding: 12px 14px;
+}
+
+.pdp-preorder-title {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.pdp-preorder-box ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.preorder-summary-box {
+  margin: 10px 0;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+}
+
+.cop-preorder-info,
+.admin-order-preorder-info {
+  margin: 10px 0;
+  padding: 8px 12px;
+  font-size: 0.84rem;
+}
+
+.admin-order-limit-warning {
+  margin: 10px 0;
+  padding: 10px 14px;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.84rem;
+}
+
+.admin-order-limit-warning ul {
+  margin: 0 0 0 18px;
+  padding: 0;
+}
+
+.admin-preorder-pill,
+.admin-limit-pill {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.admin-preorder-pill {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+
+.admin-limit-pill {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.btn-action-arrived {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd6fe;
+  background: #f5f3ff;
+  color: #6d28d9;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-preorder-wait-note {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6d28d9;
+}
+
+.admin-limit-preorder-box {
+  margin: 4px 0 14px;
+  padding: 12px 14px 2px;
+  border: 1px dashed #c4b5fd;
+  border-radius: 10px;
+  background: #faf8ff;
+}
+
+.admin-toggle-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.cop-btn-pay-now {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #0053e2;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.order-pay-modal {
+  position: relative;
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 24px 22px;
+  border-radius: 16px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.order-pay-modal h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.order-pay-sub {
+  margin: 4px 0 12px;
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
+.order-pay-qr {
+  width: 220px;
+  max-width: 100%;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.order-pay-rows {
+  margin: 14px 0;
+  text-align: left;
+  font-size: 0.86rem;
+}
+
+.order-pay-rows > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 7px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.order-pay-rows span {
+  color: #64748b;
+  min-width: 130px;
+}
+
+.order-pay-rows strong {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #0f172a;
+}
+
+.order-pay-rows button {
+  padding: 3px 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.order-pay-amount {
+  color: #0053e2 !important;
+  font-size: 1rem;
+}
+
+.order-pay-confirm {
+  width: 100%;
+}
