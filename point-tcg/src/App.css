@@ -10516,3 +10516,12 @@ body {
 .order-transfer-info .order-pay-rows span { grid-area: label; }
 .order-transfer-info .order-pay-rows strong { grid-area: value; text-align: left; word-break: normal; overflow-wrap: anywhere; }
 .order-transfer-info .order-pay-rows button { grid-area: btn; }
+.shipping-surcharge-note {
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.82rem;
+  font-weight: 600;
+}

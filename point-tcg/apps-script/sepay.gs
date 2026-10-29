@@ -28,8 +28,20 @@ var ST_PRE_ARRIVED = 'Hàng đã về (Chờ thanh toán phần còn lại)';
 // Phải khớp với functions/pricing.js và src/utils/currency.js
 var VND_RATE = 26500;
 var FREE_SHIPPING_THRESHOLD = 75;
-var EXPRESS_FEE = 15;
-var STANDARD_FEE = 8.5;
+// Phí ship VNĐ, từ sản phẩm thứ 5 cứ mỗi 2 sản phẩm cộng một mức phụ thu (khớp src/utils/shipping.js)
+var SHIPPING_VERSION = 2;
+var SHIPPING_RATES = { standard: { baseVnd: 30000, surchargeVnd: 15000 }, express: { baseVnd: 50000, surchargeVnd: 25000 } };
+
+function shippingFeeOf(order, subtotal, freeShip) {
+  var isExpress = String(order.shippingMethod || '').indexOf('Hoả tốc') >= 0;
+  var free = subtotal >= FREE_SHIPPING_THRESHOLD || freeShip;
+  if (order.shippingVersion !== SHIPPING_VERSION) return isExpress ? 15 : (free ? 0 : 8.5); // đơn cũ
+  if (!isExpress && free) return 0;
+  var items = (order.items || []).reduce(function (s, i) { return s + (Number(i.qty) || 0); }, 0);
+  var steps = items > 4 ? Math.ceil((items - 4) / 2) : 0;
+  var rate = SHIPPING_RATES[isExpress ? 'express' : 'standard'];
+  return (rate.baseVnd + steps * rate.surchargeVnd) / VND_RATE;
+}
 var TOLERANCE = 0.01;
 
 // Chạy 1 lần trong trình soạn thảo: tạo khoá bí mật và in ra link webhook để dán vào SePay
@@ -241,8 +253,7 @@ function priceOrder(order, checkPreorderOpen) {
     }
   }
 
-  var isExpress = String(order.shippingMethod || '').indexOf('Hoả tốc') >= 0;
-  var shippingFee = isExpress ? EXPRESS_FEE : (subtotal >= FREE_SHIPPING_THRESHOLD || freeShip ? 0 : STANDARD_FEE);
+  var shippingFee = shippingFeeOf(order, subtotal, freeShip);
   var total = round2(Math.max(0, subtotal - subtotal * percent / 100 + shippingFee));
   var amountVnd = Math.round(total * VND_RATE / 1000) * 1000;
   if (Math.abs((Number(order.total) || 0) - total) > TOLERANCE) {

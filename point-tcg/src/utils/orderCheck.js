@@ -4,8 +4,8 @@
 // Quy tắc phí ship / mã giảm giá phải khớp với CheckoutModal.
 import { orderVndRate } from './currency';
 import { translate, formatMoney } from '../i18n';
+import { expectedOrderShippingUsd } from './shipping';
 
-const FREE_SHIPPING_THRESHOLD = 75;
 const LEGACY_MAX_DISCOUNT_PERCENT = 10; // đơn cũ trước khi có bảng coupons
 const TOLERANCE = 0.01;
 
@@ -69,8 +69,7 @@ export function checkOrderPricing(order, products = [], coupons = null) {
   }
 
   // 3. Phí ship
-  const isExpress = (order.shippingMethod || '').includes('Hoả tốc');
-  const expectedShipping = isExpress ? 15 : (expectedSubtotal >= FREE_SHIPPING_THRESHOLD || freeShip ? 0 : 8.5);
+  const expectedShipping = expectedOrderShippingUsd(order, expectedSubtotal, freeShip);
   if (differs(order.shippingFee, expectedShipping)) {
     warnings.push(`Phí ship trong đơn ${money(order.shippingFee)}, đúng ra là ${money(expectedShipping)}.`);
   }

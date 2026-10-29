@@ -4,8 +4,24 @@
 // Phải khớp với src/utils/currency.js
 export const VND_RATE = 26500;
 const FREE_SHIPPING_THRESHOLD = 75;
-const EXPRESS_FEE = 15;
-const STANDARD_FEE = 8.5;
+// Phải khớp với src/utils/shipping.js: phí VNĐ, từ sản phẩm thứ 5 cứ mỗi 2 sản phẩm cộng một mức phụ thu
+const SHIPPING_VERSION = 2;
+const SHIPPING_RATES = { standard: { baseVnd: 30000, surchargeVnd: 15000 }, express: { baseVnd: 50000, surchargeVnd: 25000 } };
+const LEGACY_EXPRESS_FEE = 15;
+const LEGACY_STANDARD_FEE = 8.5;
+
+export function shippingFeeOf(order, subtotal, freeShip) {
+  const isExpress = (order.shippingMethod || '').includes('Hoả tốc');
+  const free = subtotal >= FREE_SHIPPING_THRESHOLD || freeShip;
+  if (order.shippingVersion !== SHIPPING_VERSION) {
+    return isExpress ? LEGACY_EXPRESS_FEE : (free ? 0 : LEGACY_STANDARD_FEE);
+  }
+  if (!isExpress && free) return 0;
+  const items = (order.items || []).reduce((s, i) => s + (Number(i.qty) || 0), 0);
+  const steps = items > 4 ? Math.ceil((items - 4) / 2) : 0;
+  const rate = SHIPPING_RATES[isExpress ? 'express' : 'standard'];
+  return (rate.baseVnd + steps * rate.surchargeVnd) / VND_RATE;
+}
 const TOLERANCE = 0.01;
 
 const round2 = (n) => Math.round(n * 100) / 100;
@@ -43,8 +59,7 @@ export function computeOrderPrice(order, productsById, coupon) {
     }
   }
 
-  const isExpress = (order.shippingMethod || '').includes('Hoả tốc');
-  const shippingFee = isExpress ? EXPRESS_FEE : (subtotal >= FREE_SHIPPING_THRESHOLD || freeShip ? 0 : STANDARD_FEE);
+  const shippingFee = shippingFeeOf(order, subtotal, freeShip);
   const discount = subtotal * percent / 100;
   const total = round2(Math.max(0, subtotal - discount + shippingFee));
   const amountVnd = Math.round((total * VND_RATE) / 1000) * 1000;

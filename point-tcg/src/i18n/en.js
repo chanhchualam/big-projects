@@ -455,5 +455,7 @@ export default {
   "ảnh {i}/{n}": "image {i}/{n}",
   "Ẩn thông báo này": "Hide this announcement",
   "← Quay lại cửa hàng": "← Back to store",
-  "✕ Đóng": "✕ Close"
+  "✕ Đóng": "✕ Close",
+  "Đơn {n} sản phẩm: phí ship đã gồm phụ thu theo khối lượng của đơn vị vận chuyển (từ sản phẩm thứ 5, cứ mỗi 2 sản phẩm cộng thêm một mức).": "{n}-item order: shipping includes the carrier weight surcharge (from the 5th item, one extra step per 2 items).",
+  "Quét mã VietQR chuyển khoản (Có đồng hồ đếm ngược 1 phút)": "Scan VietQR to transfer (1-minute countdown)"
 };

@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { getProductCatalogImage } from '../products';
 import { useI18n } from '../i18n';
+import { countItems, shippingFeeUsd, FREE_SHIPPING_THRESHOLD } from '../utils/shipping';
 
 export default function CartDrawer({
   isOpen,
@@ -33,8 +34,10 @@ export default function CartDrawer({
 
   if (!isOpen) return null;
 
-  const freeShippingThreshold = 75;
+  const freeShippingThreshold = FREE_SHIPPING_THRESHOLD;
   const freeShippingMet = cartTotal >= freeShippingThreshold;
+  // Ước tính theo giao tiêu chuẩn (đã gồm phụ thu khi từ 5 sản phẩm)
+  const estimatedShipping = shippingFeeUsd('standard', countItems(cartItems), cartTotal, false);
   const progressPercent = Math.min(100, Math.round((cartTotal / freeShippingThreshold) * 100));
 
   return (
@@ -152,12 +155,12 @@ export default function CartDrawer({
             </div>
             <div className="drawer-summary-row">
               <span>{t('Estimated Shipping')}</span>
-              <span>{freeShippingMet ? t('FREE') : money(8.5)}</span>
+              <span>{freeShippingMet ? t('FREE') : money(estimatedShipping)}</span>
             </div>
 
             <div className="drawer-total-row">
               <span>{t('Total')}</span>
-              <span>{money(cartTotal + (freeShippingMet ? 0 : 8.5))}</span>
+              <span>{money(cartTotal + estimatedShipping)}</span>
             </div>
 
             <button

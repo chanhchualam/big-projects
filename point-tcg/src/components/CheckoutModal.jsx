@@ -5,6 +5,7 @@ import { getQrConfig, loadQrConfig, generateQrUrl, QR_SECONDS } from '../utils/q
 import { fetchCoupon, redeemCoupon, reservePreorderSlots } from '../services/firestoreService';
 import { getCouponError } from '../utils/orderCheck';
 import { usdToVnd, VND_RATE } from '../utils/currency';
+import { countItems, shippingFeeUsd, surchargeSteps, isFreeStandardShipping, SHIPPING_VERSION } from '../utils/shipping';
 import { useI18n, getLocale } from '../i18n';
 import { getDepositPercent, depositUsdFor, formatReleaseDate } from '../utils/preorder';
 import { PRE_AWAIT_DEPOSIT, PRE_DEPOSIT_REPORTED } from '../utils/orderStatus';
@@ -144,12 +145,13 @@ export default function CheckoutModal({
 
   if (!isOpen) return null;
 
-  // Shipping Fee Calculation
-  const freeShippingThreshold = 75;
-  const isFreeStandard = cartTotal >= freeShippingThreshold;
-  const shippingFee = shippingMethod === 'standard'
-    ? (isFreeStandard || appliedCoupon?.freeShip ? 0 : 8.5)
-    : 15.0;
+  // Phí ship theo phương thức + số sản phẩm (từ 5 sản phẩm có phụ thu), xem utils/shipping.js
+  const itemCount = countItems(cartItems);
+  const isFreeStandard = isFreeStandardShipping(cartTotal, appliedCoupon?.freeShip);
+  const standardFee = shippingFeeUsd('standard', itemCount, cartTotal, appliedCoupon?.freeShip);
+  const expressFee = shippingFeeUsd('express', itemCount, cartTotal, appliedCoupon?.freeShip);
+  const shippingFee = shippingMethod === 'standard' ? standardFee : expressFee;
+  const hasSurcharge = surchargeSteps(itemCount) > 0;
 
   // Total Calculation
   const discountAmount = appliedDiscount > 0 ? (cartTotal * (appliedDiscount / 100)) : 0;
@@ -297,6 +299,7 @@ export default function CheckoutModal({
         })),
         subtotal: cartTotal,
         shippingFee,
+        shippingVersion: SHIPPING_VERSION,
         discountAmount,
         couponCode: appliedCoupon?.code || '',
         total: finalTotal,
@@ -845,6 +848,11 @@ export default function CheckoutModal({
                     <span>{t('Phương Thức Vận Chuyển')}</span>
                   </h3>
 
+                  {hasSurcharge && (
+                    <p className="shipping-surcharge-note">
+                      {t('Đơn {n} sản phẩm: phí ship đã gồm phụ thu theo khối lượng của đơn vị vận chuyển (từ sản phẩm thứ 5, cứ mỗi 2 sản phẩm cộng thêm một mức).', { n: itemCount })}
+                    </p>
+                  )}
                   <div className="shipping-options-list">
                     <label
                       className={`shipping-option-card ${shippingMethod === 'standard' ? 'active' : ''}`}
@@ -861,7 +869,7 @@ export default function CheckoutModal({
                         <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{t('Hộp chống sốc niêm phong (3-5 ngày làm việc)')}</div>
                       </div>
                       <div style={{ fontWeight: 800, color: isFreeStandard ? '#16a34a' : '#0053e2' }}>
-                        {isFreeStandard ? t('MIỄN PHÍ') : money(8.5)}
+                        {isFreeStandard ? t('MIỄN PHÍ') : money(standardFee)}
                       </div>
                     </label>
 
@@ -880,7 +888,7 @@ export default function CheckoutModal({
                         <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{t('Bảo hiểm 100% giá trị thẻ hiếm, giao trong 24h')}</div>
                       </div>
                       <div style={{ fontWeight: 800, color: '#0053e2' }}>
-                        {money(15)}
+                        {money(expressFee)}
                       </div>
                     </label>
                   </div>
@@ -916,7 +924,7 @@ export default function CheckoutModal({
                   {paymentMethod === 'qr' && (
                     <div className="payment-details-box qr-box">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, color: '#0f172a', marginBottom: '8px' }}>
-                        <span>{t('Quét mã VietQR chuyển khoản (Có đồng hồ đếm ngược 15:00)')}</span>
+                        <span>{t('Quét mã VietQR chuyển khoản (Có đồng hồ đếm ngược 1 phút)')}</span>
                       </div>
                       <p style={{ fontSize: '0.84rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
                         {t('Khi bấm "Đặt Hàng & Thanh Toán" bên dưới, đơn hàng sẽ ngay lập tức được gửi đến shop và màn hình sẽ hiển thị mã QR VietQR kèm thời gian đếm ngược 15 phút để bạn quét thanh toán nhanh chóng.')}

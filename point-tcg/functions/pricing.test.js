@@ -1,7 +1,7 @@
 // Chạy: cd functions && npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeOrderPrice, parseOrderIdFromContent } from './pricing.js';
+import { computeOrderPrice, parseOrderIdFromContent, shippingFeeOf, VND_RATE } from './pricing.js';
 
 const products = new Map([['a', { price: 50 }], ['b', { price: 10 }]]);
 const baseOrder = {
@@ -93,4 +93,40 @@ test('giới hạn mỗi khách: trong giới hạn thì không cảnh báo', ()
   const prods = new Map([['a', { price: 50, maxPerCustomer: 2 }]]);
   const order = { id: 'o1', uid: 'u1', customerPhone: '0912345678', items: [{ id: 'a', title: 'A', qty: 2 }] };
   assert.deepEqual(computeLimitIssues(order, [order], prods), []);
+});
+
+// Bảng phí ship mới (shippingVersion 2): phí VNĐ, từ sản phẩm thứ 5 cứ mỗi 2 sản phẩm cộng một mức phụ thu
+test('ship v2: 1–4 sản phẩm 30.000đ / hoả tốc 50.000đ', () => {
+  const o = { shippingVersion: 2, shippingMethod: 'Tiêu chuẩn', items: [{ qty: 4 }] };
+  assert.equal(Math.round(shippingFeeOf(o, 10, false) * VND_RATE), 30000);
+  assert.equal(Math.round(shippingFeeOf({ ...o, shippingMethod: 'Hoả tốc' }, 10, false) * VND_RATE), 50000);
+});
+
+test('ship v2: 5–6 sản phẩm phụ thu 1 mức, 7–8 sản phẩm 2 mức', () => {
+  const fee = (qty, m = 'Tiêu chuẩn') => Math.round(shippingFeeOf({ shippingVersion: 2, shippingMethod: m, items: [{ qty }] }, 10, false) * VND_RATE);
+  assert.equal(fee(5), 45000);
+  assert.equal(fee(6), 45000);
+  assert.equal(fee(7), 60000);
+  assert.equal(fee(6, 'Hoả tốc'), 75000);
+  assert.equal(fee(8, 'Hoả tốc'), 100000);
+});
+
+test('ship v2: miễn phí tiêu chuẩn từ $75 / mã freeShip, hoả tốc vẫn tính phí', () => {
+  const o = { shippingVersion: 2, shippingMethod: 'Tiêu chuẩn', items: [{ qty: 6 }] };
+  assert.equal(shippingFeeOf(o, 80, false), 0);
+  assert.equal(shippingFeeOf(o, 10, true), 0);
+  assert.equal(Math.round(shippingFeeOf({ ...o, shippingMethod: 'Hoả tốc' }, 80, false) * VND_RATE), 75000);
+});
+
+test('đơn cũ (không có shippingVersion) vẫn tính phí cũ $8.5 / $15', () => {
+  assert.equal(shippingFeeOf({ shippingMethod: 'Tiêu chuẩn', items: [{ qty: 6 }] }, 10, false), 8.5);
+  assert.equal(shippingFeeOf({ shippingMethod: 'Hoả tốc', items: [{ qty: 1 }] }, 10, false), 15);
+});
+
+test('ship v2: tổng đơn 6 sản phẩm khớp số VNĐ chuyển khoản', () => {
+  const fee = 45000 / VND_RATE;
+  const order = { shippingVersion: 2, shippingMethod: 'Tiêu chuẩn', couponCode: '', items: [{ id: 'b', title: 'B', price: 10, qty: 6 }], total: 60 + fee };
+  const r = computeOrderPrice(order, new Map([['b', { price: 10 }]]), null);
+  assert.deepEqual(r.issues, []);
+  assert.equal(r.amountVnd, Math.round((60 * VND_RATE + 45000) / 1000) * 1000);
 });

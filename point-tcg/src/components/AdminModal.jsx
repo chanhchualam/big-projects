@@ -348,6 +348,9 @@ export default function AdminModal({
   // ORDER STATS & METRICS
   // -------------------------------------------------------------
   const qrWaitingCount = orders.filter(o => o.status?.includes('Chờ thanh toán QR')).length;
+  // Đơn shop cần xử lý ngay: đơn COD mới, khách đã chuyển khoản / chuyển cọc đang chờ kiểm tra tiền
+  const NEEDS_CONFIRM_STATUSES = ['Chờ xác nhận (Đơn mới)', CUSTOMER_REPORTED_PAID, PRE_DEPOSIT_REPORTED];
+  const needsConfirmCount = orders.filter(o => NEEDS_CONFIRM_STATUSES.includes(o.status)).length;
   const pendingCount = orders.filter(o => o.status?.includes('Chờ') || o.status?.includes('Đã xác nhận') || o.status?.includes('Đã thanh toán')).length;
   const preparingCount = orders.filter(o => o.status === 'Đang chuẩn bị hàng').length;
   const shippingCount = orders.filter(o => o.status === 'Đang giao hàng').length;
@@ -363,6 +366,8 @@ export default function AdminModal({
     if (orderFilter !== 'all') {
       if (orderFilter === 'preorder') {
         if (!isOpenPreorder(order)) return false;
+      } else if (orderFilter === 'needs-confirm') {
+        if (!NEEDS_CONFIRM_STATUSES.includes(order.status)) return false;
       } else if (orderFilter === 'Chờ thanh toán QR') {
         if (!order.status?.includes('Chờ thanh toán QR')) return false;
       } else if (orderFilter === 'Chờ xác nhận') {
@@ -1874,7 +1879,7 @@ export default function AdminModal({
                 onClick={() => setActiveTab('orders')}
               >
                 Đơn Hàng Shopper ({orders.length})
-                {pendingCount > 0 && <span className="admin-badge-count-red">{pendingCount} mới</span>}
+                {needsConfirmCount > 0 && <span className="admin-badge-count-red">{needsConfirmCount} cần xác nhận</span>}
               </button>
 
               <button
@@ -2017,6 +2022,7 @@ export default function AdminModal({
                   <div className="status-filter-pills">
                     {[
                       { key: 'all', label: `Tất cả (${orders.length})` },
+                      { key: 'needs-confirm', label: `Cần xác nhận (${needsConfirmCount})` },
                       { key: 'Chờ thanh toán QR', label: `Chờ quét QR (${qrWaitingCount})` },
                       { key: 'Chờ xác nhận', label: `Chờ chuẩn bị (${pendingCount})` },
                       { key: 'preorder', label: `Đặt trước (${preorderCount})` },

@@ -317,13 +317,14 @@ export default function App() {
   }, []);
 
   // Compute pendingOrdersCount dynamically from `orders`
+  // Chỉ đếm đơn của chính tài khoản đang đăng nhập (admin tải cả đơn của khách cho trang quản trị)
   const pendingOrdersCount = useMemo(() => {
-    return orders.filter(o =>
+    return orders.filter(o => o.uid === authUid && (
       o.status?.includes('Chờ') ||
       o.status?.includes('Đã xác nhận') ||
       o.status?.includes('Đã thanh toán')
-    ).length;
-  }, [orders]);
+    )).length;
+  }, [orders, authUid]);
 
   // Products State with LocalStorage Persistence
   const [openDrawings, setOpenDrawings] = useState(() => {
