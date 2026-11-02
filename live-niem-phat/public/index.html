@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bảng điều khiển – Thiền Đường Live Overlay</title>
+  <link rel="stylesheet" href="css/panel.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">🪷 <b>Thiền Đường Live Overlay</b> <span>bảng điều khiển</span></div>
+    <div class="pills">
+      <span class="pill" id="pill-socket">Socket: …</span>
+      <span class="pill" id="pill-tiktok">TikTok: chưa kết nối</span>
+      <span class="pill" id="pill-sim">Giả lập: tắt</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="col controls">
+      <!-- Kết nối TikTok -->
+      <div class="card">
+        <h2>1. Kết nối TikTok Live</h2>
+        <div class="row">
+          <input id="tt-user" placeholder="TikTok ID đang live (vd: thienduong.ngansen)" autocomplete="off" />
+          <button class="primary" id="btn-connect">Kết nối</button>
+          <button id="btn-disconnect">Ngắt</button>
+        </div>
+        <div class="status" id="tt-status">Chưa kết nối</div>
+        <label class="switch"><input type="checkbox" id="sim-toggle" /> <span></span> Chế độ GIẢ LẬP (tạo người xem &amp; sự kiện ngẫu nhiên)</label>
+      </div>
+
+      <!-- Người xem test -->
+      <div class="card">
+        <h2>2. Giả lập một người xem cụ thể</h2>
+        <div class="row">
+          <input id="v-name" placeholder="Tên người xem (để trống = ngẫu nhiên)" />
+          <button id="btn-randname" title="Tên ngẫu nhiên">🎲</button>
+        </div>
+        <div class="row">
+          <input id="v-msg" placeholder='Lời nhắn / lệnh: "1", "xăm", "cầu bình an"... (Enter để gửi)' />
+          <button class="primary" id="btn-send">Gửi bình luận</button>
+        </div>
+        <div class="row">
+          <input id="v-phapdanh" placeholder="Pháp danh đặt cho nghi lễ 299 xu (để trống = hệ thống tự đặt)" />
+        </div>
+      </div>
+
+      <!-- Hành động -->
+      <div class="card">
+        <h2>3. Hành động <small>phím tắt 1–9</small></h2>
+        <div class="grid" id="actions"></div>
+      </div>
+
+      <!-- Nghi lễ -->
+      <div class="card">
+        <h2>4. Tặng quà <small>bấm vào quà để tặng thử · phím tắt Shift + 1–9</small></h2>
+        <div class="tray">
+          <div class="tray-tabs">
+            <button class="tab active" data-tab="rituals">Nghi lễ</button>
+            <button class="tab" data-tab="catalog">Tất cả quà TikTok <span id="catalog-count"></span></button>
+            <span class="tray-count">x <input id="gift-count" type="number" min="1" max="99" value="1" /></span>
+          </div>
+          <div class="gift-grid" id="rituals"></div>
+          <div class="gift-grid hidden" id="catalog"></div>
+          <div class="tray-note" id="catalog-note">Ảnh quà TikTok sẽ tự tải về khi bạn <b>kết nối vào phiên live</b> (lưu lại cho lần sau). Có thể tự đặt ảnh vào <code>public/assets/gifts/&lt;id&gt;.png</code>.</div>
+        </div>
+      </div>
+
+      <!-- Công cụ -->
+      <div class="card">
+        <h2>5. Công cụ</h2>
+        <div class="row wrap">
+          <input id="obs-url" readonly />
+          <button class="primary" id="btn-copy">📋 Copy URL overlay cho OBS</button>
+          <button id="btn-open">↗ Mở overlay</button>
+        </div>
+        <div class="row wrap">
+          <button id="btn-mute">🔊 Tắt tiếng overlay</button>
+          <label class="switch"><input type="checkbox" id="preview-audio" /> <span></span> Nghe âm thanh ở khung xem trước</label>
+        </div>
+        <div class="row wrap">
+          <button id="btn-fill">🪷 Lấp đầy bồ đoàn (test)</button>
+          <button id="btn-challenge">🎉 Hoàn thành thử thách (test)</button>
+          <button class="danger" id="btn-reset">♻ Reset phiên</button>
+        </div>
+      </div>
+
+      <!-- Log -->
+      <div class="card">
+        <h2>6. Log hệ thống <button class="mini" id="btn-clearlog">Xóa</button></h2>
+        <div id="log"></div>
+      </div>
+    </section>
+
+    <section class="col preview">
+      <div class="preview-head">
+        <span>Xem trước 9:16</span>
+        <span id="fps-preview">Preview: – FPS</span>
+        <span id="fps-obs">OBS: chưa có overlay</span>
+      </div>
+      <div class="frame-wrap">
+        <iframe id="preview" src="/overlay?preview=1" allow="autoplay" title="Overlay preview"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/panel.js"></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+{
+  "_ghiChu": "File cấu hình chính. Sửa xong lưu lại, server tự nạp lại (không cần khởi động lại, trừ 'port' và 'host').",
+
+  "port": 3000,
+  "host": "127.0.0.1",
+
+  "tiktok": {
+    "username": "",
+    "signApiKey": "",
+    "autoReconnect": true,
+    "offlineRetrySec": 30
+  },
+
+  "seats": 24,
+  "idleTimeoutSec": 600,
+  "idleTimeoutWhenQueueSec": 180,
+  "queueMax": 200,
+  "commandCooldownMs": 1200,
+  "xamCooldownMs": 20000,
+  "prayCooldownMs": 5000,
+
+  "points": {
+    "join": 1,
+    "chat": 1,
+    "like": 1,
+    "likeMaxPerEvent": 15,
+    "incense": 3,
+    "bow": 5,
+    "mo": 2,
+    "bell": 2,
+    "xam": 2,
+    "pray": 3,
+    "gender": 0,
+    "follow": 10,
+    "share": 10,
+    "perCoin": 2
+  },
+
+  "challenge": {
+    "_ghiChu": "type: likes | bows | incense | coins | merit",
+    "type": "likes",
+    "goal": 150,
+    "goalStep": 50,
+    "title": "Cả điện thả {goal} tim",
+    "doneTitle": "VIÊN MÃN!",
+    "doneText": "Cả điện đã đồng tâm hoàn thành thử thách. Hồi hướng công đức!"
+  },
+
+  "matchByCoins": true,
+  "_ghiChuRituals": "giftNames: tên quà TikTok (tiếng Anh, không phân biệt hoa thường). Nếu tên quà không khớp và matchByCoins=true thì chọn nghi lễ có số xu lớn nhất <= giá quà. effect: bow_roses | pin_rose | hai_loc | xin_chu | hoa_dang | phap_danh | phat_quang. level: small | medium | big (big = chạy lần lượt ở giữa màn hình).",
+  "rituals": [
+    { "id": "lay_phat",   "name": "Lạy Phật",          "coins": 1,   "icon": "🌹", "effect": "bow_roses",  "level": "medium", "duration": 2500, "giftNames": ["Rose", "TikTok", "GG"] },
+    { "id": "cai_hong",   "name": "Cài bông hồng",     "coins": 5,   "icon": "🥀", "effect": "pin_rose",   "level": "medium", "duration": 3000, "giftNames": ["Finger Heart", "Ice Cream Cone"] },
+    { "id": "hai_loc",    "name": "Hái lộc",           "coins": 10,  "icon": "🧧", "effect": "hai_loc",    "level": "medium", "duration": 3500, "giftNames": ["Rosa", "Friendship Necklace"] },
+    { "id": "xin_chu",    "name": "Xin chữ",           "coins": 30,  "icon": "🖌️", "effect": "xin_chu",    "level": "big",    "duration": 5000, "giftNames": ["Doughnut", "Cap"] },
+    { "id": "hoa_dang",   "name": "Dâng hoa đăng",     "coins": 99,  "icon": "🏮", "effect": "hoa_dang",   "level": "big",    "duration": 6500, "giftNames": ["Hand Hearts", "Confetti", "Paper Crane"] },
+    { "id": "phap_danh",  "name": "Đặt pháp danh",     "coins": 299, "icon": "📜", "effect": "phap_danh",  "level": "big",    "duration": 7000, "giftNames": ["Corgi", "Swan"] },
+    { "id": "phat_quang", "name": "Đại lễ Phật quang", "coins": 999, "icon": "☸️", "effect": "phat_quang", "level": "big",    "duration": 9000, "giftNames": ["Galaxy", "Lion", "Universe"] }
+  ],
+
+  "phapDanh": {
+    "_ghiChu": "overrides: đặt sẵn pháp danh cho TikTok ID cụ thể, ví dụ { \"nguyenvana\": \"Tâm An\" }",
+    "overrides": {},
+    "first": ["Tâm", "Diệu", "Thiện", "Minh", "Quảng", "Huệ", "Chơn", "Như", "Nguyên", "Đức", "Hạnh", "Tịnh"],
+    "second": ["An", "Hạnh", "Tịnh", "Liên", "Từ", "Hòa", "Giác", "Phước", "Quang", "Lạc", "Hải", "Nghiêm", "Thanh", "Huệ"]
+  },
+
+  "xinChu": [
+    { "chu": "Tâm",     "nghia": "Giữ tâm sáng, vạn sự lành" },
+    { "chu": "Nhẫn",    "nghia": "Một điều nhịn, chín điều lành" },
+    { "chu": "An",      "nghia": "Thân an, tâm an, gia đạo an" },
+    { "chu": "Phúc",    "nghia": "Phúc đức tại mẫu, gieo lành gặt lành" },
+    { "chu": "Lộc",     "nghia": "Lộc đến nhà, tài vượng quanh năm" },
+    { "chu": "Thọ",     "nghia": "Sống lâu, sống khỏe, sống vui" },
+    { "chu": "Đức",     "nghia": "Đức dày thì phúc lớn" },
+    { "chu": "Từ Bi",   "nghia": "Thương người như thể thương thân" },
+    { "chu": "Hỷ Xả",   "nghia": "Buông bỏ phiền muộn, lòng nhẹ thênh thang" },
+    { "chu": "Bình An", "nghia": "Ra ngõ gặp may, về nhà gặp vui" },
+    { "chu": "Trí Tuệ", "nghia": "Sáng suốt trong mọi quyết định" },
+    { "chu": "Duyên",   "nghia": "Duyên lành đang đến gần" },
+    { "chu": "Hiếu",    "nghia": "Hiếu kính mẹ cha, phúc để đời sau" },
+    { "chu": "Tĩnh",    "nghia": "Tĩnh lặng sinh trí tuệ" }
+  ],
+
+  "xam": [
+    { "hang": "Thượng Thượng", "tho": "Sen nở giữa hồ thơm ngát gió\nĐường xa rộng mở, bước nhẹ tênh", "loi": "Mọi việc hanh thông, cứ vững tâm mà tiến." },
+    { "hang": "Thượng Thượng", "tho": "Trăng rằm soi sáng ngõ nhà\nNiềm vui gõ cửa, phúc hòa an khang", "loi": "Gia đạo yên vui, có tin mừng." },
+    { "hang": "Thượng",        "tho": "Mưa xuân tưới mát ruộng đồng\nGieo hạt hôm nay, mai trổ bông", "loi": "Chăm chỉ ắt có thành quả, chớ nóng vội." },
+    { "hang": "Thượng",        "tho": "Chim về tổ cũ hót vang\nNgười xưa gặp lại, chuyện tàn hóa vui", "loi": "Quý nhân phù trợ, hòa giải được hiểu lầm." },
+    { "hang": "Thượng",        "tho": "Thuyền xuôi theo gió căng buồm\nBến bờ đã thấy, chẳng còn lo âu", "loi": "Công việc thuận lợi, tài lộc khá." },
+    { "hang": "Trung",         "tho": "Mây che nửa núi chờ tan\nKiên tâm đợi nắng, đường sang sẽ thành", "loi": "Còn chút trở ngại, nhẫn nại sẽ qua." },
+    { "hang": "Trung",         "tho": "Nước chảy đá mòn ngày qua\nMột lòng bền chí, ắt là nên công", "loi": "Không nên đổi ý giữa chừng." },
+    { "hang": "Trung",         "tho": "Cây non cần thêm nắng mưa\nĐừng mong trái ngọt khi chưa đến mùa", "loi": "Thời cơ chưa tới, hãy chuẩn bị thật kỹ." },
+    { "hang": "Trung Bình",    "tho": "Gió lay cành trúc nghiêng mình\nCành mềm chẳng gãy, giữ mình mà qua", "loi": "Mềm mỏng, nhún nhường thì tai qua nạn khỏi." },
+    { "hang": "Trung Bình",    "tho": "Đường quanh chớ vội đường tắt\nChậm mà chắc, giữ được an vui", "loi": "Cẩn trọng tiền bạc, tránh tranh cãi." }
+  ],
+
+  "simulator": {
+    "intervalMinMs": 500,
+    "intervalMaxMs": 1400,
+    "names": ["Minh Anh", "Tuấn Kiệt", "Thu Hà", "Bảo Ngọc", "Gia Huy", "Lan Chi", "Hoàng Nam", "Khánh Linh", "Đức Phúc", "Mai Phương", "Quốc Bảo", "Ngọc Trâm", "Thanh Tâm", "Hữu Phước", "Diệu Hiền", "An Nhiên", "Phương Thảo", "Trung Hiếu", "Hải Yến", "Văn Toàn", "Kim Ngân", "Nhật Minh", "Bích Ngọc", "Thiện Nhân", "Tường Vy", "Quang Huy", "Hồng Nhung", "Đăng Khoa", "Như Ý", "Hạnh Dung", "Trúc Lam", "Bảo An"],
+    "chats": ["A Di Đà Phật 🙏", "Chúc cả nhà bình an", "Con xin thành tâm", "Nghe tiếng chuông lòng nhẹ quá", "Thiền đường đẹp quá", "Hôm nay con vào sớm", "Nam mô Bổn Sư Thích Ca", "Cảm ơn thầy", "Tâm an là phúc", "Mọi người ngủ ngon nhé"],
+    "prayers": ["cầu gia đình bình an", "cầu mẹ mau khỏe", "cầu thi đậu đại học", "cầu công việc thuận lợi", "cầu bình an cho mọi người", "cầu buôn bán đắt hàng"]
+  },
+
+  "scene": {
+    "_ghiChu": "Tọa độ theo khung 1080x1920. Chỉnh để khớp với ảnh nền của bạn.",
+    "background": "assets/background.jpg",
+    "buddha": { "x": 540, "y": 470, "r": 330 },
+    "burner": { "x": 540, "y": 905 },
+    "monks": [
+      { "name": "Sư Trụ Trì",    "x": 540, "y": 1062, "scale": 1.25, "abbot": true },
+      { "name": "Thầy Minh Đạo", "x": 335, "y": 1052, "scale": 1.12, "role": "mo" },
+      { "name": "Thầy Tâm Từ",   "x": 745, "y": 1052, "scale": 1.12, "role": "bell" }
+    ],
+    "seatGrid": {
+      "rows": 4,
+      "leftX": [125, 260, 395],
+      "rightX": [685, 820, 955],
+      "y0": 1245,
+      "dy": 106,
+      "scale0": 0.95,
+      "scaleStep": 0.04
+    },
+    "seatPositions": null,
+    "avatarAsHead": false,
+    "lightBeams": true,
+    "ambientPetals": 14,
+    "ambientMotes": 40,
+    "maxParticles": 900
+  },
+
+  "audio": {
+    "volume": 0.7,
+    "bgm": true,
+    "bgmVolume": 0.35,
+    "bgmFile": "assets/bgm.mp3"
+  }
+}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thiền Đường Ngàn Sen – Overlay</title>
+  <!-- Font hỗ trợ tiếng Việt (nếu offline sẽ tự dùng font dự phòng) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Noto+Serif:wght@700;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/overlay.css" />
+</head>
+<body>
+  <!-- Sân khấu cố định 1080x1920, tự co giãn theo cửa sổ -->
+  <div id="stage">
+    <img id="bg-img" alt="" />
+    <canvas id="bg-fallback" width="1080" height="1920"></canvas>
+    <canvas id="scene" width="1080" height="1920"></canvas>
+
+    <div id="hud">
+      <!-- Góc trên trái: tiêu đề -->
+      <div class="panel wood" id="title-panel">
+        <div class="title-main">Thiền Đường Ngàn Sen</div>
+        <div class="title-sub">☸ Nam Mô A Di Đà Phật ☸</div>
+      </div>
+
+      <!-- Góc trên phải: thống kê -->
+      <div class="panel wood" id="stats-panel">
+        <div class="stat big"><span class="ico">🪷</span><span id="st-seats">0/24</span><small>thiền</small></div>
+        <div class="stat"><span class="ico">⏱</span><span id="st-time">00:00:00</span></div>
+        <div class="stat"><span class="ico">🙏</span><small>Công đức</small><span id="st-merit">0</span></div>
+        <div class="stat"><span class="ico">👁</span><small>Người xem</small><span id="st-viewers">0</span></div>
+        <div class="stat queue hidden" id="st-queue-row"><span class="ico">⏳</span><small>Chờ chỗ</small><span id="st-queue">0</span></div>
+      </div>
+
+      <!-- Bên phải: bảng nghi lễ -->
+      <div class="panel wood" id="ritual-panel">
+        <div class="panel-head">NGHI LỄ</div>
+        <ul id="ritual-list"></ul>
+      </div>
+
+      <!-- Bên trái giữa: TOP CHĂM CHỈ -->
+      <div class="panel wood" id="top-panel">
+        <div class="panel-head">🏆 TOP CHĂM CHỈ</div>
+        <div id="top-list"></div>
+      </div>
+
+      <!-- Góc trái dưới: hướng dẫn lệnh -->
+      <div class="panel wood" id="guide-panel">
+        <div class="panel-head">CÁCH THAM GIA</div>
+        <ul class="guide">
+          <li><b>💬 Bình luận</b> → vào thiền</li>
+          <li><b>❤️ Thả tim</b> → tim &amp; hoa bay</li>
+          <li><b>Gõ 1·2·3·4</b> → hương·lạy·mõ·chuông</li>
+          <li><b>Đổi hình:</b> gõ "nữ" / "nam"</li>
+          <li><b>Gõ "xăm"</b> → rút quẻ</li>
+          <li><b>Gõ "cầu ..."</b> → lời khấn</li>
+          <li><b>➕ Theo dõi · ↗ Chia sẻ</b> → sen nở</li>
+        </ul>
+      </div>
+
+      <!-- Giữa dưới: thử thách -->
+      <div class="panel wood" id="challenge-panel">
+        <div class="panel-head">THỬ THÁCH CẢ ĐIỆN</div>
+        <div id="ch-title">Cả điện thả 150 tim</div>
+        <div class="bar"><div id="ch-fill"></div><div id="ch-num">0/150</div></div>
+      </div>
+
+      <div id="banner-area"></div>
+      <div id="toast-area"></div>
+      <div id="ticker"></div>
+      <div id="center-fx"></div>
+      <div id="flash"></div>
+      <div id="fps"></div>
+      <div id="offline" class="hidden">⚠ Mất kết nối server – đang thử lại...</div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/hud.js"></script>
+  <script src="js/overlay.js"></script>
+</body>
+</html>
