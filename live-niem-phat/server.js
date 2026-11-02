@@ -49,6 +49,15 @@ function publicConfig() {
   // Gắn ảnh icon quà cho từng nghi lễ + danh sách quà TikTok đã biết
   c.rituals = (c.rituals || []).map((r) => Object.assign(r, { image: ritualImage(r), tiktokGift: tiktokGiftLabel(r) }));
   c.giftCatalog = Object.values(giftCatalog).sort((a, b) => a.coins - b.coins || a.name.localeCompare(b.name));
+  // Ảnh / âm thanh đã tải lên (có ?v= để overlay tự lấy bản mới)
+  c.assets = assetsInfo();
+  c.scene = c.scene || {};
+  const bg = String(c.scene.background || 'assets/background.jpg');
+  if (/^assets\/background\.[a-z]+$/i.test(bg)) c.scene.background = c.assets.background.url || bg;
+  c.audio = c.audio || {};
+  const bgm = String(c.audio.bgmFile || '');
+  if (!bgm || /^assets\/bgm\.[a-z0-9]+$/i.test(bgm)) c.audio.bgmFile = c.assets.bgm.url || '';
+  c.audio.sfx = { mo: c.assets.mo.url, bell: c.assets.bell.url, chime: c.assets.chime.url };
   return c;
 }
 
@@ -100,15 +109,96 @@ function giftsChanged() {
 /** Ảnh cho nghi lễ: "image" trong config > file public/assets/gifts/<id>.png > ảnh quà TikTok đã tải */
 function ritualImage(r) {
   if (r.image) return r.image;
-  for (const ext of ['png', 'webp', 'gif', 'jpg']) {
-    if (fs.existsSync(path.join(ROOT, 'public', 'assets', 'gifts', `${r.id}.${ext}`))) return `assets/gifts/${r.id}.${ext}`;
-  }
+  const own = findAsset(`gifts/${r.id}`, IMG_EXT);
+  if (own) return own;
   for (const n of r.giftNames || []) {
     const g = giftCatalog[String(n).toLowerCase().trim()];
     if (g && g.image) return g.image;
   }
   return null;
 }
+// ------------------------------------------------------------
+// 1c. ẢNH & ÂM THANH DO NGƯỜI DÙNG TẢI LÊN (bảng điều khiển → mục "Hình ảnh & âm thanh")
+//  - Lưu trong public/assets/, tên file cố định theo "ô" (slot), đuôi theo loại file thật
+//  - URL trả về có ?v=<thời gian sửa> để trình duyệt/OBS không dùng bản cũ trong cache
+// ------------------------------------------------------------
+const ASSETS_DIR = path.join(ROOT, 'public', 'assets');
+const IMG_EXT = ['png', 'jpg', 'webp', 'gif'];
+const AUD_EXT = ['mp3', 'm4a', 'ogg', 'wav'];
+const UPLOAD_MAX = { image: 10 * 1024 * 1024, audio: 25 * 1024 * 1024 };
+const UPLOAD_SLOTS = {
+  background: { file: 'background', kind: 'image', label: 'Ảnh nền chánh điện' },
+  bgm: { file: 'bgm', kind: 'audio', label: 'Nhạc nền' },
+  mo: { file: 'sounds/mo', kind: 'audio', label: 'Tiếng mõ' },
+  bell: { file: 'sounds/bell', kind: 'audio', label: 'Tiếng chuông' },
+  chime: { file: 'sounds/chime', kind: 'audio', label: 'Tiếng vào thiền / quà nhỏ' },
+};
+/** Ô tải lên hợp lệ: các ô cố định ở trên, hoặc "gift-<id nghi lễ>" (chống ghi file tuỳ ý) */
+function uploadSlot(name) {
+  if (Object.prototype.hasOwnProperty.call(UPLOAD_SLOTS, name)) return UPLOAD_SLOTS[name];
+  const m = /^gift-([a-z0-9_-]{1,40})$/i.exec(name || '');
+  const r = m && (config.rituals || []).find((x) => x.id === m[1]);
+  return r ? { file: `gifts/${r.id}`, kind: 'image', label: 'Ảnh quà ' + r.name } : null;
+}
+const extsOf = (kind) => (kind === 'image' ? IMG_EXT : AUD_EXT);
+/** Tìm file đã có của một ô, trả về URL kèm ?v= hoặc null */
+function findAsset(base, exts) {
+  for (const ext of exts) {
+    try {
+      const st = fs.statSync(path.join(ASSETS_DIR, `${base}.${ext}`));
+      return `assets/${base}.${ext}?v=${Math.floor(st.mtimeMs)}`;
+    } catch (_) {}
+  }
+  return null;
+}
+/** Nhận diện loại file bằng các byte đầu (không tin đuôi file hay Content-Type) */
+function sniffType(buf) {
+  if (!buf || buf.length < 12) return null;
+  const s = (a, b) => buf.subarray(a, b).toString('latin1');
+  if (buf[0] === 0x89 && s(1, 4) === 'PNG') return { kind: 'image', ext: 'png' };
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return { kind: 'image', ext: 'jpg' };
+  if (s(0, 4) === 'RIFF' && s(8, 12) === 'WEBP') return { kind: 'image', ext: 'webp' };
+  if (s(0, 4) === 'GIF8') return { kind: 'image', ext: 'gif' };
+  if (s(0, 4) === 'RIFF' && s(8, 12) === 'WAVE') return { kind: 'audio', ext: 'wav' };
+  if (s(0, 4) === 'OggS') return { kind: 'audio', ext: 'ogg' };
+  if (s(4, 8) === 'ftyp') return { kind: 'audio', ext: 'm4a' };
+  if (s(0, 3) === 'ID3' || (buf[0] === 0xff && (buf[1] & 0xe0) === 0xe0)) return { kind: 'audio', ext: 'mp3' };
+  return null;
+}
+function removeAsset(base, exts) {
+  for (const ext of exts) {
+    try {
+      fs.unlinkSync(path.join(ASSETS_DIR, `${base}.${ext}`));
+    } catch (_) {}
+  }
+}
+/** Lưu file tải lên: ghi file tạm rồi đổi tên (không bao giờ để file dở dang) */
+function saveUpload(slotName, buf) {
+  const slot = uploadSlot(slotName);
+  if (!slot) throw new Error('Ô tải lên không hợp lệ');
+  const t = sniffType(buf);
+  if (!t) throw new Error('Không nhận ra định dạng file. Ảnh: PNG/JPG/WEBP/GIF; âm thanh: MP3/M4A/OGG/WAV');
+  if (t.kind !== slot.kind) throw new Error(slot.kind === 'image' ? 'Ô này cần file ẢNH' : 'Ô này cần file ÂM THANH');
+  if (buf.length > UPLOAD_MAX[t.kind]) throw new Error(`File quá lớn (tối đa ${UPLOAD_MAX[t.kind] / 1048576} MB)`);
+  const dest = path.join(ASSETS_DIR, `${slot.file}.${t.ext}`);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  const tmp = dest + '.uploading';
+  fs.writeFileSync(tmp, buf);
+  removeAsset(slot.file, extsOf(slot.kind)); // xoá bản cũ (có thể khác đuôi)
+  fs.renameSync(tmp, dest);
+  return slot;
+}
+/** Thông tin các ô để bảng điều khiển hiển thị */
+function assetsInfo() {
+  const out = {};
+  for (const [k, s] of Object.entries(UPLOAD_SLOTS)) out[k] = { label: s.label, kind: s.kind, url: findAsset(s.file, extsOf(s.kind)) };
+  return out;
+}
+function assetsChanged(msg) {
+  log(msg);
+  if (io) io.emit('config', publicConfig());
+}
+
 function tiktokGiftLabel(r) {
   const n = (r.giftNames || [])[0];
   return n ? (giftCatalog[String(n).toLowerCase().trim()] || {}).name || n : '';
@@ -315,22 +405,24 @@ function fillFromQueue() {
   scheduleState();
 }
 
-/** Kiểm tra người không tương tác -> nhường chỗ */
+/** Kiểm tra người không tương tác -> tự rời chỗ (chạy mỗi giây để mốc thời gian ngắn như 15s vẫn chính xác) */
 setInterval(() => {
   const now = Date.now();
-  const timeoutSec = state.queue.length > 0 ? config.idleTimeoutWhenQueueSec || 180 : config.idleTimeoutSec || 600;
-  const limit = timeoutSec * 1000;
+  const idleSec = Number(config.idleTimeoutSec) || 600;
+  const queueIdleSec = Number(config.idleTimeoutWhenQueueSec) || idleSec;
+  // Có người đang chờ thì dùng mốc ngắn hơn trong hai mốc
+  const limit = (state.queue.length > 0 ? Math.min(idleSec, queueIdleSec) : idleSec) * 1000;
   state.seats.forEach((id, idx) => {
     if (!id) return;
     const u = state.users[id];
     if (!u || now - u.lastActive > limit) releaseSeat(idx, 'idle');
   });
   // Người chờ quá lâu không tương tác thì rời hàng
-  const qLimit = (config.idleTimeoutSec || 600) * 1000;
+  const qLimit = (Number(config.queueTimeoutSec) || 300) * 1000;
   const before = state.queue.length;
   state.queue = state.queue.filter((id) => state.users[id] && now - state.users[id].lastActive < qLimit);
   if (before !== state.queue.length) scheduleState();
-}, 10000);
+}, 1000);
 
 // ------------------------------------------------------------
 // 5. ĐIỂM, CÔNG ĐỨC, THỬ THÁCH
@@ -438,6 +530,16 @@ function onCooldown(u, action, ms) {
   return false;
 }
 
+/** Bỏ dấu tiếng Việt: "Nam Mô A Di Đà Phật" -> "nam mo a di da phat" */
+function stripVN(t) {
+  return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase();
+}
+/** Có phải câu niệm Phật không (có dấu / không dấu / viết liền / kèm emoji đều được) */
+function isNiemPhat(text) {
+  const k = stripVN(text).replace(/[^a-z]/g, '');
+  return /adidaphat|adidaphac|adidaphap/.test(k) || /^nammo(adida|quanthe|bonsu)/.test(k);
+}
+
 /** Phân tích bình luận thành lệnh */
 function parseCommand(text) {
   const raw = String(text || '').normalize('NFC').trim();
@@ -449,6 +551,11 @@ function parseCommand(text) {
   if (l === 'nam') return { cmd: 'gender', gender: 'nam' };
   if (l === 'nữ' || l === 'nu' || l === 'nư') return { cmd: 'gender', gender: 'nu' };
   if (/^(xin\s+|rút\s+|rut\s+)?(xăm|xam|xâm|quẻ|que)$/.test(l)) return { cmd: 'xam' };
+  if (isNiemPhat(l)) {
+    const k = stripVN(l).replace(/[^a-z]/g, '');
+    const phrase = /quanthe/.test(k) ? 'Nam Mô Quán Thế Âm Bồ Tát' : /bonsu/.test(k) ? 'Nam Mô Bổn Sư Thích Ca Mâu Ni Phật' : 'Nam Mô A Di Đà Phật';
+    return { cmd: 'niem', phrase };
+  }
   const m = raw.match(/^(cầu|cau|cầu nguyện|cau nguyen)\s+(.+)$/i);
   if (m) return { cmd: 'pray', text: m[2].trim().slice(0, 80) };
   return { cmd: 'chat', text: raw.slice(0, 80) };
@@ -456,6 +563,28 @@ function parseCommand(text) {
 
 function pick(arr) {
   return arr && arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
+}
+
+/** Đếm số người khác nhau cùng niệm Phật trong một khoảng thời gian ngắn */
+const niem = { hits: new Map(), level: 0 };
+function niemCombo(u) {
+  const cfg = config.niemCombo || {};
+  const windowMs = (cfg.windowSec || 15) * 1000;
+  const steps = cfg.thresholds || [3, 6, 10, 20, 40];
+  const now = Date.now();
+  niem.hits.set(u.id, now);
+  for (const [id, t] of niem.hits) if (now - t > windowMs) niem.hits.delete(id);
+  const n = niem.hits.size;
+  if (n < steps[0]) {
+    niem.level = 0; // nhóm cũ đã tan, lần sau bắt đầu lại từ mốc đầu
+    return;
+  }
+  // Mốc cao nhất đã đạt; chỉ bùng nổ khi lên mốc mới (mỗi nhóm tối đa = số mốc, nên không bị spam)
+  const level = steps.filter((x) => n >= x).length;
+  if (level <= niem.level) return;
+  niem.level = level;
+  emitEvt('niem_combo', u, { count: n, level, max: steps.length });
+  log(`🙏 ${n} người đồng tâm niệm Phật`);
 }
 
 /** Điểm vào chung: mọi tương tác của người xem */
@@ -486,6 +615,11 @@ function handleInteraction(type, profile, data = {}) {
         const que = pick(config.xam) || { hang: 'Thượng', tho: 'Tâm an vạn sự an', loi: '' };
         const idx = (config.xam || []).indexOf(que);
         emitEvt('xam', u, { que, soQue: idx + 1, points: addPoints(u, P.xam) });
+      } else if (c.cmd === 'niem') {
+        // Niệm Phật: hiệu ứng hào quang cho người niệm; nhiều người cùng niệm -> bùng nổ cả điện
+        if (onCooldown(u, 'niem', config.niemCooldownMs || 4000)) break;
+        emitEvt('niem', u, { phrase: c.phrase, points: addPoints(u, P.niem ?? 3) });
+        niemCombo(u);
       } else if (c.cmd === 'pray') {
         if (onCooldown(u, 'pray', config.prayCooldownMs || 5000)) break;
         emitEvt('pray', u, { text: c.text, points: addPoints(u, P.pray) });
@@ -716,7 +850,9 @@ async function tiktokConnect(username, isRetry = false) {
   const Conn = TikTok.TikTokLiveConnection || TikTok.WebcastPushConnection;
   const E = TikTok.WebcastEvent || {};
   const C = TikTok.ControlEvent || {};
-  const opts = { processInitialData: false, enableExtendedGiftInfo: true };
+  // enableExtendedGiftInfo: true sẽ gọi API danh sách quà của Euler Stream, API này nay chỉ dành
+  // cho gói Business trả phí -> kết nối thất bại. Tắt đi: sự kiện quà vẫn có tên, giá xu và ảnh.
+  const opts = { processInitialData: false, enableExtendedGiftInfo: false };
   if (config.tiktok?.signApiKey) opts.signApiKey = config.tiktok.signApiKey;
 
   let conn;
@@ -813,7 +949,9 @@ async function loadRoomGifts(conn) {
     if (changed) giftsChanged();
     log(`🎁 Đã tải ${list.length} quà TikTok (kèm ảnh icon)`);
   } catch (e) {
-    log('Không tải được danh sách quà TikTok: ' + (e.message || e), 'warn');
+    // Không bắt buộc: ảnh quà vẫn được tự học dần mỗi khi có người tặng
+    const paid = /Business plan|pricing/i.test(String(e && e.message));
+    log(paid ? 'ℹ Danh sách quà đầy đủ cần gói trả phí của Euler Stream, bỏ qua. Ảnh quà sẽ tự cập nhật khi có người tặng.' : 'Không tải được danh sách quà TikTok: ' + (e.message || e), paid ? 'info' : 'warn');
   }
 }
 
@@ -897,6 +1035,46 @@ io = new Server(server, { cors: { origin: false } });
 app.disable('x-powered-by');
 app.get('/overlay', (req, res) => res.sendFile(path.join(ROOT, 'public', 'overlay.html')));
 app.get('/api/state', (req, res) => res.json(snapshot()));
+
+// Tải ảnh / âm thanh lên từ bảng điều khiển.
+// Chống trang web lạ gửi file vào máy (CSRF): bắt buộc header X-TD-Panel (trình duyệt sẽ
+// chặn header này khi gửi từ trang khác vì server không trả CORS) và Origin phải là chính server.
+function requirePanel(req, res, next) {
+  const origin = req.get('origin');
+  let sameOrigin = true;
+  if (origin) {
+    try {
+      sameOrigin = new URL(origin).host === req.get('host');
+    } catch (_) {
+      sameOrigin = false;
+    }
+  }
+  if (req.get('x-td-panel') !== '1' || !sameOrigin) {
+    return res.status(403).json({ error: 'Chỉ bảng điều khiển mới được tải file lên' });
+  }
+  next();
+}
+app.post('/api/assets/:slot', requirePanel, express.raw({ type: () => true, limit: UPLOAD_MAX.audio + 1024 }), (req, res) => {
+  try {
+    const slot = saveUpload(req.params.slot, req.body);
+    assetsChanged(`🖼 Đã cập nhật ${slot.label}`);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+app.delete('/api/assets/:slot', requirePanel, (req, res) => {
+  const slot = uploadSlot(req.params.slot);
+  if (!slot) return res.status(400).json({ error: 'Ô tải lên không hợp lệ' });
+  removeAsset(slot.file, extsOf(slot.kind));
+  assetsChanged(`↩ Đã xoá ${slot.label}, dùng lại mặc định`);
+  res.json({ ok: true });
+});
+// Lỗi file quá lớn từ express.raw
+app.use('/api/assets', (err, req, res, next) => {
+  if (err && err.type === 'entity.too.large') return res.status(413).json({ error: 'File quá lớn' });
+  next(err);
+});
 app.use(express.static(path.join(ROOT, 'public'), { extensions: ['html'] }));
 
 const overlays = new Map(); // socket.id -> { fps, preview, t }
@@ -999,6 +1177,15 @@ io.on('connection', (socket) => {
       case 'fillSeats':
         for (let i = 0; i < 30; i++) handleInteraction('join', simProfile());
         break;
+      case 'niemGroup': {
+        // Test: nhiều người (ưu tiên người đang ngồi) lần lượt niệm Phật -> kích hoạt bùng nổ
+        const n = Math.max(1, Math.min(Number(d.count) || 5, 40));
+        const seated = state.seats.filter(Boolean).map((id) => state.users[id]).filter(Boolean);
+        const people = seated.sort(() => Math.random() - 0.5).slice(0, n);
+        while (people.length < n) people.push(simProfile());
+        people.forEach((u, i) => setTimeout(() => handleInteraction('chat', { id: u.id, name: u.name, avatar: u.avatar }, { text: 'Nam mô A Di Đà Phật 🙏' }), i * 300));
+        break;
+      }
     }
   }));
 });

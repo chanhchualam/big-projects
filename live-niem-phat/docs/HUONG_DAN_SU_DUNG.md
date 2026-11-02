@@ -45,6 +45,22 @@ Mở bảng điều khiển bằng Chrome:
 
 Dừng tool: bấm `Ctrl + C` trong cửa sổ Terminal (dữ liệu được lưu trước khi thoát).
 
+### Live bằng TikTok LIVE Studio trên Mac (khuyên dùng) – bấm đúp `Mo-Live.command`
+1. Bấm đúp file **`Mo-Live.command`** trong thư mục tool. File này sẽ:
+   - chạy server nếu chưa chạy;
+   - mở cửa sổ overlay riêng, khung dọc, ở góc trái màn hình, với cấu hình chống giật: Chrome không còn hạ tốc cửa sổ khi bị che, và hình giới hạn 30 FPS cho nhẹ máy;
+   - mở bảng điều khiển.
+2. Trong LIVE Studio: **Add source → Window capture**, rồi chọn cửa sổ overlay. Ô "Link" của LIVE Studio không nhận địa chỉ `localhost`, nên phải dùng Window capture.
+3. Trên bảng điều khiển, tắt **"Hiện khung xem trước"** khi đang live để máy khỏi phải vẽ overlay thứ hai.
+4. Máy vẫn giật thì mở `Mo-Live.command` bằng TextEdit, đổi `overlay?fps=30` thành `overlay?fps=30&lite=1` (chế độ nhẹ: ít hạt trang trí, tắt tia sáng).
+
+Mẹo cho live mượt:
+- Đóng các tab và ứng dụng nặng khác.
+- Cắm sạc cho MacBook (chạy pin, macOS sẽ hạ hiệu năng).
+- Trong LIVE Studio chọn chất lượng **720p / 30 FPS** nếu mạng hoặc máy yếu.
+
+**Về độ trễ:** TikTok thường gửi bình luận, tim, quà tới tool chậm khoảng **2–5 giây** so với lúc người xem bấm. Độ trễ này nằm ở phía TikTok, tool không rút ngắn được. Tool xử lý và vẽ hiệu ứng ngay khi nhận được.
+
 ### Bước 3 – Thêm vào OBS
 1. Trong bảng điều khiển, bấm **📋 Copy URL overlay cho OBS**.
 2. OBS → *Settings → Video*: đặt **Base (Canvas) Resolution = 1080x1920** (khung dọc).
@@ -60,8 +76,18 @@ Tham số thêm vào URL khi cần:
 | `?nobg=1` | Nền trong suốt (chỉ có nhân vật + HUD), đặt chồng lên camera/ảnh khác |
 | `?debug=1` | Hiện FPS ở góc dưới |
 | `?mute=1` | Tắt tiếng riêng overlay này |
+| `?fps=30` | Giới hạn 30 khung hình/giây, nhẹ máy hơn khi live |
+| `?lite=1` | Chế độ nhẹ: ít hạt trang trí, tắt tia sáng |
 
 Nút **Tắt tiếng overlay** trên bảng điều khiển tắt tiếng mọi overlay đang mở (kể cả trong OBS). Khung xem trước luôn tắt tiếng sẵn để không bị phát tiếng hai lần; bật công tắc "Nghe âm thanh ở khung xem trước" nếu muốn nghe thử.
+
+### Cách nhanh – Tải ảnh & âm thanh ngay trên bảng điều khiển
+Mục **5. Hình ảnh & âm thanh** trên bảng điều khiển:
+- Bấm **⬆ Tải lên** (hoặc kéo thả file vào ô) để thay **ảnh nền**, **nhạc nền**, **tiếng mõ**, **tiếng chuông**, **tiếng vào thiền** và **ảnh quà cho từng nghi lễ**.
+- Overlay (cả trong OBS / TikTok LIVE Studio) đổi theo **ngay lập tức**, không cần refresh hay khởi động lại.
+- **▶ Nghe** để nghe thử file đã tải; **↩ Mặc định** để xoá file của bạn và dùng lại hình/âm tổng hợp sẵn có.
+- Định dạng: ảnh PNG/JPG/WEBP/GIF (tối đa 10 MB), âm thanh MP3/M4A/OGG/WAV (tối đa 25 MB). Tool kiểm tra nội dung file thật, file sai loại sẽ bị từ chối kèm lý do.
+- File được lưu trong `public/assets/` (`background.*`, `bgm.*`, `sounds/`, `gifts/`), nên vẫn giữ sau khi tắt tool.
 
 ### Bước 4 – Thay ảnh nền
 1. Chuẩn bị ảnh chánh điện **1080×1920** (tượng Phật ở trên, bàn thờ đỏ, sàn gỗ...).
@@ -116,6 +142,7 @@ Sau khi đã kết nối live một lần, tab **"Tất cả quà TikTok"** trê
 | `nam` / `nữ` | Đổi hình nhân vật | 0 |
 | `xăm` | Rút quẻ, quẻ hiện giữa màn hình | +2 |
 | `cầu ...` | Bong bóng lời khấn bay lên | +3 |
+| `Nam mô A Di Đà Phật` (có/không dấu, cả `A Di Đà Phật`, `Nam mô Quán Thế Âm`…) | Hào quang vàng quanh người niệm, sen vàng nở, đốm sáng bay về tượng Phật, tượng Phật sáng lên. **Nhiều người cùng niệm trong 15 giây** (3, 6, 10, 20, 40 người) thì cả chánh điện bùng nổ ánh sáng, hoa rơi, mọi người cùng lạy | +3 (mỗi người 4 giây tính 1 lần) |
 | bình luận khác | Bong bóng chat trên đầu | +1 |
 | thả tim | Tim & cánh hoa bay lên, cộng tiến độ thử thách | +1/tim |
 | theo dõi / chia sẻ | Hoa sen nở dưới chỗ ngồi | +10 |
@@ -126,7 +153,7 @@ Các mức điểm, thời gian chờ giữa hai lệnh (chống spam), thời g
 ## Cơ chế chỗ ngồi
 - 24 bồ đoàn. Ai tương tác lần đầu (vào phòng, bình luận, tim, quà...) được xếp vào ghế trống, ưu tiên hàng trên và sát lối đi.
 - Hết chỗ thì người mới vào **hàng chờ** (bảng góc phải hiện "Chờ chỗ").
-- Người ngồi không tương tác quá `idleTimeoutSec` (mặc định 10 phút; 3 phút nếu đang có người chờ) sẽ nhường chỗ cho người đầu hàng chờ.
+- Người ngồi không tương tác quá `idleTimeoutSec` giây (hiện đặt **15 giây**; `idleTimeoutWhenQueueSec` khi đang có người chờ) sẽ tự rời chỗ và nhường cho người đầu hàng chờ. Mỗi lần bình luận / thả tim / tặng quà sẽ tính lại từ đầu. Người trong hàng chờ không tương tác quá `queueTimeoutSec` (300 giây) sẽ rời hàng.
 - **Reset phiên** đưa điểm về 0 và giải phóng mọi chỗ, nhưng vẫn giữ tên, giới tính và pháp danh của người xem.
 
 ## Xử lý sự cố

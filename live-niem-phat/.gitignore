@@ -3,3 +3,8 @@ data/
 .DS_Store
 *.log
 .env
+# Ảnh / âm thanh người dùng tải lên từ bảng điều khiển (có thể có bản quyền, không đưa lên git)
+public/assets/background.*
+public/assets/bgm.*
+public/assets/sounds/
+public/assets/gifts/

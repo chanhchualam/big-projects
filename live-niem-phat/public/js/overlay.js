@@ -7,11 +7,15 @@
  *   ?debug=1    hiện FPS
  *   ?nobg=1     nền trong suốt (không hiện ảnh nền / nền dự phòng)
  *   ?mute=1     tắt tiếng overlay này
+ *   ?fps=30     giới hạn số khung hình/giây (nhẹ máy hơn khi live; TikTok thường phát 30 FPS)
+ *   ?lite=1     chế độ nhẹ: ít hạt hiệu ứng nền, tắt tia sáng, giới hạn hạt thấp hơn
  */
 (function () {
   const params = new URLSearchParams(location.search);
   const PREVIEW = params.has('preview');
   const NOBG = params.has('nobg');
+  const LITE = params.has('lite');
+  const FPS_CAP = Math.max(10, Math.min(60, Number(params.get('fps')) || 60));
   if (params.has('debug')) document.body.classList.add('debug');
   if (NOBG) document.body.classList.add('transparent');
 
@@ -43,6 +47,7 @@
   });
 
   // ---------- Ảnh nền ----------
+  let lastBgSrc = null;
   function loadBackground() {
     const img = document.getElementById('bg-img');
     const fb = document.getElementById('bg-fallback');
@@ -52,6 +57,9 @@
       return;
     }
     const src = (config.scene && config.scene.background) || 'assets/background.jpg';
+    // Ảnh tải lên có sẵn ?v=<thời gian sửa>; chỉ nạp lại khi ảnh thật sự đổi (tránh nháy nền)
+    if (src === lastBgSrc) return;
+    lastBgSrc = src;
     img.onload = () => {
       img.classList.add('ok');
       fb.classList.add('hidden');
@@ -64,7 +72,7 @@
       g.clearRect(0, 0, 1080, 1920);
       scene.fallbackBackground(fb);
     };
-    img.src = src + (src.includes('?') ? '&' : '?') + 'v=' + Date.now();
+    img.src = src.includes('?v=') ? src : src + (src.includes('?') ? '&' : '?') + 'v=' + Date.now();
   }
 
   // ---------- Socket ----------
@@ -78,6 +86,15 @@
 
   socket.on('config', (cfg) => {
     config = cfg;
+    if (LITE) {
+      // Chế độ nhẹ: bớt hạt trang trí, tắt tia sáng, trần hạt thấp hơn
+      cfg = Object.assign({}, cfg, { scene: Object.assign({}, cfg.scene, {
+        lightBeams: false,
+        ambientPetals: Math.round((cfg.scene?.ambientPetals ?? 14) / 2),
+        ambientMotes: Math.round((cfg.scene?.ambientMotes ?? 40) / 3),
+        maxParticles: Math.min(cfg.scene?.maxParticles || 900, 450),
+      }) });
+    }
     scene.configure(cfg);
     hud.setConfig(cfg);
     A.configure(cfg.audio || {});
@@ -175,6 +192,30 @@
         scene.floatText(ev.gender === 'nu' ? 'Đổi hình: Nữ' : 'Đổi hình: Nam', a.x, a.head - 40, { size: 24, life: 1.4 });
         break;
       }
+
+      case 'niem':
+        scene.niemPhat(u, ev.phrase);
+        points(u, ev.points, ' 📿');
+        A.bell(false);
+        A.chime(5, 0.12);
+        if (u.seat == null) hud.tick([{ b: u.name }, ': ' + (ev.phrase || 'Nam Mô A Di Đà Phật') + ' 🙏']);
+        break;
+
+      case 'niem_combo':
+        // Chỉ lên giữa màn hình khi đủ đông; mốc nhỏ thì bùng nổ tại chỗ cho nhanh
+        if (ev.level >= 2) {
+          hud.center(() => buildCaption('📿 ĐỒNG TÂM NIỆM PHẬT', `${ev.count} người cùng niệm`, 'Nam Mô A Di Đà Phật'), 3800, () => {
+            scene.niemBurst(ev.level);
+            hud.flash(600);
+            A.bell(true);
+            A.sparkle();
+          });
+        } else {
+          scene.niemBurst(ev.level);
+          A.bell(true);
+          hud.tick([{ b: ev.count + ' người' }, ' đang đồng tâm niệm Phật 📿']);
+        }
+        break;
 
       case 'pray':
         scene.pray(u, ev.text);
@@ -351,8 +392,13 @@
   let fpsT = last;
   let fps = 0;
   const fpsEl = document.getElementById('fps');
+  const minFrameMs = 1000 / FPS_CAP - 2; // chừa 2ms để không rớt nhịp màn hình
   function loop(now) {
-    const dt = Math.min(0.05, (now - last) / 1000);
+    requestAnimationFrame(loop);
+    if (now - last < minFrameMs) return; // bỏ bớt khung hình khi đặt ?fps=30
+    // Cho phép bước thời gian tới 0.25s: nếu trình duyệt bị hạ tốc, hiệu ứng vẫn chạy đúng
+    // tốc độ thật (chỉ thưa khung hơn) thay vì bị "quay chậm"
+    const dt = Math.min(0.25, (now - last) / 1000);
     last = now;
     if (configured) {
       scene.update(dt);
@@ -367,7 +413,6 @@
       if (socket.connected) socket.emit('overlay:fps', { fps, preview: PREVIEW });
       if (window.parent !== window) window.parent.postMessage({ type: 'overlayFps', fps }, location.origin);
     }
-    requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
 

@@ -67,9 +67,19 @@
         </div>
       </div>
 
+      <!-- Hình ảnh & âm thanh -->
+      <div class="card">
+        <h2>5. Hình ảnh &amp; âm thanh <small>bấm "Tải lên" hoặc kéo thả file vào · overlay &amp; OBS tự cập nhật ngay</small></h2>
+        <div class="assets" id="assets"></div>
+        <div class="assets-sub">Ảnh quà cho từng nghi lễ <small>(PNG nền trong suốt đẹp nhất)</small></div>
+        <div class="asset-gifts" id="asset-gifts"></div>
+        <div class="tray-note" id="asset-msg">Ảnh: PNG / JPG / WEBP / GIF (tối đa 10 MB, ảnh nền nên 1080×1920). Âm thanh: MP3 / M4A / OGG / WAV (tối đa 25 MB).</div>
+        <input type="file" id="asset-file" class="hidden" />
+      </div>
+
       <!-- Công cụ -->
       <div class="card">
-        <h2>5. Công cụ</h2>
+        <h2>6. Công cụ</h2>
         <div class="row wrap">
           <input id="obs-url" readonly />
           <button class="primary" id="btn-copy">📋 Copy URL overlay cho OBS</button>
@@ -78,6 +88,7 @@
         <div class="row wrap">
           <button id="btn-mute">🔊 Tắt tiếng overlay</button>
           <label class="switch"><input type="checkbox" id="preview-audio" /> <span></span> Nghe âm thanh ở khung xem trước</label>
+          <label class="switch"><input type="checkbox" id="preview-on" checked /> <span></span> Hiện khung xem trước (tắt khi đang live cho máy nhẹ hơn)</label>
         </div>
         <div class="row wrap">
           <button id="btn-fill">🪷 Lấp đầy bồ đoàn (test)</button>
@@ -88,7 +99,7 @@
 
       <!-- Log -->
       <div class="card">
-        <h2>6. Log hệ thống <button class="mini" id="btn-clearlog">Xóa</button></h2>
+        <h2>7. Log hệ thống <button class="mini" id="btn-clearlog">Xóa</button></h2>
         <div id="log"></div>
       </div>
     </section>
@@ -101,6 +112,7 @@
       </div>
       <div class="frame-wrap">
         <iframe id="preview" src="/overlay?preview=1" allow="autoplay" title="Overlay preview"></iframe>
+        <div class="preview-off hidden" id="preview-off">Đã tắt khung xem trước để máy nhẹ hơn khi live.<br />Overlay trong LIVE Studio / OBS vẫn chạy bình thường.</div>
       </div>
     </section>
   </main>

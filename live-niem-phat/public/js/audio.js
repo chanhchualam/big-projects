@@ -2,6 +2,8 @@
  * ÂM THANH bằng Web Audio API (tổng hợp, không cần file):
  *  - mõ (cốc cốc), chuông chùa, chuông nhỏ (chime), nhạc nền nhẹ (drone + chuông gió)
  *  - Nếu có file public/assets/bgm.mp3 thì dùng làm nhạc nền thay cho nhạc tổng hợp
+ *  - Tiếng mõ / chuông / vào thiền có thể thay bằng file tải lên từ bảng điều khiển
+ *  - Đổi file khi đang chạy: overlay tự nạp lại, không cần refresh OBS
  */
 window.TD = window.TD || {};
 
@@ -12,7 +14,10 @@ TD.Audio = (function () {
   let bgmBus = null;
   let muted = false;
   let localMuted = false; // dùng cho iframe preview
-  let cfg = { volume: 0.7, bgm: true, bgmVolume: 0.35, bgmFile: '' };
+  let cfg = { volume: 0.7, bgm: true, bgmVolume: 0.35, bgmFile: '', sfx: {} };
+  let bgmToken = 0; // tăng mỗi lần đổi nhạc nền, bỏ qua file cũ đang tải dở
+  let synthNodes = []; // dao động của nhạc nền tổng hợp (để dừng khi đổi nhạc)
+  const sfxFiles = {}; // name -> { url, buf } âm thanh tải lên đã giải mã
   let bgmStarted = false;
   let bgmEl = null;
   let chimeTimer = null;
@@ -88,8 +93,44 @@ TD.Audio = (function () {
     n.connect(bp).connect(ng).connect(sfxBus);
     n.start(t);
   }
+  // ---------- Âm thanh từ file tải lên ----------
+  function loadSfx() {
+    const want = cfg.sfx || {};
+    for (const name of ['mo', 'bell', 'chime']) {
+      const url = want[name] || null;
+      const cur = sfxFiles[name];
+      if ((cur && cur.url) === url) continue;
+      if (!url) {
+        delete sfxFiles[name];
+        continue;
+      }
+      const entry = { url, buf: null };
+      sfxFiles[name] = entry;
+      if (!ensure()) continue;
+      fetch(url)
+        .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(r.status))))
+        .then((ab) => ctx.decodeAudioData(ab))
+        .then((buf) => { entry.buf = buf; })
+        .catch(() => { if (sfxFiles[name] === entry) delete sfxFiles[name]; }); // lỗi -> dùng âm tổng hợp
+    }
+  }
+  /** Phát file đã tải lên; trả về false nếu chưa có để dùng âm tổng hợp */
+  function playFile(name, rate = 1, vol = 1) {
+    const f = sfxFiles[name];
+    if (!f || !f.buf) return false;
+    const src = ctx.createBufferSource();
+    src.buffer = f.buf;
+    src.playbackRate.value = rate;
+    const g = ctx.createGain();
+    g.gain.value = vol;
+    src.connect(g).connect(sfxBus);
+    src.start();
+    return true;
+  }
+
   function mo() {
     if (!canPlay() || throttle('mo', 120)) return;
+    if (playFile('mo')) return;
     const t = ctx.currentTime + 0.01;
     knock(t, 1);
     knock(t + 0.2, 0.97);
@@ -98,6 +139,7 @@ TD.Audio = (function () {
   // ---------- Chuông chùa: các bội âm không hài hoà, ngân dài ----------
   function bell(big = false) {
     if (!canPlay() || throttle('bell' + big, big ? 400 : 250)) return;
+    if (playFile('bell', big ? 0.85 : 1, big ? 1 : 0.8)) return;
     const t = ctx.currentTime + 0.01;
     const f0 = big ? 130 : 220;
     const partials = [
@@ -123,6 +165,7 @@ TD.Audio = (function () {
   // ---------- Chuông nhỏ (vào thiền, quà nhỏ) ----------
   function chime(note = 0, vol = 0.18) {
     if (!canPlay() || throttle('chime', 90)) return;
+    if (playFile('chime', 1 + (note % 6) * 0.06, Math.min(1, vol * 4))) return;
     const scale = [880, 987.8, 1174.7, 1318.5, 1568, 1760];
     const f = scale[((note % scale.length) + scale.length) % scale.length];
     const t = ctx.currentTime + 0.01;
@@ -154,17 +197,18 @@ TD.Audio = (function () {
   function startBgm() {
     if (bgmStarted || !ensure()) return;
     bgmStarted = true;
+    const token = ++bgmToken;
     if (cfg.bgmFile) {
       // Thử file nhạc người dùng, nếu lỗi quay về nhạc tổng hợp
       const el = new Audio(cfg.bgmFile);
       el.loop = true;
       el.addEventListener('canplay', () => {
-        if (bgmEl) return;
+        if (bgmEl || token !== bgmToken) return;
         bgmEl = el;
         applyVolume();
         el.play().catch(() => {});
       }, { once: true });
-      el.addEventListener('error', synthBgm, { once: true });
+      el.addEventListener('error', () => { if (token === bgmToken) synthBgm(); }, { once: true });
       el.load();
     } else synthBgm();
   }
@@ -194,6 +238,7 @@ TD.Audio = (function () {
       o.connect(g).connect(lp);
       o.start();
       lfo.start();
+      synthNodes.push(o, lfo);
     });
     // Chuông gió ngũ cung ngẫu nhiên
     const penta = [440, 493.9, 554.4, 659.3, 740, 880];
@@ -217,10 +262,36 @@ TD.Audio = (function () {
     ring();
   }
 
+  /** Dừng nhạc nền hiện tại (file hoặc tổng hợp) rồi phát lại theo cấu hình mới */
+  function restartBgm() {
+    bgmToken++;
+    if (bgmEl) {
+      bgmEl.pause();
+      bgmEl.removeAttribute('src');
+      bgmEl.load();
+      bgmEl = null;
+    }
+    clearTimeout(chimeTimer);
+    synthNodes.forEach((n) => { try { n.stop(); } catch (_) {} });
+    synthNodes = [];
+    if (ctx) {
+      // Nhạc tổng hợp nối vào bgmBus: ngắt bus cũ là tắt hết, tạo bus mới
+      bgmBus.disconnect();
+      bgmBus = ctx.createGain();
+      bgmBus.connect(master);
+      applyVolume();
+    }
+    bgmStarted = false;
+    if (cfg.bgm) unlock();
+  }
+
   return {
     configure(c) {
+      const prevBgm = cfg.bgmFile;
       cfg = Object.assign(cfg, c || {});
       applyVolume();
+      loadSfx();
+      if (bgmStarted && prevBgm !== cfg.bgmFile) restartBgm();
     },
     setMuted(m) { muted = !!m; ensure(); applyVolume(); },
     setLocalMuted(m) { localMuted = !!m; ensure(); applyVolume(); if (!m) unlock(); },

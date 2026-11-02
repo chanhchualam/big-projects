@@ -100,6 +100,7 @@ Bình luận được chuẩn hoá Unicode (NFC), viết thường, bỏ dấu c
 | `1` `2` `3` `4` | hương / lạy / mõ / chuông | cooldown 1,2 s mỗi người |
 | `nam`, `nữ` (cả `nu`) | đổi hình nhân vật | |
 | `xăm`, `xin xăm`, `rút quẻ`... | rút quẻ | regex chấp nhận gõ không dấu |
+| `Nam mô A Di Đà Phật`, `adidaphat`... | niệm Phật: hào quang + **combo cả điện** | bỏ dấu (NFD) rồi so khớp, đếm số người khác nhau niệm trong 15 s, bùng nổ khi lên mốc 3/6/10/20/40 |
 | `cầu <lời>` | bong bóng lời khấn | cắt 80 ký tự |
 | còn lại | bong bóng chat | điểm chat tối đa 1 lần / 3 s |
 
@@ -107,7 +108,7 @@ Bình luận được chuẩn hoá Unicode (NFC), viết thường, bỏ dấu c
 - 24 bồ đoàn chia hai dãy. Thứ tự ưu tiên: **hàng trên trước, cột sát lối đi trước, xen kẽ trái/phải**, để cảnh luôn cân và đầy từ trung tâm ra.
 - Chọn ngẫu nhiên trong **4 ghế ưu tiên đầu** chứ không lấy ghế đầu tiên, để người vào liên tiếp không xếp thành hàng thẳng máy móc.
 - Hết ghế thì vào **hàng chờ FIFO** (giới hạn 200).
-- Cứ 10 s kiểm tra người treo máy: ngồi im quá 10 phút thì nhường ghế, **rút xuống 3 phút khi đang có người chờ**, rồi lấy người đầu hàng chờ vào thay.
+- Mỗi giây kiểm tra người không tương tác: quá `idleTimeoutSec` (cấu hình được, đang đặt 15 s) thì tự rời ghế, có thể đặt **mốc ngắn hơn khi đang có người chờ**, rồi lấy người đầu hàng chờ vào thay.
 
 ### 3. Quà tặng → nghi lễ (`matchRitual`, `handleGift`)
 ```
@@ -157,7 +158,13 @@ Ngắt kết nối thủ công thì cờ `manual` chặn mọi lần tự kết 
 ### 9. Âm thanh tổng hợp ([public/js/audio.js](public/js/audio.js))
 Tiếng mõ, chuông, chuông gió và nhạc nền đều **tổng hợp bằng Web Audio API** (oscillator + envelope + noise), nên không cần file âm thanh nào. Có file `bgm.mp3` thì dùng file. OBS không có thao tác người dùng nên overlay tự `unlock()` AudioContext khi nhận cấu hình.
 
-### 10. Bảo mật
+### 10. Tải ảnh / âm thanh trực tiếp (`saveUpload`, `sniffType`)
+- Bảng điều khiển gửi file thô lên `POST /api/assets/:slot`. Server **nhận diện loại file bằng magic bytes** (không tin đuôi file), kiểm tra đúng loại cho từng ô (ảnh/âm thanh) và giới hạn dung lượng.
+- Tên ô được kiểm tra theo **danh sách trắng** (các ô cố định + `gift-<id nghi lễ có thật>`), nên không thể ghi file ra ngoài thư mục `assets/`.
+- Ghi file tạm rồi `rename`. URL trả về có `?v=<mtime>`, overlay chỉ nạp lại đúng thứ đã đổi: ảnh nền không nháy, nhạc nền chuyển bài ngay, tiếng mõ/chuông được giải mã sẵn bằng `decodeAudioData`.
+- Chống CSRF từ trang web lạ: bắt buộc header `X-TD-Panel` và `Origin` trùng server.
+
+### 11. Bảo mật
 - Server mặc định chỉ nghe `127.0.0.1`, máy khác trong mạng không điều khiển được.
 - Mọi chữ do người xem gửi được hiển thị bằng `textContent` hoặc vẽ lên canvas, **không dùng `innerHTML` với dữ liệu người dùng**, tránh XSS.
 - Avatar chỉ nhận URL `https://`. API key (`signApiKey`) bị lọc khỏi cấu hình gửi xuống trình duyệt.

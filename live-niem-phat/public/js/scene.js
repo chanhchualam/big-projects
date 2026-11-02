@@ -1004,6 +1004,45 @@ window.TD = window.TD || {};
       this.confetti(dur * 0.6);
       this.monk('abbot', 'bow');
     }
+    /** Tượng Phật sáng lên nhẹ (k = độ mạnh 0..1). Không đè lên hiệu ứng mạnh hơn đang chạy */
+    haloPulse(dur = 2.8, k = 0.45) {
+      const q = this.quang;
+      if (q && this.t < q.t0 + q.dur && (q.k || 1) >= k) return;
+      this.quang = { t0: this.t, dur, k };
+    }
+    /** Một người niệm Phật: hào quang quanh người, sen vàng, đốm sáng bay về tượng Phật */
+    niemPhat(user, phrase) {
+      const a = this.anchor(user);
+      const b = this.L.buddha;
+      this.bow(user, 1);
+      this.bloom(a.x, a.y + 6, a.s * 1.3, 'gold', 3.5);
+      for (let i = 0; i < 3; i++) setTimeout(() => this.ring(a.x, a.y - 40 * a.s, { r1: 210, life: 1.4, w: 5 - i, sy: 0.6, color: '255,215,120' }), i * 180);
+      this.sparkles(a.x, a.head, 18, 'glow');
+      this.petals(a.x, a.head, 8, 'petalGold', 30);
+      const ty = b.y - b.r * 0.2;
+      for (let i = 0; i < 16; i++) {
+        const life = rand(1.1, 1.7);
+        this.add({ sp: 'glow', comp: 'lighter', x: a.x + rand(-24, 24), y: a.head + rand(-24, 24), vx: (b.x - a.x) / life + rand(-50, 50), vy: (ty - a.head) / life + rand(-50, 50), size: rand(12, 24), life, fadeIn: 0.15 });
+      }
+      this.floatText(phrase || 'Nam Mô A Di Đà Phật', clamp(a.x, 230, 850), a.head - 56, { size: 30, color: '#ffe9a8', stroke: '#5a2a00', life: 2.6, vy: -42 });
+      this.haloPulse(2.8, 0.45);
+    }
+    /** Nhiều người cùng niệm: cả chánh điện bừng sáng, mọi người cùng lạy, hoa sen nở khắp nơi */
+    niemBurst(level = 1) {
+      const b = this.L.buddha;
+      this.haloPulse(4 + level, Math.min(1, 0.6 + level * 0.1));
+      for (let i = 0; i < 2 + level; i++) setTimeout(() => this.ring(b.x, b.y - b.r * 0.3, { r0: b.r * 0.3, r1: 900, life: 2.4, w: 8, sy: 1, color: '255,230,150' }), i * 450);
+      this.chars.forEach((c) => {
+        if (!c || c.leaving) return;
+        c.bowStart = this.t + rand(0, 0.4);
+        c.bowDur = 1.5;
+        c.bowTimes = 1;
+        this.bloom(c.x, c.y + 6, c.s * 1.2, 'gold', 3.5);
+      });
+      this.confetti(2 + level * 0.7);
+      if (level >= 3) this.lanterns(4 + level);
+      this.monk('abbot', 'bow');
+    }
     celebrate() {
       this.confetti(3.5);
       this.chars.forEach((c) => c && !c.leaving && this.bloom(c.x, c.y + 6, c.s * 1.2, 'gold', 3.5));
@@ -1064,7 +1103,7 @@ window.TD = window.TD || {};
         for (let i = arr.length - 1; i >= 0; i--) {
           const p = arr[i];
           p.age += dt;
-          if (p.drag) { p.vx *= 1 - p.drag * dt; p.vy *= 1 - p.drag * dt; }
+          if (p.drag) { const k = Math.max(0, 1 - p.drag * dt); p.vx *= k; p.vy *= k; }
           p.vx += p.ax * dt;
           p.vy += p.ay * dt;
           p.x += p.vx * dt;
@@ -1137,7 +1176,7 @@ window.TD = window.TD || {};
       if (!q) return;
       const g = this.g;
       const k = (this.t - q.t0) / q.dur;
-      const env = Math.min(1, k * 5) * Math.min(1, (1 - k) * 4);
+      const env = Math.min(1, k * 5) * Math.min(1, (1 - k) * 4) * (q.k || 1);
       const b = this.L.buddha;
       const cy = b.y - b.r * 0.25;
       g.save();
