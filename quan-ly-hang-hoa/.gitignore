@@ -1,0 +1,5 @@
+# Bộ nhớ đệm của Firebase CLI và file hệ thống
+.firebase/
+node_modules/
+*.log
+.DS_Store

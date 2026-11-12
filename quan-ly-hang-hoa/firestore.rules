@@ -1,0 +1,307 @@
+// =====================================================================
+// File: firestore.rules
+// Đường dẫn: chi tiêu/firestore.rules
+// Deploy: npx firebase-tools deploy --only firestore:rules
+//
+// Nguyên tắc:
+// 1. CHỈ đúng UID chủ cửa hàng được đọc/ghi. Mọi người khác bị từ chối.
+// 2. Vẫn kiểm tra dữ liệu: field bắt buộc, kiểu dữ liệu, giá/số lượng >= 0,
+//    không cho field lạ (hasOnly), thời gian phải là serverTimestamp().
+// 3. Phiếu nhập/hoá đơn không sửa/xoá được — chỉ được "huỷ" (đổi status).
+//    stock_logs (lịch sử kho) chỉ được thêm, không sửa/xoá (trừ dữ liệu mẫu).
+// =====================================================================
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ------------------------- Hàm dùng chung -------------------------
+    function isOwner() {
+      return request.auth != null
+        && request.auth.uid == "0PETfvFBcqSQovsOIHC9FhOvVZb2";
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Chuỗi bắt buộc, không rỗng, tối đa maxLen ký tự
+    function requiredString(data, field, maxLen) {
+      return field in data
+        && data[field] is string
+        && data[field].trim().size() > 0
+        && data[field].size() <= maxLen;
+    }
+
+    // Chuỗi tuỳ chọn (có thể thiếu hoặc null)
+    function optionalString(data, field, maxLen) {
+      return !(field in data)
+        || data[field] == null
+        || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    // Số bắt buộc >= 0
+    function nonNegativeNumber(data, field) {
+      return field in data && data[field] is number && data[field] >= 0;
+    }
+
+    // Số tuỳ chọn >= 0
+    function optionalNonNegativeNumber(data, field) {
+      return !(field in data) || (data[field] is number && data[field] >= 0);
+    }
+
+    function optionalTimestamp(data, field) {
+      return !(field in data) || data[field] == null || data[field] is timestamp;
+    }
+
+    function optionalList(data, field, maxSize) {
+      return !(field in data) || (data[field] is list && data[field].size() <= maxSize);
+    }
+
+    // Tạo mới: createdAt và updatedAt phải là serverTimestamp()
+    function hasValidCreateTimes() {
+      return incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+    }
+
+    // Cập nhật: không được đổi createdAt, updatedAt phải là serverTimestamp()
+    function hasValidUpdateTimes() {
+      return incoming().createdAt == resource.data.createdAt
+        && incoming().updatedAt == request.time;
+    }
+
+    // Chỉ cho phép đổi đúng các field liệt kê
+    function onlyChanges(fields) {
+      return incoming().diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    // ---------------------------- Danh mục ----------------------------
+    function isValidCategory(data) {
+      return data.keys().hasOnly(['name', 'description', 'createdAt', 'updatedAt'])
+        && requiredString(data, 'name', 100)
+        && optionalString(data, 'description', 500);
+    }
+
+    match /categories/{categoryId} {
+      allow read: if isOwner();
+      allow create: if isOwner() && isValidCategory(incoming()) && hasValidCreateTimes();
+      allow update: if isOwner() && isValidCategory(incoming()) && hasValidUpdateTimes();
+      allow delete: if isOwner();
+    }
+
+    // ---------------------------- Hàng hoá ----------------------------
+    function isValidProduct(data) {
+      return data.keys().hasOnly([
+          'code', 'name', 'categoryId', 'categoryName', 'unit',
+          'costPrice', 'salePrice', 'stock', 'minStock', 'isLowStock',
+          'imageUrls', 'thumbnailUrl', 'imageCount', 'expiryDate', 'description',
+          'searchKeywords', 'lastSoldAt', 'totalSold', 'stockValue', 'createdAt', 'updatedAt'
+        ])
+        && requiredString(data, 'code', 50)
+        && requiredString(data, 'name', 200)
+        && requiredString(data, 'categoryId', 100)
+        && optionalString(data, 'categoryName', 100)
+        && requiredString(data, 'unit', 30)
+        && nonNegativeNumber(data, 'costPrice')
+        && nonNegativeNumber(data, 'salePrice')
+        && nonNegativeNumber(data, 'stock')          // tồn kho KHÔNG BAO GIỜ âm
+        && nonNegativeNumber(data, 'minStock')
+        && data.isLowStock == (data.stock <= data.minStock) // cờ "sắp hết" phải đúng
+        && optionalList(data, 'imageUrls', 3)
+        && optionalString(data, 'thumbnailUrl', 150000)
+        && optionalNonNegativeNumber(data, 'imageCount')
+        && optionalTimestamp(data, 'expiryDate')
+        && optionalString(data, 'description', 2000)
+        && optionalList(data, 'searchKeywords', 300)
+        && optionalTimestamp(data, 'lastSoldAt')
+        && optionalNonNegativeNumber(data, 'totalSold')
+        && optionalNonNegativeNumber(data, 'stockValue');   // = tồn × giá vốn (để sum() báo cáo)
+    }
+
+    match /products/{productId} {
+      allow read: if isOwner();
+      allow create: if isOwner() && isValidProduct(incoming()) && hasValidCreateTimes();
+      allow update: if isOwner() && isValidProduct(incoming()) && hasValidUpdateTimes();
+      allow delete: if isOwner();
+    }
+
+    // Ảnh sản phẩm (cách C: base64) — tách riêng để danh sách sản phẩm tải nhẹ
+    match /product_images/{productId} {
+      allow read, delete: if isOwner();
+      allow create, update: if isOwner()
+        && incoming().keys().hasOnly(['imageUrls', 'updatedAt'])
+        && incoming().imageUrls is list
+        && incoming().imageUrls.size() <= 3
+        && incoming().updatedAt == request.time;
+    }
+
+    // -------------------------- Nhà cung cấp --------------------------
+    function isValidSupplier(data) {
+      return data.keys().hasOnly([
+          'name', 'phone', 'email', 'address', 'contactPerson', 'taxCode', 'note',
+          'searchKeywords', 'createdAt', 'updatedAt'
+        ])
+        && requiredString(data, 'name', 200)
+        && optionalString(data, 'phone', 20)
+        && optionalString(data, 'email', 100)
+        && optionalString(data, 'address', 300)
+        && optionalString(data, 'contactPerson', 100)
+        && optionalString(data, 'taxCode', 20)
+        && optionalString(data, 'note', 1000)
+        && optionalList(data, 'searchKeywords', 300);
+    }
+
+    match /suppliers/{supplierId} {
+      allow read: if isOwner();
+      allow create: if isOwner() && isValidSupplier(incoming()) && hasValidCreateTimes();
+      allow update: if isOwner() && isValidSupplier(incoming()) && hasValidUpdateTimes();
+      allow delete: if isOwner();
+    }
+
+    // --------------------------- Khách hàng ---------------------------
+    function isValidCustomer(data) {
+      return data.keys().hasOnly([
+          'name', 'phone', 'email', 'address', 'note', 'searchKeywords',
+          'totalSpent', 'invoiceCount', 'lastPurchaseAt', 'createdAt', 'updatedAt'
+        ])
+        && requiredString(data, 'name', 200)
+        && optionalString(data, 'phone', 20)
+        && optionalString(data, 'email', 100)
+        && optionalString(data, 'address', 300)
+        && optionalString(data, 'note', 1000)
+        && optionalList(data, 'searchKeywords', 300)
+        && optionalNonNegativeNumber(data, 'totalSpent')
+        && optionalNonNegativeNumber(data, 'invoiceCount')
+        && optionalTimestamp(data, 'lastPurchaseAt');
+    }
+
+    match /customers/{customerId} {
+      allow read: if isOwner();
+      allow create: if isOwner() && isValidCustomer(incoming()) && hasValidCreateTimes();
+      allow update: if isOwner() && isValidCustomer(incoming()) && hasValidUpdateTimes();
+      allow delete: if isOwner();
+    }
+
+    // ---------------------------- Phiếu nhập ----------------------------
+    function isValidImport(data) {
+      return data.keys().hasOnly([
+          'code', 'supplierId', 'supplierName', 'importDate', 'items', 'itemCount',
+          'total', 'note', 'status', 'cancelledAt', 'cancelReason', 'createdAt', 'updatedAt'
+        ])
+        && requiredString(data, 'code', 30)
+        && optionalString(data, 'supplierId', 100)     // đã bỏ chức năng NCC: phiếu cũ vẫn có
+        && optionalString(data, 'supplierName', 200)
+        && data.importDate is timestamp
+        && data.items is list
+        && data.items.size() > 0
+        && data.items.size() <= 200
+        && nonNegativeNumber(data, 'itemCount')
+        && nonNegativeNumber(data, 'total')
+        && optionalString(data, 'note', 1000);
+    }
+
+    match /imports/{importId} {
+      allow read: if isOwner();
+      allow create: if isOwner()
+        && isValidImport(incoming())
+        && incoming().status == 'completed'
+        && hasValidCreateTimes();
+      // Chỉ được HUỶ phiếu (completed -> cancelled), không sửa nội dung
+      allow update: if isOwner()
+        && onlyChanges(['status', 'cancelledAt', 'cancelReason', 'updatedAt'])
+        && resource.data.status == 'completed'
+        && incoming().status == 'cancelled'
+        && incoming().cancelledAt == request.time
+        && optionalString(incoming(), 'cancelReason', 500)
+        && incoming().updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // ----------------------------- Hoá đơn -----------------------------
+    function isValidInvoice(data) {
+      return data.keys().hasOnly([
+          'code', 'customerId', 'customerName', 'customerPhone', 'invoiceDate',
+          'items', 'itemCount', 'subtotal', 'discount', 'total', 'totalCost', 'profit',
+          'paymentMethod', 'amountPaid', 'changeAmount', 'note', 'status',
+          'cancelledAt', 'cancelReason', 'createdAt', 'updatedAt'
+        ])
+        && requiredString(data, 'code', 30)
+        && optionalString(data, 'customerId', 100)     // null = khách lẻ
+        && requiredString(data, 'customerName', 200)   // denormalize tên khách
+        && optionalString(data, 'customerPhone', 20)
+        && data.invoiceDate is timestamp
+        && data.items is list
+        && data.items.size() > 0
+        && data.items.size() <= 200
+        && nonNegativeNumber(data, 'itemCount')
+        && nonNegativeNumber(data, 'subtotal')
+        && nonNegativeNumber(data, 'discount')
+        && data.discount <= data.subtotal
+        && nonNegativeNumber(data, 'total')
+        && nonNegativeNumber(data, 'totalCost')
+        && data.profit is number                         // lãi có thể âm khi giảm giá sâu
+        && data.paymentMethod in ['cash', 'transfer', 'card']
+        && optionalNonNegativeNumber(data, 'amountPaid')
+        && optionalNonNegativeNumber(data, 'changeAmount')
+        && optionalString(data, 'note', 1000);
+    }
+
+    match /invoices/{invoiceId} {
+      allow read: if isOwner();
+      allow create: if isOwner()
+        && isValidInvoice(incoming())
+        && incoming().status == 'completed'
+        && hasValidCreateTimes();
+      allow update: if isOwner()
+        && onlyChanges(['status', 'cancelledAt', 'cancelReason', 'updatedAt'])
+        && resource.data.status == 'completed'
+        && incoming().status == 'cancelled'
+        && incoming().cancelledAt == request.time
+        && optionalString(incoming(), 'cancelReason', 500)
+        && incoming().updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // ------------------------ Lịch sử tồn kho ------------------------
+    match /stock_logs/{logId} {
+      allow read: if isOwner();
+      allow create: if isOwner()
+        && incoming().keys().hasOnly([
+             'productId', 'productCode', 'productName', 'type', 'quantityChange',
+             'stockBefore', 'stockAfter', 'refType', 'refId', 'refCode', 'note', 'createdAt'
+           ])
+        && requiredString(incoming(), 'productId', 100)
+        && requiredString(incoming(), 'productName', 200)
+        && incoming().type in ['initial', 'import', 'sale', 'cancel_import', 'cancel_sale', 'return', 'adjust']
+        && incoming().quantityChange is number
+        && nonNegativeNumber(incoming(), 'stockBefore')
+        && nonNegativeNumber(incoming(), 'stockAfter')
+        && optionalString(incoming(), 'note', 500)
+        && incoming().createdAt == request.time;
+      allow update: if false;
+      // Chỉ cho xoá log của dữ liệu mẫu (id bắt đầu bằng "sample-")
+      allow delete: if isOwner() && logId.matches('sample-.*');
+    }
+
+    // ------------------- Bộ đếm số phiếu (PN/HD) -------------------
+    match /counters/{counterId} {
+      allow read: if isOwner();
+      allow create: if isOwner()
+        && incoming().keys().hasOnly(['value', 'updatedAt'])
+        && incoming().value is int
+        && incoming().value >= 1
+        && incoming().updatedAt == request.time;
+      allow update: if isOwner()
+        && incoming().keys().hasOnly(['value', 'updatedAt'])
+        && incoming().value is int
+        && incoming().value > resource.data.value       // chỉ được tăng
+        && incoming().updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // Mọi đường dẫn khác: từ chối (mặc định của Firestore, ghi rõ cho dễ hiểu)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

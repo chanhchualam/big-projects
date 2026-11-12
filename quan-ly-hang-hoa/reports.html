@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<!--
+  File: reports.html
+  Đường dẫn: chi tiêu/reports.html
+  Mục đích: Báo cáo thống kê — bộ lọc thời gian, thẻ tổng quan, 4 biểu đồ,
+            bảng chi tiết; xuất Excel (mỗi báo cáo 1 sheet), PDF (font
+            tiếng Việt Roboto), ảnh PNG từng biểu đồ, và In.
+-->
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Báo cáo thống kê | Quản lý hàng hoá</title>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-pending">
+  <div class="auth-loading-screen"><div class="spinner-border text-primary" role="status" aria-label="Đang tải"></div></div>
+
+  <div class="app-wrapper">
+    <aside class="app-sidebar" id="appSidebar"></aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <div class="app-main">
+      <header class="app-topbar" id="appTopbar"></header>
+
+      <main class="app-content">
+        <!-- ===================== Bộ lọc + xuất file ===================== -->
+        <div class="card mb-3 no-print">
+          <div class="card-body">
+            <div class="row g-2 align-items-end">
+              <div class="col-xl-5">
+                <div class="btn-group flex-wrap" role="group" aria-label="Khoảng thời gian">
+                  <input type="radio" class="btn-check" name="rangePreset" id="rangeToday" value="today">
+                  <label class="btn btn-outline-primary" for="rangeToday">Hôm nay</label>
+                  <input type="radio" class="btn-check" name="rangePreset" id="range7Days" value="7days">
+                  <label class="btn btn-outline-primary" for="range7Days">7 ngày</label>
+                  <input type="radio" class="btn-check" name="rangePreset" id="rangeMonth" value="month" checked>
+                  <label class="btn btn-outline-primary" for="rangeMonth">Tháng này</label>
+                  <input type="radio" class="btn-check" name="rangePreset" id="rangeYear" value="year">
+                  <label class="btn btn-outline-primary" for="rangeYear">Năm nay</label>
+                  <input type="radio" class="btn-check" name="rangePreset" id="rangeCustom" value="custom">
+                  <label class="btn btn-outline-primary" for="rangeCustom">Tuỳ chọn</label>
+                </div>
+              </div>
+              <div class="col-6 col-md-3 col-xl-2">
+                <label class="form-label small mb-1" for="customFrom">Từ ngày</label>
+                <input type="date" class="form-control" id="customFrom" disabled>
+              </div>
+              <div class="col-6 col-md-3 col-xl-2">
+                <label class="form-label small mb-1" for="customTo">Đến ngày</label>
+                <input type="date" class="form-control" id="customTo" disabled>
+              </div>
+              <div class="col-md-6 col-xl-3 d-flex flex-wrap gap-2 justify-content-xl-end">
+                <button class="btn btn-primary d-none" id="applyCustomRange" type="button"><i class="bi bi-funnel me-1"></i>Xem</button>
+                <button class="btn btn-success" id="exportExcelButton" type="button" disabled><i class="bi bi-file-earmark-excel me-1"></i>Excel</button>
+                <button class="btn btn-danger" id="exportPdfButton" type="button" disabled><i class="bi bi-file-earmark-pdf me-1"></i>PDF</button>
+                <button class="btn btn-outline-secondary" id="printReportButton" type="button" disabled><i class="bi bi-printer me-1"></i>In</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tiêu đề khi in -->
+        <div class="d-none d-print-block mb-3">
+          <h4 class="mb-0" id="printStoreName"></h4>
+          <div>Báo cáo kinh doanh · <span id="printRangeLabel"></span></div>
+        </div>
+
+        <div class="d-flex align-items-center mb-3">
+          <h2 class="h5 mb-0">Kỳ báo cáo: <span id="rangeLabel" class="text-primary">…</span></h2>
+          <span class="ms-auto small text-muted" id="reportLoadedAt"></span>
+        </div>
+
+        <div class="alert alert-warning d-none" id="reportWarning" role="alert"></div>
+
+        <!-- ===================== Thẻ tổng quan ===================== -->
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6 col-xl">
+            <div class="card stat-card h-100"><div class="card-body d-flex align-items-center gap-3">
+              <div class="stat-icon bg-soft-success"><i class="bi bi-cash-coin"></i></div>
+              <div><div class="stat-label">Tổng doanh thu</div><div class="stat-value text-money" id="cardRevenue">…</div></div>
+            </div></div>
+          </div>
+          <div class="col-sm-6 col-xl">
+            <div class="card stat-card h-100"><div class="card-body d-flex align-items-center gap-3">
+              <div class="stat-icon bg-soft-warning"><i class="bi bi-box-arrow-in-down"></i></div>
+              <div><div class="stat-label">Tổng chi phí nhập</div><div class="stat-value text-money" id="cardImportCost">…</div></div>
+            </div></div>
+          </div>
+          <div class="col-sm-6 col-xl">
+            <div class="card stat-card h-100"><div class="card-body d-flex align-items-center gap-3">
+              <div class="stat-icon bg-soft-primary"><i class="bi bi-graph-up-arrow"></i></div>
+              <div>
+                <div class="stat-label">Lợi nhuận gộp</div><div class="stat-value text-money" id="cardProfit">…</div>
+                <div class="small text-muted" id="cardCostOfGoods"></div>
+              </div>
+            </div></div>
+          </div>
+          <div class="col-sm-6 col-xl">
+            <div class="card stat-card h-100"><div class="card-body d-flex align-items-center gap-3">
+              <div class="stat-icon bg-soft-info"><i class="bi bi-receipt"></i></div>
+              <div><div class="stat-label">Số hoá đơn</div><div class="stat-value" id="cardInvoiceCount">…</div></div>
+            </div></div>
+          </div>
+          <div class="col-sm-6 col-xl">
+            <div class="card stat-card h-100"><div class="card-body d-flex align-items-center gap-3">
+              <div class="stat-icon bg-soft-danger"><i class="bi bi-boxes"></i></div>
+              <div>
+                <div class="stat-label">Giá trị tồn kho</div><div class="stat-value text-money" id="cardInventoryValue">…</div>
+                <div class="small text-muted">theo giá vốn, hiện tại</div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+
+        <!-- ===================== Biểu đồ ===================== -->
+        <div class="row g-3 mb-3">
+          <div class="col-xl-8">
+            <div class="card h-100">
+              <div class="card-header d-flex align-items-center">
+                <i class="bi bi-bar-chart me-2"></i>Doanh thu & lợi nhuận <span class="text-muted fw-normal ms-1" id="revenueChartUnit"></span>
+                <button class="btn btn-sm btn-light ms-auto no-print" data-png="revenueChart" title="Tải ảnh PNG"><i class="bi bi-image"></i> PNG</button>
+              </div>
+              <div class="card-body"><div class="chart-container"><canvas id="revenueChart" aria-label="Biểu đồ doanh thu và lợi nhuận" role="img"></canvas></div></div>
+            </div>
+          </div>
+          <div class="col-xl-4">
+            <div class="card h-100">
+              <div class="card-header d-flex align-items-center">
+                <i class="bi bi-pie-chart me-2"></i>Tỷ trọng doanh thu theo danh mục
+                <button class="btn btn-sm btn-light ms-auto no-print" data-png="categoryChart" title="Tải ảnh PNG"><i class="bi bi-image"></i> PNG</button>
+              </div>
+              <div class="card-body"><div class="chart-container"><canvas id="categoryChart" aria-label="Biểu đồ tỷ trọng doanh thu theo danh mục" role="img"></canvas></div></div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="card h-100">
+              <div class="card-header d-flex align-items-center">
+                <i class="bi bi-trophy me-2"></i>Top 10 hàng bán chạy (số lượng)
+                <button class="btn btn-sm btn-light ms-auto no-print" data-png="topProductsChart" title="Tải ảnh PNG"><i class="bi bi-image"></i> PNG</button>
+              </div>
+              <div class="card-body"><div class="chart-container"><canvas id="topProductsChart" aria-label="Biểu đồ top 10 hàng bán chạy" role="img"></canvas></div></div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="card h-100">
+              <div class="card-header d-flex align-items-center">
+                <i class="bi bi-arrow-left-right me-2"></i>So sánh nhập kho và bán ra
+                <button class="btn btn-sm btn-light ms-auto no-print" data-png="importSalesChart" title="Tải ảnh PNG"><i class="bi bi-image"></i> PNG</button>
+              </div>
+              <div class="card-body"><div class="chart-container"><canvas id="importSalesChart" aria-label="Biểu đồ so sánh nhập kho và bán ra" role="img"></canvas></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================== Bảng chi tiết ===================== -->
+        <div class="row g-3">
+          <div class="col-xl-6">
+            <div class="card h-100">
+              <div class="card-header"><i class="bi bi-trophy me-2"></i>Hàng bán chạy</div>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                  <thead><tr><th>#</th><th>Hàng hoá</th><th class="text-end">SL bán</th><th class="text-end">Doanh thu</th><th class="text-end">Lợi nhuận</th></tr></thead>
+                  <tbody id="topProductsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="card h-100">
+              <div class="card-header"><i class="bi bi-hourglass-split me-2"></i>Hàng tồn lâu <span class="text-muted fw-normal small" id="slowMovingHint"></span></div>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                  <thead><tr><th>Hàng hoá</th><th class="text-end">Tồn</th><th class="text-end">Giá trị tồn</th><th>Bán lần cuối</th></tr></thead>
+                  <tbody id="slowMovingBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="card h-100">
+              <div class="card-header"><i class="bi bi-exclamation-triangle me-2"></i>Hàng sắp hết</div>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                  <thead><tr><th>Hàng hoá</th><th class="text-end">Tồn</th><th class="text-end">Tối thiểu</th></tr></thead>
+                  <tbody id="lowStockBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6">
+            <div class="card h-100">
+              <div class="card-header d-flex align-items-center">
+                <i class="bi bi-stars me-2"></i>Sản phẩm mới thêm trong kỳ
+                <a href="new-products.html" class="ms-auto small no-print">Xem dạng lưới →</a>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                  <thead><tr><th>Ảnh</th><th>Hàng hoá</th><th>Ngày thêm</th><th class="text-end">Giá bán</th><th class="text-end">Tồn</th></tr></thead>
+                  <tbody id="newProductsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
+  <!-- SheetJS và jsPDF (~450KB) KHÔNG nạp ở đây: js/lazy-load.js tải khi bấm nút xuất -->
+  <script type="module">
+    import { initPage } from "./js/layout.js";
+    import { initReportsPage } from "./js/reports.js";
+    initPage({ pageId: "reports", title: "Báo cáo thống kê" }, initReportsPage);
+  </script>
+</body>
+</html>
